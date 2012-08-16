@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\Dijkstra.cs" />
     <Compile Include="BaseSolver.cs" />
     <Compile Include="CellState.cs" />
+    <Compile Include="CompartmentStatus.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Coordinator.cs" />
     <Compile Include="FileType.cs" />

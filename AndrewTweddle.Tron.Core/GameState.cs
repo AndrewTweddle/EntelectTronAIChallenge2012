@@ -31,6 +31,7 @@ namespace AndrewTweddle.Tron.Core
                     cells[x, y - 1] = new CellState(this, x, y);
                 }
             }
+            OpponentIsInSameCompartment = true;
         }
 
         [field:NonSerialized]
@@ -101,6 +102,20 @@ namespace AndrewTweddle.Tron.Core
             get;
             private set;
         }
+
+        #region Dijkstra and Voronoi information
+
+        public bool OpponentIsInSameCompartment { get; set; }
+        public int NumberOfCellsReachableByYou { get; set; }
+        public int NumberOfCellsReachableByOpponent { get; set; }
+        public int TotalDegreesOfCellsReachableByYou { get; set; }
+        public int TotalDegreesOfCellsReachableByOpponent { get; set; }
+        public int NumberOfCellsClosestToYou { get; set; }
+        public int NumberOfCellsClosestToOpponent { get; set; }
+        public int TotalDegreesOfCellsClosestToYou { get; set; }
+        public int TotalDegreesOfCellsClosestToOpponent { get; set; }
+
+        #endregion
 
         public static GameState LoadGameState(string filePath, FileType fileType = FileType.Binary)
         {
@@ -241,11 +256,40 @@ namespace AndrewTweddle.Tron.Core
             OpponentsCell.MoveNumber = opponentsWallLength;
         }
 
-        private void ClearInheritedData()
+        private void ClearInheritedData(bool resetMoveNumbers = true)
         {
-            foreach (CellState cellState in GetAllCellStates())
+            if (resetMoveNumbers)
             {
-                cellState.MoveNumber = 0;
+                foreach (CellState cellState in GetAllCellStates())
+                {
+                    cellState.MoveNumber = 0;
+                }
+            }
+            ClearDijkstraProperties();
+        }
+
+        public void ClearDijkstraProperties()
+        {
+            OpponentIsInSameCompartment = true;
+            NumberOfCellsReachableByYou = 0;
+            NumberOfCellsReachableByOpponent = 0;
+            TotalDegreesOfCellsReachableByYou = 0;
+            TotalDegreesOfCellsReachableByOpponent = 0;
+            NumberOfCellsClosestToYou = 0;
+            NumberOfCellsClosestToOpponent = 0;
+            TotalDegreesOfCellsClosestToYou = 0;
+            TotalDegreesOfCellsClosestToOpponent = 0;
+
+            IEnumerable<CellState> cells = GetAllCellStates();
+            foreach (CellState cell in cells)
+            {
+                cell.DistanceFromYou = int.MaxValue;
+                cell.DistanceFromOpponent = int.MaxValue;
+                cell.ClosestPlayer = PlayerType.Unknown;
+                cell.DegreeOfVertex = 0;
+                cell.CompartmentStatus = CompartmentStatus.InOtherCompartment;
+                cell.CellsOnPathToYourCell.Clear();
+                cell.CellsOnPathToOpponentsCell.Clear();
             }
         }
 
@@ -358,6 +402,16 @@ namespace AndrewTweddle.Tron.Core
             clone.OpponentsWallLength = OpponentsWallLength;
             clone.PlayerWhoMovedFirst = PlayerWhoMovedFirst;
             clone.PlayerToMoveNext = PlayerToMoveNext;
+
+            clone.OpponentIsInSameCompartment = OpponentIsInSameCompartment;
+            clone.NumberOfCellsReachableByYou = NumberOfCellsReachableByYou;
+            clone.NumberOfCellsReachableByOpponent = NumberOfCellsReachableByOpponent;
+            clone.TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByYou;
+            clone.TotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByOpponent;
+            clone.NumberOfCellsClosestToYou = NumberOfCellsClosestToYou;
+            clone.NumberOfCellsClosestToOpponent = NumberOfCellsClosestToOpponent;
+            clone.TotalDegreesOfCellsClosestToYou = TotalDegreesOfCellsClosestToYou;
+            clone.TotalDegreesOfCellsClosestToOpponent = TotalDegreesOfCellsClosestToOpponent;
 
             return clone;
         }

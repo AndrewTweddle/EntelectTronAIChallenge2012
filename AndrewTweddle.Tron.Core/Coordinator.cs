@@ -15,6 +15,7 @@ namespace AndrewTweddle.Tron.Core
         public static readonly int MAX_DURATION_IN_MILLISECONDS = 4500;
 
         public bool IsInDebugMode { get; set; }
+        public bool IgnoreTimer { get; set; }
         public object BestMoveLock { get; private set; }
         public GameState LastGameStateOfPreviousGame { get; set; }
         public GameState CurrentGameState { get; private set; }
@@ -99,20 +100,23 @@ namespace AndrewTweddle.Tron.Core
             OutputTriggeringEvent = new ManualResetEvent(false /* Not signalled yet*/);
 
             /* Set up a timer to signal when a move must be chosen by: */
-            DateTime endTime = StartTime + MaximumDuration;
-            DateTime now = DateTime.Now;
-            TimeSpan remainingTime = endTime - now;
-            if (remainingTime <= TimeSpan.Zero)
+            if (!IgnoreTimer)
             {
-                SignalATimeout(null);
-            }
-            else
-            {
-                System.Threading.Timer timer = new System.Threading.Timer(SignalATimeout);
-                timer.Change((long)remainingTime.TotalMilliseconds, Timeout.Infinite);
+                DateTime endTime = StartTime + MaximumDuration;
+                DateTime now = DateTime.Now;
+                TimeSpan remainingTime = endTime - now;
+                if (remainingTime <= TimeSpan.Zero)
+                {
+                    SignalATimeout(null);
+                }
+                else
+                {
+                    System.Threading.Timer timer = new System.Threading.Timer(SignalATimeout);
+                    timer.Change((long)remainingTime.TotalMilliseconds, Timeout.Infinite);
+                }
             }
 
-            /* Start the solver running: */
+            /* Determine file paths: */
             string exeFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             BinaryGameStateFilePath = Path.Combine(exeFolder, "GameState.bin");
             XmlGameStateFilePath = Path.Combine(exeFolder, "GameState.xml");
@@ -158,15 +162,26 @@ namespace AndrewTweddle.Tron.Core
                 /* Set up the new game state: */
                 CurrentGameState.LoadRawCellData(cells);
 
-                /* Run solver in a separate thread: */
-                SolverThread = new Thread(RunTheSolver);
-                SolverThread.Start();
+                if (IgnoreTimer)
+                {
+                    /* Run solver in the same thread: */
+                    if (Solver != null)
+                    {
+                        Solver.Solve();
+                    }
+                }
+                else
+                {
+                    /* Run solver in a separate thread: */
+                    SolverThread = new Thread(RunTheSolver);
+                    SolverThread.Start();
 
-                /* Wait for solver to finish running, or for a timeout to occur: */
-                OutputTriggeringEvent.WaitOne();
+                    /* Wait for solver to finish running, or for a timeout to occur: */
+                    OutputTriggeringEvent.WaitOne();
+                }
 
                 /* Stop the solver thread if it's still running: */
-                if (SolverThread.IsAlive)
+                if (SolverThread != null && SolverThread.IsAlive)
                 {
                     SolverThread.Abort();
                 }
@@ -216,7 +231,7 @@ namespace AndrewTweddle.Tron.Core
                 Guid gameGuid = Guid.NewGuid();
                 string fileName = String.Format("GameState.{0}.ext", gameGuid);
                 string historyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string historyFolderName = String.Format("{0}History", this.GetType().Name);
+                string historyFolderName = String.Format("{0}History", Solver.GetType().Name);
                 historyFolder = Path.Combine(historyFolder, historyFolderName);
 
                 if (!Directory.Exists(historyFolder))

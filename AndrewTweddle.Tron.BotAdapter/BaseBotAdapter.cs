@@ -24,6 +24,8 @@ namespace AndrewTweddle.Tron.BotAdapter
         {
             /* Prepare: */
             Coordinator coordinator = new Coordinator(Solver);
+            coordinator.IsInDebugMode = true;
+            coordinator.IgnoreTimer = true;
             coordinator.StartTime = DateTime.Now;
 
             /* Load the data: */

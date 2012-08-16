@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AndrewTweddle.Tron.Core;
+using AndrewTweddle.Tron.Core.Algorithms;
 
 namespace AndrewTweddle.Tron.Bots
 {
@@ -32,6 +33,8 @@ namespace AndrewTweddle.Tron.Bots
             }
 
             yourNewCell.OccupationStatus = OccupationStatus.You;
+
+            Dijkstra.Perform(gameState);
 
             Coordinator.SetBestMoveSoFar(gameState);
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -24,6 +25,8 @@ namespace AndrewTweddle.Tron.Core
         {
             GameState = gameState;
             Position = new Position(x, y);
+            CellsOnPathToYourCell = new ArrayList();
+            CellsOnPathToOpponentsCell = new ArrayList();
         }
 
         public Position Position { get; private set; }
@@ -56,10 +59,39 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        #region Dijkstra algorithm
+
+        public int DistanceFromYou { get; set; }
+        public int DistanceFromOpponent { get; set; }
+        public PlayerType ClosestPlayer { get; set; }
+        public int DegreeOfVertex { get; set; }
+        public CompartmentStatus CompartmentStatus { get; set; }
+        public ArrayList CellsOnPathToYourCell { get; private set; }
+        public ArrayList CellsOnPathToOpponentsCell { get; private set; }
+
+        #endregion
+
         public void CopyFrom(CellState source)
         {
             OccupationStatus = source.OccupationStatus;
             MoveNumber = source.MoveNumber;
+            DistanceFromYou = source.DistanceFromYou;
+            DistanceFromOpponent = source.DistanceFromOpponent;
+            ClosestPlayer = source.ClosestPlayer;
+            DegreeOfVertex = source.DegreeOfVertex;
+            CompartmentStatus = source.CompartmentStatus;
+
+            CellsOnPathToYourCell.Clear();
+            foreach (CellState previousCellState in source.CellsOnPathToYourCell)
+            {
+                CellsOnPathToYourCell.Add(GameState[previousCellState.Position]);
+            }
+
+            CellsOnPathToOpponentsCell.Clear();
+            foreach (CellState previousCellState in source.CellsOnPathToOpponentsCell)
+            {
+                CellsOnPathToOpponentsCell.Add(GameState[previousCellState.Position]);
+            }
         }
 
         public IEnumerable<CellState> GetAdjacentCellStates()

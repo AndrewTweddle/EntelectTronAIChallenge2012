@@ -19,7 +19,14 @@ namespace AndrewTweddle.Tron.Core
 
         public override int GetHashCode()
         {
-            return 31 * X + Y;
+            if (IsPole)
+            {
+                return Y;
+            }
+            else
+            {
+                return 31 * X + Y;
+            }
         }
 
         public override bool Equals(object obj)
@@ -27,7 +34,14 @@ namespace AndrewTweddle.Tron.Core
             if (obj is Position)
             {
                 Position otherPosition = (Position)obj;
-                return otherPosition.X == X && otherPosition.Y == Y;
+                if (IsPole)
+                {
+                    return otherPosition.Y == Y;
+                }
+                else
+                {
+                    return otherPosition.X == X && otherPosition.Y == Y;
+                }
             }
             return false;
         }

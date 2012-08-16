@@ -7,6 +7,7 @@ namespace AndrewTweddle.Tron.Core
 {
     public enum PlayerType: byte
     {
+        Unknown,
         You,
         Opponent
     }

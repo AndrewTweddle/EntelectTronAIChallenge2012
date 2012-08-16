@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CopyCatBot.cs" />
-    <Compile Include="ScaredyCatBot.cs" />
+    <Compile Include="CopyCatSolver.cs" />
+    <Compile Include="ScaredyCatSolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
