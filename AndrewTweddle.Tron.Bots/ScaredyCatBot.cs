@@ -6,10 +6,12 @@ using AndrewTweddle.Tron.Core;
 
 namespace AndrewTweddle.Tron.Bots
 {
-    public class ScaredyCatBot
+    public class ScaredyCatSolver: BaseSolver
     {
-        public GameState GenerateNextGameState(GameState gameState)
+        protected override void DoSolve()
         {
+            GameState gameState = Coordinator.CurrentGameState.Clone();
+
             if (gameState.PlayerWhoMovedFirst == PlayerType.You)
             {
                 throw new ApplicationException("Scaredy cat bot must go second!");
@@ -31,7 +33,7 @@ namespace AndrewTweddle.Tron.Bots
 
             yourNewCell.OccupationStatus = OccupationStatus.You;
 
-            return gameState;
+            Coordinator.SetBestMoveSoFar(gameState);
         }
     }
 }

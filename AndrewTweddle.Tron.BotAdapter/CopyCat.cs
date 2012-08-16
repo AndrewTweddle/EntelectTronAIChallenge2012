@@ -9,10 +9,13 @@ namespace AndrewTweddle.Tron.BotAdapter
 {
     public class CopyCat: BaseBotAdapter
     {
-        public override Core.GameState GenerateNextGameState(GameState gameState)
+        protected override ISolver CreateSolver()
         {
-            CopyCatBot bot = new CopyCatBot();
-            return bot.GenerateNextGameState(gameState);
+            return new CopyCatSolver();
+        }
+
+        public CopyCat(): base()
+        {
         }
     }
 }

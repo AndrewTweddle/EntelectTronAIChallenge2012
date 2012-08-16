@@ -6,15 +6,16 @@ using AndrewTweddle.Tron.Core;
 
 namespace AndrewTweddle.Tron.Bots
 {
-    public class CopyCatBot
+    public class CopyCatSolver: BaseSolver
     {
-        public GameState GenerateNextGameState(GameState gameState)
+        protected override void DoSolve()
         {
-            if (gameState.PlayerWhoMovedFirst == PlayerType.You)
+            if (Coordinator.CurrentGameState.PlayerWhoMovedFirst == PlayerType.You)
             {
                 throw new ApplicationException("Copycat bot must go second!");
             }
 
+            GameState gameState = Coordinator.CurrentGameState.Clone();
             int midlineX = (gameState.OpponentsOriginalCell.Position.X + gameState.YourOriginalCell.Position.X) / 2;
             int opponentsXOffset = gameState.OpponentsCell.Position.X - midlineX;
             int newX = (midlineX + 1 - opponentsXOffset + Constants.Columns) % Constants.Columns;
@@ -33,7 +34,7 @@ namespace AndrewTweddle.Tron.Bots
 
             yourNewCell.OccupationStatus = OccupationStatus.You;
 
-            return gameState;
+            Coordinator.SetBestMoveSoFar(gameState);
         }
     }
 }

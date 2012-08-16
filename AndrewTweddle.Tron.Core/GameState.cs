@@ -356,6 +356,8 @@ namespace AndrewTweddle.Tron.Core
 
             clone.YourWallLength = YourWallLength;
             clone.OpponentsWallLength = OpponentsWallLength;
+            clone.PlayerWhoMovedFirst = PlayerWhoMovedFirst;
+            clone.PlayerToMoveNext = PlayerToMoveNext;
 
             return clone;
         }

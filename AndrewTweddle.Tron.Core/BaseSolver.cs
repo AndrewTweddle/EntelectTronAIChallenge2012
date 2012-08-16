@@ -7,19 +7,17 @@ namespace AndrewTweddle.Tron.Core
 {
     public abstract class BaseSolver: ISolver
     {
-        public Coordinator Coordinator { get; private set; }
-
-        private BaseSolver()
-        {
-        }
-
-        public BaseSolver(Coordinator coordinator)
-        {
-            Coordinator = coordinator;
-        }
+        protected abstract void DoSolve();
 
         public void Solve()
         {
+            if (Coordinator == null)
+            {
+                throw new ApplicationException("The solver has no coordinator");
+            }
+            DoSolve();
         }
+        
+        public Coordinator Coordinator { get; set; }
     }
 }

@@ -9,10 +9,9 @@ namespace AndrewTweddle.Tron.BotAdapter
 {
     public class ScaredyCat: BaseBotAdapter
     {
-        public override Core.GameState GenerateNextGameState(GameState gameState)
+        protected override ISolver CreateSolver()
         {
-            ScaredyCatBot bot = new ScaredyCatBot();
-            return bot.GenerateNextGameState(gameState);
+            return new ScaredyCatSolver();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AndrewTweddle.Tron.Core
 {
     public interface ISolver
     {
-        Coordinator Coordinator { get; }
+        Coordinator Coordinator { get; set; }
 
         void Solve();
     }
