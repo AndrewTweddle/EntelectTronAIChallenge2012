@@ -25,8 +25,8 @@ namespace AndrewTweddle.Tron.Core
         {
             GameState = gameState;
             Position = new Position(x, y);
-            CellsOnPathToYourCell = new ArrayList();
-            CellsOnPathToOpponentsCell = new ArrayList();
+            // CellsOnPathToYourCell = new ArrayList();
+            // CellsOnPathToOpponentsCell = new ArrayList();
         }
 
         public Position Position { get; private set; }
@@ -66,8 +66,8 @@ namespace AndrewTweddle.Tron.Core
         public PlayerType ClosestPlayer { get; set; }
         public int DegreeOfVertex { get; set; }
         public CompartmentStatus CompartmentStatus { get; set; }
-        public ArrayList CellsOnPathToYourCell { get; private set; }
-        public ArrayList CellsOnPathToOpponentsCell { get; private set; }
+        // public ArrayList CellsOnPathToYourCell { get; private set; }
+        // public ArrayList CellsOnPathToOpponentsCell { get; private set; }
 
         #endregion
 
@@ -81,6 +81,7 @@ namespace AndrewTweddle.Tron.Core
             DegreeOfVertex = source.DegreeOfVertex;
             CompartmentStatus = source.CompartmentStatus;
 
+            /*
             CellsOnPathToYourCell.Clear();
             foreach (CellState previousCellState in source.CellsOnPathToYourCell)
             {
@@ -92,6 +93,7 @@ namespace AndrewTweddle.Tron.Core
             {
                 CellsOnPathToOpponentsCell.Add(GameState[previousCellState.Position]);
             }
+             */
         }
 
         public IEnumerable<CellState> GetAdjacentCellStates()

@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Diagnostics;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -150,10 +151,16 @@ namespace AndrewTweddle.Tron.Core
                     formatter = new BinaryFormatter();
                     break;
             }
+
+            Stopwatch swatch = Stopwatch.StartNew();
+
             using (FileStream fs = File.Create(filePath))
             {
                 formatter.Serialize(fs, this);
             }
+
+            swatch.Stop();
+            Debug.WriteLine("Time to serialize state: {0}", swatch.Elapsed);
         }
 
         public void LoadRawCellData(IEnumerable<RawCellData> cells)
@@ -288,8 +295,8 @@ namespace AndrewTweddle.Tron.Core
                 cell.ClosestPlayer = PlayerType.Unknown;
                 cell.DegreeOfVertex = 0;
                 cell.CompartmentStatus = CompartmentStatus.InOtherCompartment;
-                cell.CellsOnPathToYourCell.Clear();
-                cell.CellsOnPathToOpponentsCell.Clear();
+                // cell.CellsOnPathToYourCell.Clear();
+                // cell.CellsOnPathToOpponentsCell.Clear();
             }
         }
 

@@ -8,6 +8,10 @@ namespace AndrewTweddle.Tron.Core
     [Serializable]
     public class Position
     {
+        [NonSerialized]
+        private int hashCode;
+        private static readonly Position[,][] adjacentPositions;
+
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -17,16 +21,79 @@ namespace AndrewTweddle.Tron.Core
             Y = y;
         }
 
+        static Position()
+        {
+            Position newPosition;
+
+            for (int X = 0; X < Constants.Columns; X++)
+            {
+                for (int Y = 0; Y < Constants.Rows; Y++)
+                {
+                    List<Position> adjacentPositionsList = new List<Position>();
+
+                    if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
+                    {
+                        int y = (Y == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
+                        for (int x = 0; x < 29; x++)
+                        {
+                            newPosition = new Position(x, y);
+                            adjacentPositionsList.Add(newPosition);
+                        }
+                    }
+                    else
+                    {
+                        // West:
+                        newPosition = new Position((X + Constants.Columns - 1) % Constants.Columns, Y);
+                        adjacentPositionsList.Add(newPosition);
+
+                        // East:
+                        newPosition = new Position((X + 1) % Constants.Columns, Y);
+                        adjacentPositionsList.Add(newPosition);
+
+                        // North:
+                        if (Y == Constants.ArcticCircleY)
+                        {
+                            newPosition = new Position(Constants.NorthPoleX, Constants.NorthPoleY);
+                            adjacentPositionsList.Add(newPosition);
+                        }
+                        else
+                        {
+                            newPosition = new Position(X, Y - 1);
+                            adjacentPositionsList.Add(newPosition);
+                        }
+
+                        // South:
+                        if (Y == Constants.AntarcticCircleY)
+                        {
+                            newPosition = new Position(Constants.SouthPoleX, Constants.SouthPoleY);
+                            adjacentPositionsList.Add(newPosition);
+                        }
+                        else
+                        {
+                            newPosition = new Position(X, Y + 1);
+                            adjacentPositionsList.Add(newPosition);
+                        }
+                    }
+
+                    adjacentPositions[X, Y] = adjacentPositionsList.ToArray();
+                }
+            }
+        }
+
         public override int GetHashCode()
         {
-            if (IsPole)
+            if (hashCode == 0)
             {
-                return Y;
+                if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
+                {
+                    hashCode = Y + 1;
+                }
+                else
+                {
+                    hashCode = 31 * X + Y + 1;
+                }
             }
-            else
-            {
-                return 31 * X + Y;
-            }
+            return hashCode;
         }
 
         public override bool Equals(object obj)
@@ -34,13 +101,13 @@ namespace AndrewTweddle.Tron.Core
             if (obj is Position)
             {
                 Position otherPosition = (Position)obj;
-                if (IsPole)
+                if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
                 {
                     return otherPosition.Y == Y;
                 }
                 else
                 {
-                    return otherPosition.X == X && otherPosition.Y == Y;
+                    return otherPosition.Y == Y && otherPosition.X == X;
                 }
             }
             return false;
@@ -72,9 +139,9 @@ namespace AndrewTweddle.Tron.Core
 
         public IEnumerable<Position> GetAdjacentPositions()
         {
-            if (IsPole)
+            if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
             {
-                int y = IsNorthPole ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
+                int y = (Y == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
                 for (int x = 0; x < 29; x++)
                 {
                     yield return new Position(x, y);

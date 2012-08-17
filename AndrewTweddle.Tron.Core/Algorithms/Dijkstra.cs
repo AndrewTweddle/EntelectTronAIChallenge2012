@@ -14,7 +14,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
             gameState.ClearDijkstraProperties();
 
-            List<CellState> reachableCells = new List<CellState>();
+            TimeSpan elapsed = swatch.Elapsed;
+            Debug.WriteLine(String.Format("Clearing Dijkstra properties took {0}", elapsed));
+
+            HashSet<CellState> reachableCells = new HashSet<CellState>();
 
             CalculateDistancesFromAPlayer(gameState, PlayerType.You, reachableCells);
             if (calculateDistancesFromOpponent)
@@ -27,9 +30,9 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             Debug.WriteLine(String.Format( "Dijkstra took {0}", swatch.Elapsed));
         }
 
-        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, List<CellState> reachableCells)
+        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, HashSet<CellState> reachableCells)
         {
-            List<CellState> cellsToExpand = new List<CellState>();
+            HashSet<CellState> cellsToExpand = new HashSet<CellState>();
 
             int numberOfCellsReachable = 0;
             int totalDegreesOfCellsReachable = 0;
@@ -37,8 +40,6 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             CompartmentStatus compartmentStatus;
             GetDistanceDelegate getDistance = null;
             SetDistanceDelegate setDistance = null;
-            ClearCellsOnPathDelegate clearCellsOnPath = null;
-            AddCellToPathDelegate addCellToPath = null;
 
             switch (player)
             {
@@ -46,16 +47,12 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                     compartmentStatus = CompartmentStatus.InYourCompartment;
                     getDistance = GetDistanceFromYou;
                     setDistance = SetDistanceFromYou;
-                    clearCellsOnPath = ClearCellsOnPathToYou;
-                    addCellToPath = AddCellToPathToYourCell;
                     cellsToExpand.Add(gameState.YourCell);
                     break;
                 case PlayerType.Opponent:
                     compartmentStatus = CompartmentStatus.InOpponentsCompartment;
                     getDistance = GetDistanceFromOpponent;
                     setDistance = SetDistanceFromOpponent;
-                    clearCellsOnPath = ClearCellsOnPathToOpponent;
-                    addCellToPath = AddCellToPathToOpponentsCell;
                     cellsToExpand.Add(gameState.OpponentsCell);
                     break;
                 default:
@@ -64,10 +61,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
             int nextDistance = 0;
 
-            while (cellsToExpand.Count > 0)
+            while (cellsToExpand.Any())
             {
                 nextDistance++;
-                List<CellState> nextLevelOfCells = new List<CellState>();
+                HashSet<CellState> nextLevelOfCells = new HashSet<CellState>();
                 foreach (CellState sourceCell in cellsToExpand)
                 {
                     int degreeOfVertex = 0;
@@ -86,22 +83,13 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                                 adjacentCell.CompartmentStatus |= compartmentStatus;
                                 degreeOfVertex++;
                                 int existingDistance = getDistance(adjacentCell);
-                                if (existingDistance >= nextDistance)
+                                if (nextDistance < existingDistance)
                                 {
-                                    if (existingDistance != nextDistance)
-                                    {
-                                        setDistance(adjacentCell, nextDistance);
-                                        clearCellsOnPath(adjacentCell);
-                                        if (!nextLevelOfCells.Contains(adjacentCell))
-                                        {
-                                            nextLevelOfCells.Add(adjacentCell);
-                                        }
-                                    }
-                                    addCellToPath(adjacentCell, sourceCell);
-                                    if (!reachableCells.Contains(adjacentCell))
-                                    {
-                                        reachableCells.Add(adjacentCell);
-                                    }
+                                    setDistance(adjacentCell, nextDistance);
+
+                                    // HashSets automatically filter out duplicates, so no need to check:
+                                    nextLevelOfCells.Add(adjacentCell);
+                                    reachableCells.Add(adjacentCell);
                                 }
                                 break;
                         }
@@ -127,10 +115,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             }
         }
 
-        private static void CalculateClosestVertices(GameState gameState, List<CellState> reachableCells)
+        private static void CalculateClosestVertices(GameState gameState, HashSet<CellState> reachableCells)
         {
-            Stopwatch swatch = Stopwatch.StartNew();
-
             int numberOfCellsClosestToYou = 0;
             int numberOfCellsClosestToOpponent = 0;
             int totalDegreesOfCellsClosestToYou = 0;
@@ -194,9 +180,6 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             gameState.NumberOfCellsClosestToOpponent = numberOfCellsClosestToOpponent;
             gameState.TotalDegreesOfCellsClosestToYou = totalDegreesOfCellsClosestToYou;
             gameState.TotalDegreesOfCellsClosestToOpponent = totalDegreesOfCellsClosestToOpponent;
-
-            swatch.Stop();
-            Debug.WriteLine(String.Format("Calculating closest vertices took {0}", swatch.Elapsed));
         }
 
         private delegate int GetDistanceDelegate(CellState cellState);
@@ -226,22 +209,22 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
         private static void ClearCellsOnPathToYou(CellState cellState)
         {
-            cellState.CellsOnPathToYourCell.Clear();
+            // cellState.CellsOnPathToYourCell.Clear();
         }
 
         private static void ClearCellsOnPathToOpponent(CellState cellState)
         {
-            cellState.CellsOnPathToOpponentsCell.Clear();
+            // cellState.CellsOnPathToOpponentsCell.Clear();
         }
 
         private static void AddCellToPathToYourCell(CellState fromCell, CellState cellOnPath)
         {
-            fromCell.CellsOnPathToYourCell.Add(cellOnPath);
+            // fromCell.CellsOnPathToYourCell.Add(cellOnPath);
         }
 
         private static void AddCellToPathToOpponentsCell(CellState fromCell, CellState cellOnPath)
         {
-            fromCell.CellsOnPathToOpponentsCell.Add(cellOnPath);
+            // fromCell.CellsOnPathToOpponentsCell.Add(cellOnPath);
         }
     }
 }

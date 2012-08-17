@@ -218,7 +218,7 @@ namespace AndrewTweddle.Tron.Core
 
                 if (IsInDebugMode)
                 {
-                    BestMoveSoFar.SaveGameState(XmlGameStateFilePath, FileType.Xml);
+                    // BestMoveSoFar.SaveGameState(XmlGameStateFilePath, FileType.Xml);
                 }
             }
         }
