@@ -10,7 +10,9 @@ namespace AndrewTweddle.Tron.Core
     {
         [NonSerialized]
         private int hashCode;
-        private static readonly Position[,][] adjacentPositions;
+
+        [NonSerialized]
+        private static readonly Position[,][] adjacentPositions = new Position[Constants.Columns,Constants.Rows][];
 
         public int X { get; set; }
         public int Y { get; set; }
@@ -34,7 +36,7 @@ namespace AndrewTweddle.Tron.Core
                     if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
                     {
                         int y = (Y == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
-                        for (int x = 0; x < 29; x++)
+                        for (int x = 0; x < Constants.Columns; x++)
                         {
                             newPosition = new Position(x, y);
                             adjacentPositionsList.Add(newPosition);
