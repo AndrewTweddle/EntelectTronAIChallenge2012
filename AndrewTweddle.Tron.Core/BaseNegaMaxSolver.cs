@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -46,6 +47,10 @@ namespace AndrewTweddle.Tron.Core
             if (chosenChildNode != null)
             {
                 Coordinator.SetBestMoveSoFar(chosenChildNode.GameState);
+            }
+            else
+            {
+                Debug.WriteLine("NegaMax found no child");
             }
         }
 

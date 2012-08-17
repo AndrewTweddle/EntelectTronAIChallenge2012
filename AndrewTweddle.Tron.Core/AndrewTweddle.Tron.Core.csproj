@@ -16,7 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -50,6 +50,7 @@
     <Compile Include="Coordinator.cs" />
     <Compile Include="FileType.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="ISolver.cs" />
     <Compile Include="OccupationStatus.cs" />
     <Compile Include="PlayerType.cs" />

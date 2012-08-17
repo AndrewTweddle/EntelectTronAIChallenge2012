@@ -201,12 +201,12 @@ namespace AndrewTweddle.Tron.Core
             /* Ensure there is a best move: */
             if (BestMoveSoFar == null)
             {
-                CellState anyPossibleMove = CurrentGameState.YourCell.GetAdjacentCellStates().FirstOrDefault();
+                CellState anyPossibleMove = CurrentGameState.YourCell.GetAdjacentCellStates().Where(
+                    cs => cs.OccupationStatus == OccupationStatus.Clear).FirstOrDefault();
                 if (anyPossibleMove != null)
                 {
                     GameState bestMoveSoFar = CurrentGameState.Clone();
-                    bestMoveSoFar.YourCell.OccupationStatus = OccupationStatus.YourWall;
-                    bestMoveSoFar[anyPossibleMove.Position].OccupationStatus = OccupationStatus.You;
+                    bestMoveSoFar.MoveToPosition(anyPossibleMove.Position);
                     BestMoveSoFar = bestMoveSoFar;
                 }
             }
@@ -219,6 +219,7 @@ namespace AndrewTweddle.Tron.Core
                 if (IsInDebugMode)
                 {
                     BestMoveSoFar.SaveGameState(XmlGameStateFilePath, FileType.Xml);
+                    BestMoveSoFar.CheckThatGameStateIsValid(CurrentGameState);
                 }
             }
         }

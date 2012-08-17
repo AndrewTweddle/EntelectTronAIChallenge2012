@@ -440,29 +440,172 @@ namespace AndrewTweddle.Tron.Core
             foreach (CellState toCell in clearCells)
             {
                 GameState nextGameState = Clone();
-                CellState destFromCell = nextGameState[fromCell.Position];
-                CellState destToCell = nextGameState[toCell.Position];
-                destToCell.MoveNumber = destFromCell.MoveNumber++;
-
-                if (PlayerToMoveNext == PlayerType.You)
-                {
-                    destFromCell.OccupationStatus = OccupationStatus.YourWall;
-                    destToCell.OccupationStatus = OccupationStatus.You;
-                    nextGameState.PlayerToMoveNext = PlayerType.Opponent;
-                    nextGameState.YourWallLength++;
-                    nextGameState.YourCell = destToCell;
-                }
-                else
-                {
-                    destFromCell.OccupationStatus = OccupationStatus.OpponentWall;
-                    destToCell.OccupationStatus = OccupationStatus.Opponent;
-                    nextGameState.PlayerToMoveNext = PlayerType.You;
-                    nextGameState.OpponentsWallLength++;
-                    nextGameState.OpponentsCell = destToCell;
-                }
-
-                Dijkstra.Perform(nextGameState);
+                nextGameState.MoveToPosition(toCell.Position);
                 yield return nextGameState;
+            }
+        }
+
+        public void MoveToPosition(Position position)
+        {
+            CellState fromCell = PlayerToMoveNext == PlayerType.You ? YourCell : OpponentsCell;
+            CellState toCell = this[position];
+
+            if (toCell.OccupationStatus != OccupationStatus.Clear)
+            {
+                string errorMessage = String.Format(
+                    "{0} cannot move to ({1}, {2}) as that space is occupied by {3}",
+                    PlayerToMoveNext, toCell.Position.X, toCell.Position.Y, toCell.OccupationStatus);
+                throw new ApplicationException(errorMessage);
+            }
+
+            if (!fromCell.Position.GetAdjacentPositions().Contains(toCell.Position))
+            {
+                string errorMessage = String.Format(
+                    "{0} cannot move from ({1}, {2}) to ({3}, {4}) as these positions are not adjacent.",
+                    PlayerToMoveNext, fromCell.Position.X, fromCell.Position.Y, toCell.Position.X, toCell.Position.Y);
+                throw new ApplicationException(errorMessage);
+            }
+
+            toCell.MoveNumber = fromCell.MoveNumber + 1;
+
+            if (PlayerToMoveNext == PlayerType.You)
+            {
+                fromCell.OccupationStatus = OccupationStatus.YourWall;
+                toCell.OccupationStatus = OccupationStatus.You;
+                PlayerToMoveNext = PlayerType.Opponent;
+                YourWallLength += 1;
+                YourCell = toCell;
+            }
+            else
+            {
+                fromCell.OccupationStatus = OccupationStatus.OpponentWall;
+                toCell.OccupationStatus = OccupationStatus.Opponent;
+                PlayerToMoveNext = PlayerType.You;
+                OpponentsWallLength++;
+                OpponentsCell = toCell;
+            }
+
+            Dijkstra.Perform(this);
+        }
+
+        public void CheckThatGameStateIsValid(GameState previousGameState)
+        {
+            if (PlayerToMoveNext == previousGameState.PlayerToMoveNext)
+            {
+                throw new ApplicationException("The player to move next did not change");
+            }
+
+            switch (previousGameState.PlayerToMoveNext)
+            {
+                case PlayerType.You:
+                    if (YourWallLength != previousGameState.YourWallLength + 1)
+                    {
+                        throw new ApplicationException("Your wall length did not increase after your move");
+                    }
+                    break;
+
+                case PlayerType.Opponent:
+                    if (OpponentsWallLength != previousGameState.OpponentsWallLength + 1)
+                    {
+                        throw new ApplicationException("The opponents wall length did not increase after their move");
+                    }
+                    break;
+
+                default:
+                    throw new ApplicationException("Player to move next is unknown");
+            }
+
+            CellState cellThatWasVacated = null;
+            CellState cellThatWasOccupied = null;
+
+            foreach (CellState srcCell in previousGameState.GetAllCellStates())
+            {
+                string errorMessage;
+                CellState destCell = this[srcCell.Position];
+
+                if (srcCell.OccupationStatus != destCell.OccupationStatus)
+                {
+                    switch (srcCell.OccupationStatus)
+                    {
+                        case OccupationStatus.Clear:
+                            if (cellThatWasOccupied == null)
+                            {
+                                cellThatWasOccupied = destCell;
+                            }
+                            else
+                            {
+                                errorMessage = String.Format(
+                                    "Multiple cells were vacated in a single move: ({0}, {1}) and ({2}, {3})",
+                                    cellThatWasOccupied.Position.X, cellThatWasOccupied.Position.Y,
+                                    destCell.Position.X, destCell.Position.Y);
+                                throw new ApplicationException(errorMessage);
+                            }
+                            OccupationStatus expectedOccupationStatus = previousGameState.PlayerToMoveNext.ToOccupationStatus();
+                            if (destCell.OccupationStatus != expectedOccupationStatus)
+                            {
+                                errorMessage = String.Format("The cell occupied ({0}, {1}) was changed to {2} not {3}",
+                                        destCell.Position.X, destCell.Position.Y,
+                                        destCell.OccupationStatus, expectedOccupationStatus);
+                                throw new ApplicationException(errorMessage);
+                            }
+                            break;
+
+                        case OccupationStatus.You:
+                        case OccupationStatus.Opponent:
+                            /* Changed from a tron cycle to a wall. Check that there was only 1 such change: */
+                            if (cellThatWasVacated == null)
+                            {
+                                cellThatWasVacated = destCell;
+                            }
+                            else
+                            {
+                                errorMessage = String.Format(
+                                    "Multiple cells were vacated in a single move: ({0}, {1}) and ({2}, {3})",
+                                    cellThatWasVacated.Position.X, cellThatWasVacated.Position.Y,
+                                    destCell.Position.X, destCell.Position.Y);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            /* Check that the cell vacated was for the player who had the move: */
+                            if (srcCell.OccupationStatus != previousGameState.PlayerToMoveNext.ToOccupationStatus())
+                            {
+                                errorMessage = String.Format(
+                                    "The cell vacated at ({0}, {1}) was not for {2}, but should have been.",
+                                    destCell.Position.X, destCell.Position.Y, previousGameState.PlayerToMoveNext);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            /* Check that the correct wall was put in the tron cycle's place: */
+                            OccupationStatus expectedWallOccupationStatus = previousGameState.PlayerToMoveNext.ToWallType();
+                            if (destCell.OccupationStatus != expectedWallOccupationStatus)
+                            {
+                                errorMessage = String.Format("The cell at ({0}, {1}) was changed to {2} not {3}, which is not allowed",
+                                    destCell.Position.X, destCell.Position.Y,
+                                    destCell.OccupationStatus, expectedWallOccupationStatus);
+                                throw new ApplicationException(errorMessage);
+                            }
+                            break;
+
+                        default:
+                            errorMessage = String.Format(
+                                "The cell at ({0}, {1}) changed from {2} to {3}, which is not allowed",
+                                srcCell.Position.X, srcCell.Position.Y, srcCell.OccupationStatus, destCell.OccupationStatus);
+                            throw new ApplicationException(errorMessage);
+                    }
+                }
+            }
+
+            /* TODO: The following could be a result of losing the game. 
+             * So find a better way e.g. a VictoriousPlayer property: 
+             */
+            if (cellThatWasVacated == null)
+            {
+                throw new ApplicationException("No cell was exited");
+            }
+
+            if (cellThatWasOccupied == null)
+            {
+                throw new ApplicationException("No cell was occupied");
             }
         }
     }
