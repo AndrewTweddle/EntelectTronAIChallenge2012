@@ -25,6 +25,7 @@ namespace AndrewTweddle.Tron.Core
 
         static Position()
         {
+            /* Cache adjacent positions to speed up enumeration: */
             Position newPosition;
 
             for (int X = 0; X < Constants.Columns; X++)
@@ -139,44 +140,9 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public IEnumerable<Position> GetAdjacentPositions()
+        public Position[] GetAdjacentPositions()
         {
-            if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
-            {
-                int y = (Y == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
-                for (int x = 0; x < 29; x++)
-                {
-                    yield return new Position(x, y);
-                }
-            }
-            else
-            {
-                // West:
-                yield return new Position((X + Constants.Columns - 1) % Constants.Columns, Y);
-
-                // East:
-                yield return new Position((X + 1) % Constants.Columns, Y);
-
-                // North:
-                if (Y == Constants.ArcticCircleY)
-                {
-                    yield return new Position(Constants.NorthPoleX, Constants.NorthPoleY);
-                }
-                else
-                {
-                    yield return new Position(X, Y - 1);
-                }
-
-                // South:
-                if (Y == Constants.AntarcticCircleY)
-                {
-                    yield return new Position(Constants.SouthPoleX, Constants.SouthPoleY);
-                }
-                else
-                {
-                    yield return new Position(X, Y + 1);
-                }
-            }
+            return adjacentPositions[X, Y];
         }
     }
 }
