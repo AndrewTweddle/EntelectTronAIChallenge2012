@@ -14,9 +14,6 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
             gameState.ClearDijkstraProperties();
 
-            TimeSpan elapsed = swatch.Elapsed;
-            Debug.WriteLine(String.Format("Clearing Dijkstra properties took {0}", elapsed));
-
             HashSet<CellState> reachableCells = new HashSet<CellState>();
 
             CalculateDistancesFromAPlayer(gameState, PlayerType.You, reachableCells);

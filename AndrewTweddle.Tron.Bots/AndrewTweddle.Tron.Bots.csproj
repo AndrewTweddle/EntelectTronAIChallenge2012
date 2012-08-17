@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CopyCatSolver.cs" />
+    <Compile Include="NegaMaxSolver.cs" />
     <Compile Include="ScaredyCatSolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

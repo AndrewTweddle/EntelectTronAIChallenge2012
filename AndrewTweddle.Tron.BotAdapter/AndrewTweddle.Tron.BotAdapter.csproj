@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="BaseBotAdapter.cs" />
     <Compile Include="CopyCat.cs" />
+    <Compile Include="NegaMax.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScaredyCat.cs" />
   </ItemGroup>

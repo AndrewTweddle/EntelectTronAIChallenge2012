@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
+using AndrewTweddle.Tron.Core.Algorithms;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -295,8 +296,6 @@ namespace AndrewTweddle.Tron.Core
                 cell.ClosestPlayer = PlayerType.Unknown;
                 cell.DegreeOfVertex = 0;
                 cell.CompartmentStatus = CompartmentStatus.InOtherCompartment;
-                // cell.CellsOnPathToYourCell.Clear();
-                // cell.CellsOnPathToOpponentsCell.Clear();
             }
         }
 
@@ -431,6 +430,40 @@ namespace AndrewTweddle.Tron.Core
                 yield return cellState;
             }
             yield return SouthPole;
+        }
+
+        public IEnumerable<GameState> GetPossibleNextStates()
+        {
+            CellState fromCell = (PlayerToMoveNext == PlayerType.You) ? YourCell : OpponentsCell;
+
+            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates().Where(cs => cs.OccupationStatus == OccupationStatus.Clear);
+            foreach (CellState toCell in clearCells)
+            {
+                GameState nextGameState = Clone();
+                CellState destFromCell = nextGameState[fromCell.Position];
+                CellState destToCell = nextGameState[toCell.Position];
+                destToCell.MoveNumber = destFromCell.MoveNumber++;
+
+                if (PlayerToMoveNext == PlayerType.You)
+                {
+                    destFromCell.OccupationStatus = OccupationStatus.YourWall;
+                    destToCell.OccupationStatus = OccupationStatus.You;
+                    nextGameState.PlayerToMoveNext = PlayerType.Opponent;
+                    nextGameState.YourWallLength++;
+                    nextGameState.YourCell = destToCell;
+                }
+                else
+                {
+                    destFromCell.OccupationStatus = OccupationStatus.OpponentWall;
+                    destToCell.OccupationStatus = OccupationStatus.Opponent;
+                    nextGameState.PlayerToMoveNext = PlayerType.You;
+                    nextGameState.OpponentsWallLength++;
+                    nextGameState.OpponentsCell = destToCell;
+                }
+
+                Dijkstra.Perform(nextGameState);
+                yield return nextGameState;
+            }
         }
     }
 }
