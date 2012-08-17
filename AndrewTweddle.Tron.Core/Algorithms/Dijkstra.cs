@@ -27,7 +27,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             }
 
             swatch.Stop();
-            Debug.WriteLine(String.Format( "Dijkstra took {0}", swatch.Elapsed));
+            Debug.WriteLine(String.Format( "Dijkstra with {1} spaces filled took {0} ", swatch.Elapsed, gameState.OpponentsWallLength + gameState.YourWallLength + 2));
         }
 
         private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, HashSet<CellState> reachableCells)
@@ -184,8 +184,6 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
         private delegate int GetDistanceDelegate(CellState cellState);
         private delegate void SetDistanceDelegate(CellState cellState, int distance);
-        private delegate void ClearCellsOnPathDelegate(CellState cellState);
-        private delegate void AddCellToPathDelegate(CellState fromCell, CellState cellOnPath);
 
         private static int GetDistanceFromYou(CellState cellState)
         {
@@ -205,26 +203,6 @@ namespace AndrewTweddle.Tron.Core.Algorithms
         private static void SetDistanceFromOpponent(CellState cellState, int distance)
         {
             cellState.DistanceFromOpponent = distance;
-        }
-
-        private static void ClearCellsOnPathToYou(CellState cellState)
-        {
-            // cellState.CellsOnPathToYourCell.Clear();
-        }
-
-        private static void ClearCellsOnPathToOpponent(CellState cellState)
-        {
-            // cellState.CellsOnPathToOpponentsCell.Clear();
-        }
-
-        private static void AddCellToPathToYourCell(CellState fromCell, CellState cellOnPath)
-        {
-            // fromCell.CellsOnPathToYourCell.Add(cellOnPath);
-        }
-
-        private static void AddCellToPathToOpponentsCell(CellState fromCell, CellState cellOnPath)
-        {
-            // fromCell.CellsOnPathToOpponentsCell.Add(cellOnPath);
         }
     }
 }

@@ -96,9 +96,16 @@ namespace AndrewTweddle.Tron.Core
              */
         }
 
-        public IEnumerable<CellState> GetAdjacentCellStates()
+        public CellState[] GetAdjacentCellStates()
         {
-            return Position.GetAdjacentPositions().Select(pos => GameState[pos]);
+            Position[] adjacentPositions = Position.GetAdjacentPositions();
+            int count = adjacentPositions.Length;
+            CellState[] adjacentCellStates = new CellState[count];
+            for (int i=0; i<count; i++)
+            {
+                adjacentCellStates[i] = GameState[adjacentPositions[i]];
+            }
+            return adjacentCellStates;
         }
 
         public override int GetHashCode()
