@@ -48,10 +48,14 @@
     <Compile Include="CompartmentStatus.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Coordinator.cs" />
+    <Compile Include="EvaluationStatus.cs" />
+    <Compile Include="ExpansionStatus.cs" />
     <Compile Include="FileType.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="GameStateStoragePolicy.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ISolver.cs" />
+    <Compile Include="Move.cs" />
     <Compile Include="OccupationStatus.cs" />
     <Compile Include="PlayerType.cs" />
     <Compile Include="Position.cs" />

@@ -14,16 +14,16 @@ namespace AndrewTweddle.Tron.Bots
             {
                 if (searchNode.GameState.PlayerToMoveNext == PlayerType.You)
                 {
-                    searchNode.Value = double.NegativeInfinity;
+                    searchNode.Evaluation = double.NegativeInfinity;
                 }
                 else
                 {
-                    searchNode.Value = double.PositiveInfinity;
+                    searchNode.Evaluation = double.PositiveInfinity;
                 }
             }
             else
             {
-                searchNode.Value = searchNode.GameState.TotalDegreesOfCellsClosestToYou + searchNode.GameState.NumberOfCellsClosestToYou
+                searchNode.Evaluation = searchNode.GameState.TotalDegreesOfCellsClosestToYou + searchNode.GameState.NumberOfCellsClosestToYou
                     - searchNode.GameState.TotalDegreesOfCellsClosestToOpponent - searchNode.GameState.NumberOfCellsClosestToOpponent;
             }
         }

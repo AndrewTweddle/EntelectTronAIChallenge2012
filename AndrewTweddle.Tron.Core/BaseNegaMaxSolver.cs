@@ -10,28 +10,30 @@ namespace AndrewTweddle.Tron.Core
     {
         protected abstract void Evaluate(SearchNode searchNode);
 
-        public int Depth { get; private set; }
+        public int MaxDepth { get; private set; }
         public SearchNode RootNode { get; private set; }
 
         protected BaseNegaMaxSolver(): base()
         {
-            Depth = 6;
+            MaxDepth = 6;
         }
 
         public BaseNegaMaxSolver(int depth): base()
         {
-            Depth = depth;
+            MaxDepth = depth;
         }
 
         protected override void DoSolve()
         {
-            RootNode = new SearchNode(null /*parentNode*/, Coordinator.CurrentGameState);
-            double value = Negamax(RootNode, Depth);
-            RootNode.Value = value;
+            RootNode = new SearchNode(Coordinator.CurrentGameState);
+            double evaluation = Negamax(RootNode);
+            RootNode.Evaluation = evaluation;
 
-            List<SearchNode> bestChildNodes = RootNode.ChildNodes.Where(sn => sn.Value == value).ToList();
+            List<SearchNode> bestChildNodes = RootNode.ChildNodes.Where(
+                childNode => childNode.EvaluationStatus == EvaluationStatus.Evaluated && childNode.Evaluation == evaluation
+            ).ToList();
+
             SearchNode chosenChildNode = null;
-
             if (bestChildNodes.Count > 1)
             {
                 Random rnd = new Random();
@@ -50,17 +52,19 @@ namespace AndrewTweddle.Tron.Core
             }
             else
             {
-                Debug.WriteLine("NegaMax found no child");
+                Debug.WriteLine("NegaMax found no best child");
             }
         }
 
-        private double Negamax(SearchNode searchNode, int depth, double alpha = double.NegativeInfinity, 
-            double beta = double.PositiveInfinity, int color = 1)
+        private double Negamax(SearchNode searchNode, int depth = 0, double alpha = double.NegativeInfinity, 
+            double beta = double.PositiveInfinity)
         {
-            if (depth == 0)
+            int multiplier = searchNode.GameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
+
+            if (depth >= MaxDepth)
             {
                 Evaluate(searchNode);
-                return color * searchNode.Value;
+                return multiplier * searchNode.Evaluation;
             }
             else
             {
@@ -69,27 +73,45 @@ namespace AndrewTweddle.Tron.Core
                 if (!searchNode.ChildNodes.Any())
                 {
                     /* Game is terminal: */
-                    Evaluate(searchNode);
-                    return color * searchNode.Value;
+                    Evaluate(searchNode);  // TODO: Why not just return PositiveInfinity?
+                    return multiplier * searchNode.Evaluation;
                 }
                 else
                 {
+                    double max = double.NegativeInfinity;
+                    bool pruning = false;
+
                     foreach (SearchNode childNode in searchNode.ChildNodes)
                     {
-                        double value = -Negamax(childNode, depth - 1, -beta, -alpha, -color);
-                        childNode.Value = value;
-
-                        // Alpha-beta pruning:
-                        if (value >= beta)
+                        if (pruning)
                         {
-                            break;
+                            childNode.EvaluationStatus = EvaluationStatus.Pruned;
                         }
-                        if (value > alpha)
+                        else
                         {
-                            alpha = value;
+                            double evaluation = -Negamax(childNode, depth + 1, -beta, -alpha);
+                            childNode.Evaluation = evaluation;
+
+                            // Alpha-beta pruning:
+                            if (evaluation > max)
+                            {
+                                max = evaluation;
+                            }
+                            if (evaluation > alpha)
+                            {
+                                alpha = evaluation;
+                            }
+                            if (alpha >= beta)
+                            {
+                                pruning = true;
+                            }
                         }
                     }
-                    return alpha;
+                    if (pruning)
+                    {
+                        return alpha;
+                    }
+                    return max;
                 }
             }
         }

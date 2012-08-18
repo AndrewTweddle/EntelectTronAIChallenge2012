@@ -432,20 +432,65 @@ namespace AndrewTweddle.Tron.Core
             yield return SouthPole;
         }
 
-        public IEnumerable<GameState> GetPossibleNextStates()
+        public IEnumerable<Move> GetPossibleNextMoves()
         {
-            CellState fromCell = (PlayerToMoveNext == PlayerType.You) ? YourCell : OpponentsCell;
+            CellState fromCell;
+            int moveNumber;
+
+            if (PlayerToMoveNext == PlayerType.You)
+            {
+                fromCell = YourCell;
+                moveNumber = YourWallLength + 1;
+            }
+            else
+            {
+                fromCell = OpponentsCell;
+                moveNumber = OpponentsWallLength + 1;
+            }
 
             IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates().Where(cs => cs.OccupationStatus == OccupationStatus.Clear);
             foreach (CellState toCell in clearCells)
             {
+                Move move = new Move(PlayerToMoveNext, moveNumber, toCell.Position);
+                yield return move;
+            }
+        }
+
+        public IEnumerable<GameState> GetPossibleNextStates()
+        {
+            IEnumerable<Move> possibleNextMoves = GetPossibleNextMoves();
+            foreach (Move move in possibleNextMoves)
+            {
                 GameState nextGameState = Clone();
-                nextGameState.MoveToPosition(toCell.Position);
+                nextGameState.MakeMove(move);
                 yield return nextGameState;
             }
         }
 
-        public void MoveToPosition(Position position)
+        public void MakeMove(Move move, bool performDijkstra = true)
+        {
+            // Check that the move has the correct player:
+            if (move.PlayerType != PlayerToMoveNext)
+            {
+                string errorMessage = String.Format("Attempt to {0} is invalid because the other player has the turn", move.PlayerType);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            // Check that the move has the correct move number:
+            int expectedMoveNumber = 1 + (move.PlayerType == PlayerType.You ? YourWallLength : OpponentsWallLength);
+            if (move.MoveNumber != expectedMoveNumber)
+            {
+                string errorMessage = String.Format(
+                    "Attempt to {0} is invalid because the turn number should be {1}",
+                    move, expectedMoveNumber);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            // Further validation will occur in the MoveToPosition call:
+            MoveToPosition(move.To, performDijkstra);
+        }
+
+        public void MoveToPosition(Position position, bool performDijkstra = true)
         {
             CellState fromCell = PlayerToMoveNext == PlayerType.You ? YourCell : OpponentsCell;
             CellState toCell = this[position];
@@ -485,7 +530,10 @@ namespace AndrewTweddle.Tron.Core
                 OpponentsCell = toCell;
             }
 
-            Dijkstra.Perform(this);
+            if (performDijkstra)
+            {
+                Dijkstra.Perform(this);
+            }
         }
 
         public void CheckThatGameStateIsValid(GameState previousGameState)
