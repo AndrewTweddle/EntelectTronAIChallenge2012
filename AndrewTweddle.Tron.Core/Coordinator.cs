@@ -18,7 +18,7 @@ namespace AndrewTweddle.Tron.Core
         public bool IgnoreTimer { get; set; }
         public object BestMoveLock { get; private set; }
         public GameState LastGameStateOfPreviousGame { get; set; }
-        public GameState CurrentGameState { get; private set; }
+        public GameState CurrentGameState { get; set; }
         public GameState BestMoveSoFar { get; private set; }  // TODO: Replace with Move not GameState?
         public ISolver Solver { get; set; }
         public DateTime StartTime { get; set; }
@@ -161,35 +161,49 @@ namespace AndrewTweddle.Tron.Core
             {
                 /* Set up the new game state: */
                 CurrentGameState.LoadRawCellData(cells);
-
-                if (IgnoreTimer)
-                {
-                    /* Run solver in the same thread: */
-                    if (Solver != null)
-                    {
-                        Solver.Solve();
-                    }
-                }
-                else
-                {
-                    /* Run solver in a separate thread: */
-                    SolverThread = new Thread(RunTheSolver);
-                    SolverThread.Start();
-
-                    /* Wait for solver to finish running, or for a timeout to occur: */
-                    OutputTriggeringEvent.WaitOne();
-                }
-
-                /* Stop the solver thread if it's still running: */
-                if (SolverThread != null && SolverThread.IsAlive)
-                {
-                    SolverThread.Abort();
-                }
+                Run();
             }
             finally
             {
                 /* Ensure no memory leaks due to dangling events: */
                 CurrentGameState.NewGameDetected -= ArchiveGameStateOfPreviousGame;
+            }
+        }
+
+        public void Run(GameState currentGameState)
+        {
+            CurrentGameState = currentGameState;
+            Run();
+        }
+
+        public void Run()
+        {
+            if (IgnoreTimer)
+            {
+                /* Run solver in the same thread: */
+                if (Solver != null)
+                {
+                    Solver.Solve();
+                }
+            }
+            else
+            {
+                /* Run solver in a separate thread: */
+                SolverThread = new Thread(RunTheSolver);
+                SolverThread.Start();
+                try
+                {
+                    /* Wait for solver to finish running, or for a timeout to occur: */
+                    OutputTriggeringEvent.WaitOne();
+                }
+                finally
+                {
+                    /* Stop the solver thread if it's still running: */
+                    if (SolverThread != null && SolverThread.IsAlive)
+                    {
+                        SolverThread.Abort();
+                    }
+                }
             }
         }
 

@@ -656,5 +656,90 @@ namespace AndrewTweddle.Tron.Core
                 throw new ApplicationException("No cell was occupied");
             }
         }
+
+        public static GameState InitializeNewGameState(bool performDijkstra = true)
+        {
+            GameState gameState = new GameState();
+            Random rnd = new Random();
+            int yourX = rnd.Next(Constants.Columns-1);
+            int yourY = rnd.Next(Constants.Rows - 3) + 1;
+            int opponentsX = (yourX + Constants.Columns / 2) % Constants.Columns;
+            int opponentsY = Constants.SouthPoleY - yourY;
+            CellState yourCell = gameState[yourX, yourY];
+            CellState opponentsCell = gameState[opponentsX, opponentsY];
+            yourCell.OccupationStatus = OccupationStatus.You;
+            opponentsCell.OccupationStatus = OccupationStatus.Opponent;
+            gameState.YourCell = yourCell;
+            gameState.YourOriginalCell = yourCell;
+            gameState.OpponentsCell = opponentsCell;
+            gameState.PlayerWhoMovedFirst = PlayerType.You;
+            gameState.OpponentsOriginalCell = opponentsCell;
+            gameState.PlayerToMoveNext = PlayerType.You;
+            if (performDijkstra)
+            {
+                Dijkstra.Perform(gameState);
+            }
+            return gameState;
+        }
+
+        public void FlipGameState()
+        {
+            CellState newOpponentsCell = YourCell, newYourCell = OpponentsCell;
+
+            foreach (CellState cellState in GetAllCellStates())
+            {
+                switch (cellState.OccupationStatus)
+                {
+                    case OccupationStatus.You:
+                        cellState.OccupationStatus = OccupationStatus.Opponent;
+                        break;
+
+                    case OccupationStatus.Opponent:
+                        cellState.OccupationStatus = OccupationStatus.You;
+                        break;
+                    
+                    case OccupationStatus.YourWall:
+                        cellState.OccupationStatus = OccupationStatus.OpponentWall;
+                        break;
+
+                    case OccupationStatus.OpponentWall:
+                        cellState.OccupationStatus = OccupationStatus.YourWall;
+                        break;
+
+                    default:  // case OccupationStatus.Clear:
+                        break;
+                }
+            }
+
+            CellState newOpponentsOriginalCell = YourOriginalCell;
+            YourOriginalCell = OpponentsOriginalCell;
+            OpponentsOriginalCell = newOpponentsOriginalCell;
+
+            OpponentsCell = newOpponentsCell;
+            YourCell = newYourCell;
+
+            PlayerWhoMovedFirst = (PlayerWhoMovedFirst == PlayerType.You) ? PlayerType.Opponent : PlayerType.You;
+            PlayerToMoveNext = (PlayerToMoveNext == PlayerType.You) ? PlayerType.Opponent : PlayerType.You;
+
+            int newOpponentsWallLength = YourWallLength;
+            YourWallLength = OpponentsWallLength;
+            OpponentsWallLength = newOpponentsWallLength;
+
+            int newNumberOfCellsClosestToOpponent = NumberOfCellsClosestToYou;
+            NumberOfCellsClosestToYou = NumberOfCellsClosestToOpponent;
+            NumberOfCellsClosestToOpponent = newNumberOfCellsClosestToOpponent;
+
+            int newNumberOfCellsReachableByOpponent = NumberOfCellsReachableByYou;
+            NumberOfCellsReachableByYou = NumberOfCellsReachableByOpponent;
+            NumberOfCellsReachableByOpponent = newNumberOfCellsReachableByOpponent;
+
+            int newTotalDegreesOfCellsClosestToOpponent = TotalDegreesOfCellsClosestToYou;
+            TotalDegreesOfCellsClosestToYou = TotalDegreesOfCellsClosestToOpponent;
+            TotalDegreesOfCellsClosestToOpponent = newTotalDegreesOfCellsClosestToOpponent;
+
+            int newTotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByYou;
+            TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByOpponent;
+            TotalDegreesOfCellsReachableByOpponent = newTotalDegreesOfCellsReachableByOpponent;
+        }
     }
 }

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndrewTweddle.Tron.BotAdapt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndrewTweddle.Tron.Bots", "AndrewTweddle.Tron.Bots\AndrewTweddle.Tron.Bots.csproj", "{0444A4FD-918E-469A-AAA7-A100D3003EEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndrewTweddle.Tron.UI", "AndrewTweddle.Tron.UI\AndrewTweddle.Tron.UI.csproj", "{E68571B7-E9CE-4964-8B4F-782171E8C8B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,16 @@ Global
 		{0444A4FD-918E-469A-AAA7-A100D3003EEF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0444A4FD-918E-469A-AAA7-A100D3003EEF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0444A4FD-918E-469A-AAA7-A100D3003EEF}.Release|x86.ActiveCfg = Release|Any CPU
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Debug|x86.ActiveCfg = Debug|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Debug|x86.Build.0 = Debug|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Release|Any CPU.ActiveCfg = Release|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Release|Mixed Platforms.Build.0 = Release|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Release|x86.ActiveCfg = Release|x86
+		{E68571B7-E9CE-4964-8B4F-782171E8C8B0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,23 @@
+﻿<Window x:Class="AndrewTweddle.Tron.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:st="clr-namespace:AndrewTweddle.Tron.UI.SearchTree"
+        xmlns:gb="clr-namespace:AndrewTweddle.Tron.UI.GameBoard"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">Start game</Button>
+        <gb:GameStateView Grid.Row="1" x:Name="MainGameStateView"></gb:GameStateView>
+        <!--
+        <st:SearchTreeControl Grid.Row="0" Grid.Column="0" />
+        -->
+    </Grid>
+</Window>
