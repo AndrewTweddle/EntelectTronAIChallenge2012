@@ -45,6 +45,24 @@ namespace AndrewTweddle.Tron.UI.GameBoard
                     return 1;
                 }
             }
+            set
+            {
+            }
+        }
+
+        public int CellWidth
+        {
+            get
+            {
+                if (CellState.Position.IsPole)
+                {
+                    return 25 * 30;
+                }
+                else
+                {
+                    return 25;
+                }
+            }
         }
 
         public Color BackgroundColor

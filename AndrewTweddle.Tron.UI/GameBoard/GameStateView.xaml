@@ -7,8 +7,25 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <!--
+        <Style TargetType="ListBox">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <Canvas Width="590" Height="590" Background="Black" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        -->
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Grid.Row" Value="{Binding Path=CellState.Position.Y}"/>
+            <Setter Property="Grid.Column" Value="{Binding Path=CellState.Position.X}"/>
+            <Setter Property="Grid.ColumnSpan" Value="{Binding Path=ColumnSpan}"/>
+        </Style>
     </UserControl.Resources>
     <StackPanel Orientation="Vertical">
+        <!--
         <Border>
             <Grid x:Name="GameStateSummaryGrid">
                 <Grid.RowDefinitions>
@@ -26,12 +43,12 @@
 
                 <Label Grid.Row="1">Blue walls:</Label>
                 <TextBox Grid.Row="1" Grid.Column="1" Margin="5" IsReadOnly="True" Text="{Binding Path=GameState.OpponentsWallLength,Mode=OneWay}" />
-
             </Grid>
         </Border>
-        <ListBox ItemsSource="CellStateViewModels">
-            <ListBox.Template>
-                <ControlTemplate>
+        -->
+        <ListBox ItemsSource="{Binding CellStateViewModels}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -98,22 +115,64 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        
-                        <ItemsPresenter />
                     </Grid>
-                </ControlTemplate>
-            </ListBox.Template>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="Black" BorderThickness="1" 
-                            Grid.Row="{Binding Path=CellState.Position.Y}"
-                            Grid.Column="{Binding Path=CellState.Position.X}"
-                            Grid.ColumnSpan="{Binding Path=ColumnSpan}"
-                            Background="{Binding Path=BackgroundColor}">
+                    <Border 
+                        BorderBrush="Black" BorderThickness="1" Margin="0"
+                        Width="{Binding Path=CellWidth}" Height="25"
+                        >
+                        <Border.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <!-- template...
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding}" Value="" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="" Value="" />
+                                            <Setter Property="Border.Background" Value="" />
+                                            <Setter Property="TextBlock.Foreground" Value="" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    -->
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=GameState.}" Value="" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="" />
+                                            <Setter Property="TextBlock.Foreground" Value="" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Border.Background>
+                            <SolidColorBrush Color="{Binding Path=BackgroundColor}" />
+                        </Border.Background>
                         <TextBlock Foreground="Black" 
-                                   Visibility="{Binding Path=Display,Converter={StaticResource BoolToVisConverter}}" 
+                                   HorizontalAlignment="Center"
                                    Text="{Binding Path=DistanceFromClosestPlayer}"
-                                   />
+                                   >
+                            <TextBlock.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="OccupationStatus.Clear">
+                                            <DataTrigger.Setters>
+                                                <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                            </DataTrigger.Setters>    
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                    <Style.Setters>
+                                        <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                                    </Style.Setters>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>

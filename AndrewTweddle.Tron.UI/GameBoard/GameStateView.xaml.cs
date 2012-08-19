@@ -19,15 +19,18 @@ namespace AndrewTweddle.Tron.UI.GameBoard
     /// </summary>
     public partial class GameStateView : UserControl
     {
+        private GameStateViewModel viewModel;
+
         public GameStateViewModel ViewModel
         {
             get
             {
-                return DataContext as GameStateViewModel;
+                return viewModel;
             }
             set
             {
-                DataContext = value;
+                viewModel = value;
+                DataContext = viewModel;
             }
         }
 

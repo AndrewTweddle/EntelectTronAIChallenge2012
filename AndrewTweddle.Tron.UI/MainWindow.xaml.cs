@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ComponentModel;
 
 namespace AndrewTweddle.Tron.UI
 {
@@ -19,14 +20,17 @@ namespace AndrewTweddle.Tron.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainViewModel mainViewModel;
+
         MainViewModel MainViewModel
         {
             get
             {
-                return DataContext as MainViewModel;
+                return mainViewModel;
             }
             set
             {
+                mainViewModel = value;
                 DataContext = value;
                 MainGameStateView.ViewModel = value.GameStateViewModel;
             }
@@ -41,6 +45,62 @@ namespace AndrewTweddle.Tron.UI
         private void StartGameButton_Click(object sender, RoutedEventArgs e)
         {
             MainViewModel.StartGame();
+            TakeNextTurnInASeparateThread();
+        }
+
+        private void TakeNextTurnInASeparateThread()
+        {
+            BackgroundWorker backgroundWorker = (BackgroundWorker)this.FindResource("takeTurnBackgroundWorker");
+            backgroundWorker.RunWorkerAsync();
+        }
+
+        private void BackgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            MainViewModel.TakeNextTurn();
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            if (MainViewModel.GameStateViewModel.GameState.IsGameOver)
+            {
+                // TODO: Indicate who won
+
+                // TODO: Get enablement from MainViewModel rather...
+                StartGameButton.IsEnabled = true;  
+                StopGameButton.IsEnabled = false;
+                PauseGameButton.IsEnabled = false;
+                ResumeGameButton.IsEnabled = false;
+            }
+            else
+            {
+                if (MainViewModel.IsInProgress && !MainViewModel.IsPaused)
+                {
+                    TakeNextTurnInASeparateThread();
+                }
+            }
+        }
+
+        private void StopGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel.StopGame();
+        }
+
+        private void PauseGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel.Pause();
+        }
+
+        private void ResumeGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel.Resume();
+
+            /* Only take the next turn if the current turn is not still in progress 
+             * (since Pause & Resume could be pressed within the duration of a single turn:
+             */
+            if (!MainViewModel.IsTurnInProgress)
+            {
+                TakeNextTurnInASeparateThread();
+            }
         }
     }
 }

@@ -3,7 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:st="clr-namespace:AndrewTweddle.Tron.UI.SearchTree"
         xmlns:gb="clr-namespace:AndrewTweddle.Tron.UI.GameBoard"
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         Title="MainWindow" Height="350" Width="525">
+    <Window.Resources>
+        <cm:BackgroundWorker
+            x:Key="takeTurnBackgroundWorker"
+            WorkerSupportsCancellation="True"
+            DoWork="BackgroundWorker_DoWork"
+            RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted"
+        />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -14,8 +23,87 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         
-        <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">Start game</Button>
-        <gb:GameStateView Grid.Row="1" x:Name="MainGameStateView"></gb:GameStateView>
+        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="2">
+            <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsInProgress}" Value="False"/>
+                                    <Condition Binding="{Binding IsTurnInProgress}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True"/>
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Style.Setters>
+                            <Setter Property="Button.IsEnabled" Value="False"/>
+                        </Style.Setters>
+                    </Style>
+                </Button.Style>
+                Start
+            </Button>
+            
+            <Button Name="StopGameButton" Margin="5" Click="StopGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=IsInProgress}" Value="True">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Stop
+            </Button>
+            
+            <Button Name="PauseGameButton" Margin="5" Click="PauseGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=IsPaused}" Value="False" />
+                                    <Condition Binding="{Binding Path=IsInProgress}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Pause
+            </Button>
+            
+            <Button Name="ResumeGameButton" Margin="5" Click="ResumeGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger> <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsPaused}" Value="True" />
+                                    <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Resume
+            </Button>
+        </WrapPanel>
+        
+        <gb:GameStateView Grid.Row="1" x:Name="MainGameStateView" />
         <!--
         <st:SearchTreeControl Grid.Row="0" Grid.Column="0" />
         -->

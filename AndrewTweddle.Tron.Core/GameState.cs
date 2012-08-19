@@ -9,15 +9,35 @@ using System.Runtime.Serialization.Formatters.Soap;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using AndrewTweddle.Tron.Core.Algorithms;
+using System.ComponentModel;
 
 namespace AndrewTweddle.Tron.Core
 {
     public delegate void GameStateEvent(GameState gameState);
 
     [Serializable]
-    public class GameState
+    public class GameState: INotifyPropertyChanged
     {
         private CellState[,] cells;
+        private PlayerType playerWhoMovedFirst;
+        private PlayerType playerToMoveNext;
+        private CellState southPole;
+        private CellState northPole;
+        private CellState yourCell;
+        private CellState opponentsCell;
+        private CellState yourOriginalCell;
+        private CellState opponentsOriginalCell;
+        private int yourWallLength;
+        private int opponentsWallLength;
+        private bool opponentIsInSameCompartment;
+        private int numberOfCellsReachableByYou;
+        private int numberOfCellsReachableByOpponent;
+        private int totalDegreesOfCellsReachableByYou;
+        private int totalDegreesOfCellsReachableByOpponent;
+        private int numberOfCellsClosestToYou;
+        private int numberOfCellsClosestToOpponent;
+        private int totalDegreesOfCellsClosestToYou;
+        private int totalDegreesOfCellsClosestToOpponent;
         
         public GameState()
         {
@@ -39,10 +59,57 @@ namespace AndrewTweddle.Tron.Core
         [field:NonSerialized]
         public event GameStateEvent NewGameDetected;
 
-        public PlayerType PlayerWhoMovedFirst { get; private set; }
-        public PlayerType PlayerToMoveNext { get; private set; }
-        public CellState SouthPole { get; private set; }
-        public CellState NorthPole { get; private set; }
+        public PlayerType PlayerWhoMovedFirst
+        {
+            get
+            {
+                return playerWhoMovedFirst;
+            }
+            private set
+            {
+                playerWhoMovedFirst = value;
+                OnPropertyChanged("PlayerWhoMovedFirst");
+            }
+        }
+
+        public PlayerType PlayerToMoveNext
+        {
+            get
+            {
+                return playerToMoveNext;
+            }
+            private set
+            {
+                playerToMoveNext = value;
+                OnPropertyChanged("PlayerToMoveNext");
+            }
+        }
+
+        public CellState SouthPole
+        {
+            get
+            {
+                return southPole;
+            }
+            private set
+            {
+                southPole = value;
+                OnPropertyChanged("SouthPole");
+            }
+        }
+
+        public CellState NorthPole
+        {
+            get
+            {
+                return northPole;
+            }
+            private set
+            {
+                northPole = value;
+                OnPropertyChanged("NorthPole");
+            }
+        }
 
         public CellState this[int x, int y]
         {
@@ -71,51 +138,220 @@ namespace AndrewTweddle.Tron.Core
 
         public CellState YourCell
         {
-            get;
-            internal set;
+            get
+            {
+                return yourCell;
+            }
+            internal set
+            {
+                yourCell = value;
+                OnPropertyChanged("YourCell");
+            }
         }
 
         public CellState OpponentsCell
         {
-            get;
-            internal set;
+            get
+            {
+                return opponentsCell;
+            }
+            internal set
+            {
+                opponentsCell = value;
+                OnPropertyChanged("OpponentsCell");
+            }
         }
 
         public CellState YourOriginalCell
         {
-            get;
-            private set;
+            get
+            {
+                return yourOriginalCell;
+            }
+            private set
+            {
+                yourOriginalCell = value;
+                OnPropertyChanged("YourOriginalCell");
+            }
         }
 
         public CellState OpponentsOriginalCell
         {
-            get;
-            private set;
+            get
+            {
+                return opponentsOriginalCell;
+            }
+            private set
+            {
+                opponentsOriginalCell = value;
+                OnPropertyChanged("OpponentsOriginalCell");
+            }
         }
 
         public int YourWallLength
         {
-            get;
-            private set;
+            get
+            {
+                return yourWallLength;
+            }
+            private set
+            {
+                yourWallLength = value;
+                OnPropertyChanged("YourWallLength");
+            }
         }
 
         public int OpponentsWallLength
         {
-            get;
-            private set;
+            get
+            {
+                return opponentsWallLength;
+            }
+            private set
+            {
+                opponentsWallLength = value;
+                OnPropertyChanged("OpponentsWallLength");
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return !GetPossibleNextMoves().Any();
+            }
+        }
+
+        public PlayerType Winner
+        {
+            get
+            {
+                if (IsGameOver)
+                {
+                    return PlayerToMoveNext == PlayerType.You ? PlayerType.Opponent : PlayerType.You;
+                }
+                return PlayerType.Unknown;
+            }
         }
 
         #region Dijkstra and Voronoi information
 
-        public bool OpponentIsInSameCompartment { get; set; }
-        public int NumberOfCellsReachableByYou { get; set; }
-        public int NumberOfCellsReachableByOpponent { get; set; }
-        public int TotalDegreesOfCellsReachableByYou { get; set; }
-        public int TotalDegreesOfCellsReachableByOpponent { get; set; }
-        public int NumberOfCellsClosestToYou { get; set; }
-        public int NumberOfCellsClosestToOpponent { get; set; }
-        public int TotalDegreesOfCellsClosestToYou { get; set; }
-        public int TotalDegreesOfCellsClosestToOpponent { get; set; }
+        public bool OpponentIsInSameCompartment
+        {
+            get
+            {
+                return opponentIsInSameCompartment;
+            }
+            set
+            {
+                opponentIsInSameCompartment = value;
+                OnPropertyChanged("OpponentIsInSameCompartment");
+            }
+        }
+
+        public int NumberOfCellsReachableByYou 
+        {
+            get
+            {
+                return numberOfCellsReachableByYou;
+            }
+            set
+            {
+                numberOfCellsReachableByYou = value;
+                OnPropertyChanged("NumberOfCellsReachableByYou");
+            }
+        }
+
+        public int NumberOfCellsReachableByOpponent 
+        {
+            get
+            {
+                return numberOfCellsReachableByOpponent;
+            }
+            set
+            {
+                numberOfCellsReachableByOpponent = value;
+                OnPropertyChanged("NumberOfCellsReachableByOpponent");
+            }
+        }
+
+        public int TotalDegreesOfCellsReachableByYou 
+        {
+            get
+            {
+                return totalDegreesOfCellsReachableByYou;
+            }
+            set
+            {
+                totalDegreesOfCellsReachableByYou = value;
+                OnPropertyChanged("TotalDegreesOfCellsReachableByYou");
+            }
+        }
+
+        public int TotalDegreesOfCellsReachableByOpponent 
+        {
+            get
+            {
+                return totalDegreesOfCellsReachableByOpponent;
+            }
+            set
+            {
+                totalDegreesOfCellsReachableByOpponent = value;
+                OnPropertyChanged("TotalDegreesOfCellsReachableByOpponent");
+            }
+        }
+        
+        public int NumberOfCellsClosestToYou 
+        {
+            get
+            {
+                return numberOfCellsClosestToYou;
+            }
+            set
+            {
+                numberOfCellsClosestToYou = value; 
+                OnPropertyChanged("NumberOfCellsClosestToYou");
+            }
+        }
+
+        public int NumberOfCellsClosestToOpponent
+        {
+            get
+            {
+                return numberOfCellsClosestToOpponent;
+            }
+            set
+            {
+                numberOfCellsClosestToOpponent = value;
+                OnPropertyChanged("NumberOfCellsClosestToOpponent");
+            }
+        }
+
+        public int TotalDegreesOfCellsClosestToYou 
+        { 
+            get
+            {
+                return totalDegreesOfCellsClosestToYou ; 
+            }
+            set
+            {
+                totalDegreesOfCellsClosestToYou = value;
+                OnPropertyChanged("TotalDegreesOfCellsClosestToYou ");
+            }
+        }
+
+        public int TotalDegreesOfCellsClosestToOpponent 
+        {
+            get
+            {
+                return totalDegreesOfCellsClosestToOpponent;
+            }
+            set
+            {
+                totalDegreesOfCellsClosestToOpponent = value;
+                OnPropertyChanged("TotalDegreesOfCellsClosestToOpponent");
+            }
+        }
 
         #endregion
 
@@ -361,65 +597,69 @@ namespace AndrewTweddle.Tron.Core
         public GameState Clone()
         {
             GameState clone = new GameState();
+            clone.CopyFrom(this);
 
-            foreach (CellState source in GetAllCellStates())
+            return clone;
+        }
+
+        public void CopyFrom(GameState sourceGameState)
+        {
+            foreach (CellState source in sourceGameState.GetAllCellStates())
             {
-                CellState dest = clone[source.Position];
+                CellState dest = this[source.Position];
                 dest.CopyFrom(source);
             }
 
-            if (OpponentsCell == null)
+            if (sourceGameState.OpponentsCell == null)
             {
-                clone.OpponentsCell = null;
+                OpponentsCell = null;
             }
             else
             {
-                clone.OpponentsCell = clone[OpponentsCell.Position];
+                OpponentsCell = this[sourceGameState.OpponentsCell.Position];
             }
 
-            if (YourCell == null)
+            if (sourceGameState.YourCell == null)
             {
-                clone.YourCell = null;
+                YourCell = null;
             }
             else
             {
-                clone.YourCell = clone[YourCell.Position];
+                YourCell = this[sourceGameState.YourCell.Position];
             }
 
-            if (OpponentsOriginalCell == null)
+            if (sourceGameState.OpponentsOriginalCell == null)
             {
-                clone.OpponentsOriginalCell = null;
+                OpponentsOriginalCell = null;
             }
             else
             {
-                clone.OpponentsOriginalCell = clone[OpponentsOriginalCell.Position];
+                OpponentsOriginalCell = this[sourceGameState.OpponentsOriginalCell.Position];
             }
 
-            if (YourOriginalCell == null)
+            if (sourceGameState.YourOriginalCell == null)
             {
-                clone.YourOriginalCell = null;
+                YourOriginalCell = null;
             }
             else
             {
-                clone.YourOriginalCell = clone[YourOriginalCell.Position];
+                YourOriginalCell = this[sourceGameState.YourOriginalCell.Position];
             }
 
-            clone.YourWallLength = YourWallLength;
-            clone.OpponentsWallLength = OpponentsWallLength;
-            clone.PlayerWhoMovedFirst = PlayerWhoMovedFirst;
-            clone.PlayerToMoveNext = PlayerToMoveNext;
+            YourWallLength = sourceGameState.YourWallLength;
+            OpponentsWallLength = sourceGameState.OpponentsWallLength;
+            PlayerWhoMovedFirst = sourceGameState.PlayerWhoMovedFirst;
+            PlayerToMoveNext = sourceGameState.PlayerToMoveNext;
 
-            clone.OpponentIsInSameCompartment = OpponentIsInSameCompartment;
-            clone.NumberOfCellsReachableByYou = NumberOfCellsReachableByYou;
-            clone.NumberOfCellsReachableByOpponent = NumberOfCellsReachableByOpponent;
-            clone.TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByYou;
-            clone.TotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByOpponent;
-            clone.NumberOfCellsClosestToYou = NumberOfCellsClosestToYou;
-            clone.NumberOfCellsClosestToOpponent = NumberOfCellsClosestToOpponent;
-            clone.TotalDegreesOfCellsClosestToYou = TotalDegreesOfCellsClosestToYou;
-            clone.TotalDegreesOfCellsClosestToOpponent = TotalDegreesOfCellsClosestToOpponent;
-
-            return clone;
+            OpponentIsInSameCompartment = sourceGameState.OpponentIsInSameCompartment;
+            NumberOfCellsReachableByYou = sourceGameState.NumberOfCellsReachableByYou;
+            NumberOfCellsReachableByOpponent = sourceGameState.NumberOfCellsReachableByOpponent;
+            TotalDegreesOfCellsReachableByYou = sourceGameState.TotalDegreesOfCellsReachableByYou;
+            TotalDegreesOfCellsReachableByOpponent = sourceGameState.TotalDegreesOfCellsReachableByOpponent;
+            NumberOfCellsClosestToYou = sourceGameState.NumberOfCellsClosestToYou;
+            NumberOfCellsClosestToOpponent = sourceGameState.NumberOfCellsClosestToOpponent;
+            TotalDegreesOfCellsClosestToYou = sourceGameState.TotalDegreesOfCellsClosestToYou;
+            TotalDegreesOfCellsClosestToOpponent = sourceGameState.TotalDegreesOfCellsClosestToOpponent;
         }
 
         public IEnumerable<CellState> GetAllCellStates()
@@ -740,6 +980,18 @@ namespace AndrewTweddle.Tron.Core
             int newTotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByYou;
             TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByOpponent;
             TotalDegreesOfCellsReachableByOpponent = newTotalDegreesOfCellsReachableByOpponent;
+        }
+
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChangedEventArgs args = new PropertyChangedEventArgs(propertyName);
+                PropertyChanged(this, args);
+            }
         }
     }
 }

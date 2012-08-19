@@ -2,20 +2,47 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace AndrewTweddle.Tron.Core
 {
     [Serializable]
-    public class Position
+    public class Position: INotifyPropertyChanged
     {
+        private int x;
+        private int y;
+
         [NonSerialized]
         private int hashCode;
 
         [NonSerialized]
         private static readonly Position[,][] adjacentPositions = new Position[Constants.Columns,Constants.Rows][];
 
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int X 
+        {
+            get
+            {
+                return x;
+            }
+            set
+            {
+                x = value;
+                OnPropertyChanged("X");
+            }
+        }
+
+        public int Y 
+        {
+            get
+            {
+                return y;
+            }
+            set
+            {
+                y = value;
+                OnPropertyChanged("Y");
+            }
+        }
 
         public Position(int x, int y)
         {
@@ -148,6 +175,18 @@ namespace AndrewTweddle.Tron.Core
         public Position[] GetAdjacentPositions()
         {
             return adjacentPositions[X, Y];
+        }
+
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChangedEventArgs args = new PropertyChangedEventArgs(propertyName);
+                PropertyChanged(this, args);
+            }
         }
     }
 }
