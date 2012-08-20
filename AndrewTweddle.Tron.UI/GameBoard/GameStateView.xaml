@@ -203,9 +203,48 @@
                                 </Style.Setters>
                             </Style>
                         </Border.Style>
-                        <StackPanel>
+                        <Grid>
+                            <Ellipse x:Name="YourEllipse"
+                                     Width="20" Height="20"
+                                     HorizontalAlignment="Center"
+                                     Fill="Red" Stroke="Black">
+                                <Ellipse.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <Ellipse x:Name="OppponentsEllipse"
+                                     Width="20" Height="20"
+                                     HorizontalAlignment="Center"
+                                     Fill="Blue" Stroke="Black">
+                                <Ellipse.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
                             <TextBlock x:Name="DistanceFromYouTextBlock"
                                        HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        Text="{Binding Path=CellState.DistanceFromYou}"
                                        >
@@ -230,6 +269,7 @@
                             </TextBlock>
                             <TextBlock x:Name="DistanceFromOpponentTextBlock"
                                        HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        Text="{Binding Path=CellState.DistanceFromOpponent}"
                                        >
@@ -254,12 +294,23 @@
                             </TextBlock>
                             <TextBlock x:Name="MoveNumberTextBlock"
                                        HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        Text="{Binding CellState.MoveNumber}">
                                 <TextBlock.Style>
                                     <Style>
                                         <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="YourWall">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
                                                 <DataTrigger.Setters>
                                                     <Setter Property="TextBlock.Visibility" Value="Visible" />
                                                 </DataTrigger.Setters>
@@ -272,49 +323,12 @@
                                         </Style.Triggers>
                                         <Style.Setters>
                                             <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                                            <Setter Property="TextBlock.Foreground" Value="White" />
                                         </Style.Setters>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <Ellipse x:Name="YourEllipse"
-                                     Width="25" Height="25"
-                                     HorizontalAlignment="Center"
-                                     Fill="Red" Stroke="Black">
-                                <Ellipse.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
-                                                <DataTrigger.Setters>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
-                                                </DataTrigger.Setters>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                        <Style.Setters>
-                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
-                                        </Style.Setters>
-                                    </Style>
-                                </Ellipse.Style>
-                            </Ellipse>
-                            <Ellipse x:Name="OppponentsEllipse"
-                                     Width="25" Height="25"
-                                     HorizontalAlignment="Center"
-                                     Fill="Blue" Stroke="Black">
-                                <Ellipse.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
-                                                <DataTrigger.Setters>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
-                                                </DataTrigger.Setters>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                        <Style.Setters>
-                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
-                                        </Style.Setters>
-                                    </Style>
-                                </Ellipse.Style>
-                            </Ellipse>
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
