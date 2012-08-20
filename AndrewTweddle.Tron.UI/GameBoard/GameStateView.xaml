@@ -121,12 +121,16 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border 
-                        BorderBrush="Black" BorderThickness="1" Margin="0"
-                        Width="{Binding Path=CellWidth}" Height="25"
+                        BorderBrush="Black" BorderThickness="1" Margin="0" Height="25"
                         >
                         <Border.Style>
                             <Style>
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=CellState.Position.IsPole}" Value="True">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Border.Width" Value="825" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
                                     <!-- template...
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
@@ -139,40 +143,116 @@
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
                                     -->
+                                    <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="Red" />
+                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="YourWall">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="DarkRed" />
+                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="Blue" />
+                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="OpponentWall">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="DarkBlue" />
+                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Path=GameState.}" Value="" />
+                                            <Condition Binding="{Binding Path=CellState.OccupationStatus}" Value="Clear" />
+                                            <Condition Binding="{Binding Path=CellState.ClosestPlayer}" Value="You" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
-                                            <Setter Property="Border.Background" Value="" />
-                                            <Setter Property="TextBlock.Foreground" Value="" />
+                                            <Setter Property="Border.Background" Value="Pink" />
+                                            <Setter Property="TextBlock.Foreground" Value="Black" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=CellState.OccupationStatus}" Value="Clear" />
+                                            <Condition Binding="{Binding Path=CellState.ClosestPlayer}" Value="Opponent" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="LightBlue" />
+                                            <Setter Property="TextBlock.Foreground" Value="Black" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=CellState.OccupationStatus}" Value="Clear" />
+                                            <Condition Binding="{Binding Path=CellState.ClosestPlayer}" Value="Unknown" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Border.Background" Value="White" />
+                                            <Setter Property="TextBlock.Foreground" Value="Black" />
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
                                 </Style.Triggers>
+                                <Style.Setters>
+                                    <Setter Property="Border.Width" Value="25" />
+                                </Style.Setters>
                             </Style>
                         </Border.Style>
-                        <Border.Background>
-                            <SolidColorBrush Color="{Binding Path=BackgroundColor}" />
-                        </Border.Background>
-                        <TextBlock Foreground="Black" 
-                                   HorizontalAlignment="Center"
-                                   Text="{Binding Path=DistanceFromClosestPlayer}"
-                                   >
-                            <TextBlock.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="OccupationStatus.Clear">
-                                            <DataTrigger.Setters>
-                                                <Setter Property="TextBlock.Visibility" Value="Visible" />
-                                            </DataTrigger.Setters>    
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                    <Style.Setters>
-                                        <Setter Property="TextBlock.Visibility" Value="Collapsed" />
-                                    </Style.Setters>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <StackPanel>
+                            <TextBlock x:Name="DistanceFromYouTextBlock"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Text="{Binding Path=CellState.DistanceFromYou}"
+                                       >
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=CellState.OccupationStatus}" Value="Clear" />
+                                                    <Condition Binding="{Binding Path=CellState.ClosestPlayer}" Value="You" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock x:Name="DistanceFromOpponentTextBlock"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Text="{Binding Path=CellState.DistanceFromOpponent}"
+                                       >
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=CellState.OccupationStatus}" Value="Clear" />
+                                                    <Condition Binding="{Binding Path=CellState.ClosestPlayer}" Value="Opponent" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>

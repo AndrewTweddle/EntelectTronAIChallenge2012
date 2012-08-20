@@ -64,12 +64,6 @@ namespace AndrewTweddle.Tron.UI
             if (MainViewModel.GameStateViewModel.GameState.IsGameOver)
             {
                 // TODO: Indicate who won
-
-                // TODO: Get enablement from MainViewModel rather...
-                StartGameButton.IsEnabled = true;  
-                StopGameButton.IsEnabled = false;
-                PauseGameButton.IsEnabled = false;
-                ResumeGameButton.IsEnabled = false;
             }
             else
             {

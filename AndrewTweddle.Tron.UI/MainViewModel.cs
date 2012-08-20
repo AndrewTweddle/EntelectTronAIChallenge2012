@@ -169,6 +169,7 @@ namespace AndrewTweddle.Tron.UI
 
         public void StartGame()
         {
+            IsTurnOfPlayer1 = true;
             IsInProgress = true;
             IsPaused = false;
 
