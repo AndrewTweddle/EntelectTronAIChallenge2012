@@ -65,41 +65,6 @@ namespace AndrewTweddle.Tron.UI.GameBoard
             }
         }
 
-        public Color BackgroundColor
-        {
-            get
-            {
-                if (cellState == null)
-                {
-                    return Colors.LightGray;
-                }
-                else
-                {
-                    switch (cellState.OccupationStatus)
-                    {
-                        case OccupationStatus.You:
-                            return ParentViewModel.YourCellColor;
-                        case OccupationStatus.YourWall:
-                            return ParentViewModel.YourWallColor;
-                        case OccupationStatus.Opponent:
-                            return ParentViewModel.OpponentsCellColor;
-                        case OccupationStatus.OpponentWall:
-                            return ParentViewModel.OpponentsWallColor;
-                        default: // OccupationStatus.Clear
-                            switch (cellState.ClosestPlayer)
-                            {
-                                case PlayerType.You:
-                                    return ParentViewModel.YourClosestToColor;
-                                case PlayerType.Opponent:
-                                    return ParentViewModel.OpponentsClosestToColor;
-                                default:
-                                    return Colors.White;
-                            }
-                    }
-                }
-            }
-        }
-
         public int DistanceFromClosestPlayer
         {
             get
