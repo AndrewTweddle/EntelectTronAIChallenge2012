@@ -37,7 +37,7 @@ namespace AndrewTweddle.Tron.Core
             if (bestChildNodes.Count > 1)
             {
                 Random rnd = new Random();
-                int randomMoveIndex = rnd.Next(bestChildNodes.Count - 1);
+                int randomMoveIndex = rnd.Next(bestChildNodes.Count);
                 chosenChildNode = bestChildNodes[randomMoveIndex];
             }
             else

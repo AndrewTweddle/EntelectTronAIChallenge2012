@@ -100,8 +100,8 @@ namespace TronMarshall
             _state = new BlockTypes[TronSdk.Common.BOARD_BLOCKS_X, TronSdk.Common.BOARD_BLOCKS_Y];
 
             Random rnd = new Random();
-            int startX = rnd.Next(TronSdk.Common.BOARD_BLOCKS_X - 1);
-            int startY = 1 + rnd.Next(TronSdk.Common.BOARD_BLOCKS_Y - 2);                   
+            int startX = rnd.Next(TronSdk.Common.BOARD_BLOCKS_X);
+            int startY = 1 + rnd.Next(TronSdk.Common.BOARD_BLOCKS_Y - 2);
 
             _state[startX, startY] = BlockTypes.You;
             _state[(startX + Common.BOARD_BLOCKS_X / 2) % Common.BOARD_BLOCKS_X, Common.BOARD_BLOCKS_Y - 1 - startY] = BlockTypes.Opponent;

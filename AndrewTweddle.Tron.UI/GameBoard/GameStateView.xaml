@@ -145,8 +145,8 @@
                                     -->
                                     <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
                                         <DataTrigger.Setters>
-                                            <Setter Property="Border.Background" Value="Red" />
-                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                            <Setter Property="Border.Background" Value="Pink" />
+                                            <Setter Property="TextBlock.Foreground" Value="Black" />
                                         </DataTrigger.Setters>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="YourWall">
@@ -157,8 +157,8 @@
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
                                         <DataTrigger.Setters>
-                                            <Setter Property="Border.Background" Value="Blue" />
-                                            <Setter Property="TextBlock.Foreground" Value="White" />
+                                            <Setter Property="Border.Background" Value="LightBlue" />
+                                            <Setter Property="TextBlock.Foreground" Value="Black" />
                                         </DataTrigger.Setters>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="OpponentWall">
@@ -252,6 +252,68 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            <TextBlock x:Name="MoveNumberTextBlock"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Text="{Binding CellState.MoveNumber}">
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="YourWall">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="OpponentWall">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Ellipse x:Name="YourEllipse"
+                                     Width="25" Height="25"
+                                     HorizontalAlignment="Center"
+                                     Fill="Red" Stroke="Black">
+                                <Ellipse.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="You">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <Ellipse x:Name="OppponentsEllipse"
+                                     Width="25" Height="25"
+                                     HorizontalAlignment="Center"
+                                     Fill="Blue" Stroke="Black">
+                                <Ellipse.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=CellState.OccupationStatus}" Value="Opponent">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <Setter Property="Ellipse.Visibility" Value="Collapsed" />
+                                        </Style.Setters>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
                         </StackPanel>
                     </Border>
                 </DataTemplate>

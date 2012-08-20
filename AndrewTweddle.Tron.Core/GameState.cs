@@ -901,8 +901,8 @@ namespace AndrewTweddle.Tron.Core
         {
             GameState gameState = new GameState();
             Random rnd = new Random();
-            int yourX = rnd.Next(Constants.Columns-1);
-            int yourY = rnd.Next(Constants.Rows - 3) + 1;
+            int yourX = rnd.Next(Constants.Columns);
+            int yourY = rnd.Next(Constants.Rows - 2) + 1;
             int opponentsX = (yourX + Constants.Columns / 2) % Constants.Columns;
             int opponentsY = Constants.SouthPoleY - yourY;
             CellState yourCell = gameState[yourX, yourY];

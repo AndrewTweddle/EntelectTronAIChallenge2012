@@ -24,7 +24,7 @@ namespace AndrewTweddle.Tron.Bots
             else
             {
                 Random rnd = new Random();
-                int chosenMoveIndex = rnd.Next(possibleMoves.Length - 1);
+                int chosenMoveIndex = rnd.Next(possibleMoves.Length);
                 chosenMove = possibleMoves[chosenMoveIndex];
             }
             newGameState.MakeMove(chosenMove);
