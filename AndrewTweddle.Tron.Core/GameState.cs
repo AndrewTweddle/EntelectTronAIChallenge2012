@@ -949,6 +949,16 @@ namespace AndrewTweddle.Tron.Core
                     default:  // case OccupationStatus.Clear:
                         break;
                 }
+
+                switch (cellState.ClosestPlayer)
+                {
+                    case PlayerType.You:
+                        cellState.ClosestPlayer = PlayerType.Opponent;
+                        break;
+                    case PlayerType.Opponent:
+                        cellState.ClosestPlayer = PlayerType.You;
+                        break;
+                }
             }
 
             CellState newOpponentsOriginalCell = YourOriginalCell;

@@ -5,6 +5,7 @@ using System.Text;
 using AndrewTweddle.Tron.Core;
 using AndrewTweddle.Tron.Bots;
 using AndrewTweddle.Tron.UI.GameBoard;
+using System.Collections.ObjectModel;
 
 namespace AndrewTweddle.Tron.UI
 {
@@ -19,6 +20,44 @@ namespace AndrewTweddle.Tron.UI
         private bool isPaused = false;
         private bool isInProgress = false;
         private bool isTurnInProgress = false;
+
+        private ObservableCollection<Type> solverTypes;
+        private Type player1SolverType;
+        private Type player2SolverType;
+
+        public ObservableCollection<Type> SolverTypes
+        {
+            get
+            {
+                return solverTypes;
+            }
+        }
+
+        public Type Player1SolverType
+        {
+            get
+            {
+                return player1SolverType;
+            }
+            set
+            {
+                player1SolverType = value;
+                OnPropertyChanged("Player1SolverType");
+            }
+        }
+
+        public Type Player2SolverType
+        {
+            get
+            {
+                return player2SolverType;
+            }
+            set
+            {
+                player2SolverType = value;
+                OnPropertyChanged("Player2SolverType");
+            }
+        }
 
         public bool IsPaused
         {
@@ -163,6 +202,12 @@ namespace AndrewTweddle.Tron.UI
 
         public MainViewModel()
         {
+            solverTypes = new ObservableCollection<Type>();
+            solverTypes.Add(typeof(NegaMaxSolver));
+            solverTypes.Add(typeof(CopyCatSolver));
+            solverTypes.Add(typeof(ScaredyCatSolver));
+            solverTypes.Add(typeof(RandomSolver));
+
             GameStateViewModel = new GameStateViewModel();
             GameStateViewModel.GameState = new GameState();
         }
@@ -177,7 +222,7 @@ namespace AndrewTweddle.Tron.UI
             GameStateViewModel.GameState.CopyFrom(gameState);
             
             /* Set up player 1 (red): */
-            Player1Solver = new RandomSolver();
+            Player1Solver = Activator.CreateInstance(Player1SolverType) as ISolver;
             Player1Coordinator = new Coordinator(Player1Solver)
             {
                 IsInDebugMode = true,
@@ -185,7 +230,7 @@ namespace AndrewTweddle.Tron.UI
             };
 
             /* Set up player 2 (blue): */
-            Player2Solver = new NegaMaxSolver();
+            Player2Solver = Activator.CreateInstance(Player2SolverType) as ISolver;
             Player2Coordinator = new Coordinator(Player2Solver)
             {
                 IsInDebugMode = true,

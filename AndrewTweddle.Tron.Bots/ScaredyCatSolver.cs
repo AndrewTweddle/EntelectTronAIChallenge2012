@@ -20,22 +20,7 @@ namespace AndrewTweddle.Tron.Bots
 
             int newX = (gameState.OpponentsCell.Position.X + Constants.Columns / 2) % Constants.Columns;
             int newY = Constants.SouthPoleY - gameState.OpponentsCell.Position.Y;
-
-            gameState.YourCell.OccupationStatus = OccupationStatus.YourWall;
-
-            CellState yourNewCell = gameState[newX, newY];
-
-            if (yourNewCell.OccupationStatus != OccupationStatus.Clear)
-            {
-                string errorMessage = String.Format(
-                    "Error attempting to move to point ({0}, {1}) - point is already occuped", yourNewCell.Position.X, yourNewCell.Position.Y);
-                throw new ApplicationException(errorMessage);
-            }
-
-            yourNewCell.OccupationStatus = OccupationStatus.You;
-
-            Dijkstra.Perform(gameState);
-
+            gameState.MoveToPosition(new Position(newX, newY));
             Coordinator.SetBestMoveSoFar(gameState);
         }
     }

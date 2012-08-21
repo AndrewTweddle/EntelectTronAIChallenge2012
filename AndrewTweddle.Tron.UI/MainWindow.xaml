@@ -26,6 +26,26 @@
         </Grid.ColumnDefinitions>
         
         <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="2">
+            <Border BorderBrush="Red" Background="Pink">
+                <StackPanel Orientation="Horizontal">
+                    <Label>Player 1:</Label>
+                    <ComboBox x:Name="player1ComboBox" 
+                              ItemsSource="{Binding SolverTypes}" 
+                              DisplayMemberPath="Name" 
+                              SelectedItem="{Binding Path=Player1SolverType}" 
+                              Width="200" />
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="Blue" Background="LightBlue">
+                <StackPanel Orientation="Horizontal">
+                    <Label Foreground="White">Player 2:</Label>
+                    <ComboBox x:Name="player2ComboBox" 
+                              ItemsSource="{Binding SolverTypes}" 
+                              DisplayMemberPath="Name" 
+                              SelectedItem="{Binding Path=Player2SolverType}" 
+                              Width="200"  />
+                </StackPanel>
+            </Border>
             <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">
                 <Button.Style>
                     <Style>
