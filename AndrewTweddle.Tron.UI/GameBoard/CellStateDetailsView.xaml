@@ -3,49 +3,54 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+             mc:Ignorable="d"> 
+             <!--:DesignHeight="280" d:DesignWidth="300"-->
+    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="10" Padding="10" Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
         
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        
-        <Label Grid.Row="0">Position:</Label>
-        <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.Position}" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.ColumnSpan="2" FontWeight="Bold">Cell details:</Label>
+            
+            <Label Grid.Row="1">Position:</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.Position,Mode=OneWay}" />
 
-        <Label Grid.Row="1">Degree (neighbours):</Label>
-        <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DegreeOfVertex}" />
+            <Label Grid.Row="2">Degree (neighbours):</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DegreeOfVertex,Mode=OneWay}" />
 
-        <Label Grid.Row="2">Status:</Label>
-        <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.OccupationStatus}" />
+            <Label Grid.Row="3">Status:</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.OccupationStatus,Mode=OneWay}" />
 
-        <Label Grid.Row="3">Move number:</Label>
-        <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.MoveNumber}" />
+            <Label Grid.Row="4">Move number:</Label>
+            <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.MoveNumber,Mode=OneWay}" />
 
-        <Label Grid.Row="4">Compartment status:</Label>
-        <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.CompartmentStatus}" />
+            <Label Grid.Row="5">Compartment status:</Label>
+            <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.CompartmentStatus,Mode=OneWay}" />
 
-        <Label Grid.Row="5">Closest player:</Label>
-        <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.ClosestPlayer}" />
-        <!-- TODO: Convert to player1/player2-->
+            <Label Grid.Row="6">Closest player:</Label>
+            <TextBox Grid.Row="6" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.ClosestPlayer,Mode=OneWay}" />
+            <!-- TODO: Convert to player1/player2-->
 
-        <Label Grid.Row="6">Distance from player 1:</Label>
-        <TextBox Grid.Row="6" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DistanceFromYou}" />
+            <Label Grid.Row="7">Distance from player 1:</Label>
+            <TextBox Grid.Row="7" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DistanceFromYou,Mode=OneWay}" />
 
-        <Label Grid.Row="7">Distance from player 2:</Label>
-        <TextBox Grid.Row="7" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DistanceFromOpponent}" />
+            <Label Grid.Row="8">Distance from player 2:</Label>
+            <TextBox Grid.Row="8" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DistanceFromOpponent,Mode=OneWay}" />
 
-    </Grid>
+        </Grid>
+    </Border>
 </UserControl>

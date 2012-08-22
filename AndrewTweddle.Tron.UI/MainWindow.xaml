@@ -4,7 +4,7 @@
         xmlns:st="clr-namespace:AndrewTweddle.Tron.UI.SearchTree"
         xmlns:gb="clr-namespace:AndrewTweddle.Tron.UI.GameBoard"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
-        Title="MainWindow" Height="350" Width="525"
+        Title="MainWindow" Height="350" Width="800"
         WindowState="Maximized"
         >
     <Window.Resources>
@@ -18,34 +18,40 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
-        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="2">
-            <Border BorderBrush="Red" Background="Pink">
+        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="3">
+            <Border BorderBrush="Red" Background="Pink" Padding="5">
                 <StackPanel Orientation="Horizontal">
                     <Label>Player 1:</Label>
                     <ComboBox x:Name="player1ComboBox" 
+                              Height="23"
                               ItemsSource="{Binding SolverTypes}" 
                               DisplayMemberPath="Name" 
                               SelectedItem="{Binding Path=Player1SolverType}" 
                               Width="200" />
                 </StackPanel>
             </Border>
-            <Border BorderBrush="Blue" Background="LightBlue">
+            <Border BorderBrush="Blue" Background="LightBlue" Padding="5">
                 <StackPanel Orientation="Horizontal">
                     <Label Foreground="White">Player 2:</Label>
                     <ComboBox x:Name="player2ComboBox" 
+                              Height="23"
                               ItemsSource="{Binding SolverTypes}" 
                               DisplayMemberPath="Name" 
                               SelectedItem="{Binding Path=Player2SolverType}" 
                               Width="200"  />
                 </StackPanel>
             </Border>
+            
             <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">
                 <Button.Style>
                     <Style>
@@ -125,7 +131,11 @@
             </Button>
         </WrapPanel>
         
-        <gb:GameStateView Grid.Row="1" x:Name="MainGameStateView" />
+        <gb:GameStateView Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="MainGameStateView" />
+        <gb:CellStateDetailsView Grid.Row="1" Grid.Column="1" 
+                                 x:Name="CellStateDetails"
+                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext.SelectedCellStateViewModel}" 
+                                 />
         <!--
         <st:SearchTreeControl Grid.Row="0" Grid.Column="0" />
         -->

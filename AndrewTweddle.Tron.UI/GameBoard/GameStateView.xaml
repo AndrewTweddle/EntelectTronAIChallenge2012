@@ -7,17 +7,6 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
-        <!--
-        <Style TargetType="ListBox">
-            <Setter Property="ItemsPanel">
-                <Setter.Value>
-                    <ItemsPanelTemplate>
-                        <Canvas Width="590" Height="590" Background="Black" />
-                    </ItemsPanelTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        -->
         <Style TargetType="ListBoxItem">
             <Setter Property="Grid.Row" Value="{Binding Path=CellState.Position.Y}"/>
             <Setter Property="Grid.Column" Value="{Binding Path=CellState.Position.X}"/>
@@ -46,7 +35,7 @@
             </Grid>
         </Border>
         -->
-        <ListBox ItemsSource="{Binding CellStateViewModels}">
+        <ListBox ItemsSource="{Binding CellStateViewModels}" SelectedItem="{Binding SelectedCellStateViewModel}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -121,7 +110,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border 
-                        BorderBrush="Black" BorderThickness="1" Margin="0" Height="25"
+                        Margin="0" Height="25"
                         >
                         <Border.Style>
                             <Style>
@@ -197,9 +186,17 @@
                                             <Setter Property="TextBlock.Foreground" Value="Black" />
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
+                                    <DataTrigger 
+                                        Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}, AncestorLevel=1}, Path=IsSelected}" 
+                                        Value="True">
+                                        <Setter Property="Border.BorderBrush" Value="Yellow"/>
+                                        <Setter Property="Border.BorderThickness" Value="2"/>
+                                    </DataTrigger>
                                 </Style.Triggers>
                                 <Style.Setters>
                                     <Setter Property="Border.Width" Value="25" />
+                                    <Setter Property="Border.BorderBrush" Value="Black"/>
+                                    <Setter Property="Border.BorderThickness" Value="1"/>
                                 </Style.Setters>
                             </Style>
                         </Border.Style>

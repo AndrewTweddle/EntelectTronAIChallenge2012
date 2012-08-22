@@ -273,13 +273,10 @@ namespace AndrewTweddle.Tron.UI
                         newGameState.FlipGameState();
                     }
                     GameStateViewModel.GameState.CopyFrom(newGameState);
+                    IsTurnOfPlayer1 = !IsTurnOfPlayer1;
                     if (newGameState.IsGameOver)
                     {
                         StopGame();
-                    }
-                    else
-                    {
-                        IsTurnOfPlayer1 = !IsTurnOfPlayer1;
                     }
                 }
             }

@@ -12,6 +12,7 @@ namespace AndrewTweddle.Tron.UI.GameBoard
     public class GameStateViewModel:BaseViewModel
     {
         private GameState gameState;
+        private CellStateViewModel selectedCellStateViewModel;
         private ObservableCollection<CellStateViewModel> cellStateViewModels;
 
         public GameState GameState
@@ -73,6 +74,19 @@ namespace AndrewTweddle.Tron.UI.GameBoard
                     cellStateViewModels = value;
                     OnPropertyChanged("CellStateViewModels");
                 }
+            }
+        }
+
+        public CellStateViewModel SelectedCellStateViewModel
+        {
+            get
+            {
+                return selectedCellStateViewModel;
+            }
+            set
+            {
+                selectedCellStateViewModel = value;
+                OnPropertyChanged("SelectedCellStateViewModel");
             }
         }
 
