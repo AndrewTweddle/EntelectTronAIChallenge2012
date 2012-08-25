@@ -62,6 +62,8 @@ namespace AndrewTweddle.Tron.UI
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            MainViewModel.DisplaySearchTree();
+
             if (MainViewModel.GameStateViewModel.GameState.IsGameOver)
             {
                 // TODO: Indicate who won

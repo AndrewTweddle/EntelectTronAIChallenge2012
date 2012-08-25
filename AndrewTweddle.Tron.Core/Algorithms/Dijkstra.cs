@@ -128,8 +128,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                         break;
 
                     case CompartmentStatus.InYourCompartment:
-                        cellState.ClosestPlayer = PlayerType.Opponent;
-                        numberOfCellsClosestToOpponent++;
+                        cellState.ClosestPlayer = PlayerType.You;
                         break;
 
                     case CompartmentStatus.InSharedCompartment:

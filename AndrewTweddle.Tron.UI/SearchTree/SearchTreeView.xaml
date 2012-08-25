@@ -11,8 +11,31 @@
             DataType="{x:Type core:SearchNode}"
             ItemsSource="{Binding ChildNodes}">
             <StackPanel Orientation="Horizontal">
+                <Border BorderBrush="Blue" BorderThickness="1" Background="Beige" Margin="2" TextBlock.Foreground="Black">
+                    <!--
+                    <Border.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=Move.PlayerType}" Value="You">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Border.Background" Value="MintGreen" />
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=Move.PlayerType}" Value="Opponent">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Border.Background" Value="Pink" />
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    -->
+                    <TextBlock Text="{Binding Path=Evaluation}" />
+                </Border>
                 <TextBlock Text="{Binding Path=Move}" />
+                <!--
                 <Button Click="DisplayButton_Click" Tag="{Binding}">Display</Button>
+                -->
             </StackPanel>
         </HierarchicalDataTemplate>
     </UserControl.Resources>

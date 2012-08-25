@@ -219,17 +219,29 @@ namespace AndrewTweddle.Tron.Core
             if (obj is SearchNode)
             {
                 SearchNode otherSearchNode = (SearchNode)obj;
-                return otherSearchNode.Depth == Depth && otherSearchNode.Move == Move 
-                    && ( otherSearchNode.ParentNode.Equals(ParentNode)
-                         || (otherSearchNode.ParentNode == null && ParentNode == null)
-                       );
+                if (otherSearchNode.ParentNode == null)
+                {
+                    // Other node is root of a search tree:
+                    if (ParentNode != null)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (otherSearchNode.Move != Move)
+                    {
+                        return false;
+                    }
+                }
+                return otherSearchNode.Depth == Depth;
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return Depth ^ Move.GetHashCode() ^ (ParentNode == null ? 0 : ParentNode.GetHashCode());
+            return Depth ^ (Move == null ? 0 : Move.GetHashCode()) ^ (ParentNode == null ? 0 : ParentNode.GetHashCode());
         }
 
         #endregion

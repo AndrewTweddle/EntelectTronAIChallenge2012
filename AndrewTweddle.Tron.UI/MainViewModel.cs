@@ -304,13 +304,6 @@ namespace AndrewTweddle.Tron.UI
                     {
                         GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player1SelectedCellActivated;
                     }
-                    /* TODO: Get this working, despite the ObservableCollection<SearchNode> being updated on a different thread:
-                    if (Player1Solver is BaseNegaMaxSolver)
-                    {
-                        BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player1Solver;
-                        SearchTreeViewModel.RootNode = nega.RootNode;
-                    }
-                     */
                 }
                 else
                 {
@@ -319,13 +312,6 @@ namespace AndrewTweddle.Tron.UI
                     {
                         GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player2SelectedCellActivated;
                     }
-                    /* TODO: Get this working, despite the ObservableCollection<SearchNode> being updated on a different thread:
-                    if (Player2Solver is BaseNegaMaxSolver)
-                    {
-                        BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player2Solver;
-                        SearchTreeViewModel.RootNode = nega.RootNode;
-                    }
-                     */
                 }
                 coordinator.CurrentGameState = GameStateViewModel.GameState.Clone();
                 if (!IsTurnOfPlayer1)
@@ -391,6 +377,26 @@ namespace AndrewTweddle.Tron.UI
         public void Resume()
         {
             IsPaused = false;
+        }
+
+        public void DisplaySearchTree()
+        {
+            if (!IsTurnOfPlayer1)
+            {
+                if (Player1Solver is BaseNegaMaxSolver)
+                {
+                    BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player1Solver;
+                    SearchTreeViewModel.RootNode = nega.RootNode;
+                }
+            }
+            else
+            {
+                if (Player2Solver is BaseNegaMaxSolver)
+                {
+                    BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player2Solver;
+                    SearchTreeViewModel.RootNode = nega.RootNode;
+                }
+            }
         }
     }
 }
