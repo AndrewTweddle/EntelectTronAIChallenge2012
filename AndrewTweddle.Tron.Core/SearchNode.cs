@@ -2,23 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace AndrewTweddle.Tron.Core
 {
-    public class SearchNode
+    public class SearchNode: INotifyPropertyChanged
     {
         #region Private Member variables
 
         private WeakReference weakReferenceToGameState;
         private GameState gameState;
         private double evaluation;
-        private List<SearchNode> childNodes = new List<SearchNode>();
+        private SearchNode parentNode;
+        private ObservableCollection<SearchNode> childNodes;
+        private int depth;
+        private ExpansionStatus expansionStatus;
+        private EvaluationStatus evaluationStatus;
+        private GameStateStoragePolicy gameStateStoragePolicy;
+        private Move move;
+        private Type childNodeCollectionType;
 
         #endregion
 
         #region Public properties
 
-        public int Depth { get; private set; }
+        public int Depth 
+        {
+            get
+            {
+                return depth;
+            }
+            private set
+            {
+                depth = value;
+                OnPropertyChanged("Depth");
+            }
+        }
+
         public double Evaluation 
         {
             get
@@ -28,21 +49,83 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 evaluation = value;
+                OnPropertyChanged("Evaluation");
                 EvaluationStatus = Core.EvaluationStatus.Evaluated;
             }
         }
-        public SearchNode ParentNode { get; private set; }
-        public IEnumerable<SearchNode> ChildNodes
+
+        public SearchNode ParentNode 
+        {
+            get
+            {
+                return parentNode;
+            }
+            private set
+            {
+                parentNode = value;
+                OnPropertyChanged("ParentNode");
+            }
+        }
+
+        public ObservableCollection<SearchNode> ChildNodes
         {
             get
             {
                 return childNodes;
             }
         }
-        public ExpansionStatus ExpansionStatus { get; private set; }
-        public EvaluationStatus EvaluationStatus { get; set; }
-        public GameStateStoragePolicy GameStateStoragePolicy { get; set;  }
-        public Move Move { get; private set; }
+
+        public ExpansionStatus ExpansionStatus
+        {
+            get
+            {
+                return expansionStatus;
+            }
+            private set
+            {
+                expansionStatus = value;
+                OnPropertyChanged("ExpansionStatus");
+            }
+        }
+        
+        public EvaluationStatus EvaluationStatus
+        {
+            get
+            {
+                return evaluationStatus;
+            }
+            set
+            {
+                evaluationStatus = value;
+                OnPropertyChanged("EvaluationStatus");
+            }
+        }
+        
+        public GameStateStoragePolicy GameStateStoragePolicy
+        {
+            get
+            {
+                return gameStateStoragePolicy;
+            }
+            set
+            {
+                gameStateStoragePolicy = value;
+                OnPropertyChanged("GameStateStoragePolicy");
+            }
+        }
+        
+        public Move Move
+        {
+            get
+            {
+                return move;
+            }
+            private set
+            {
+                move = value;
+                OnPropertyChanged("Move");
+            }
+        }
 
         public GameState GameState {
             get
@@ -52,8 +135,28 @@ namespace AndrewTweddle.Tron.Core
             private set
             {
                 SetGameState(value);
+                OnPropertyChanged("GameState");
             }
         }
+
+        public Type ChildNodeCollectionType
+        {
+            get
+            {
+                return childNodeCollectionType;
+            }
+            set
+            {
+                childNodeCollectionType = value;
+                OnPropertyChanged("ChildNodeCollectionType");
+            }
+        }
+
+        #endregion
+
+        #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         #endregion
 
@@ -62,11 +165,13 @@ namespace AndrewTweddle.Tron.Core
         private SearchNode() { }
 
         /* This constuctor is for root nodes: */
-        public SearchNode(GameState rootGameState)
+        public SearchNode(GameState rootGameState, Type childNodeCollectionType)
         {
             // Always maintain a strong reference to the root game state:
             GameStateStoragePolicy = Core.GameStateStoragePolicy.StrongReference;
             GameState = rootGameState;
+            ChildNodeCollectionType = childNodeCollectionType;
+            childNodes = Activator.CreateInstance(childNodeCollectionType) as ObservableCollection<SearchNode>;
         }
 
         public SearchNode(SearchNode parentNode, Move move)
@@ -77,6 +182,8 @@ namespace AndrewTweddle.Tron.Core
                     "Incorrect constructor used to create the root search node (a game state must be provided)");
             }
             ParentNode = parentNode;
+            ChildNodeCollectionType = ParentNode.ChildNodeCollectionType;
+            childNodes = Activator.CreateInstance(ChildNodeCollectionType) as ObservableCollection<SearchNode>;
             Move = move;
             if (parentNode == null)
             {
@@ -110,7 +217,10 @@ namespace AndrewTweddle.Tron.Core
             }
             if (childSearchNodes.Any())
             {
-                childNodes.AddRange(childSearchNodes);
+                foreach (SearchNode childSearchNode in childSearchNodes)
+                {
+                    childNodes.Add(childSearchNode);
+                }
             }
             ExpansionStatus = ExpansionStatus.FullyExpanded;
             if (GameStateStoragePolicy == GameStateStoragePolicy.StrongReferenceOnRootAndLeafNodeOnly
@@ -138,6 +248,19 @@ namespace AndrewTweddle.Tron.Core
         public override int GetHashCode()
         {
             return Depth ^ Move.GetHashCode() ^ (ParentNode == null ? 0 : ParentNode.GetHashCode());
+        }
+
+        #endregion
+
+        #region Protected methods
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChangedEventArgs args = new PropertyChangedEventArgs(propertyName);
+                PropertyChanged(this, args);
+            }
         }
 
         #endregion

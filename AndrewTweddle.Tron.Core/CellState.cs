@@ -80,18 +80,6 @@ namespace AndrewTweddle.Tron.Core
                 if (value != OccupationStatus)
                 {
                     occupationStatus = value;
-
-                    switch (occupationStatus)
-                    {
-                        case OccupationStatus.You:
-                            GameState.YourCell = this;
-                            break;
-                        case OccupationStatus.Opponent:
-                            GameState.OpponentsCell = this;
-                            break;
-                        default:
-                            break;
-                    }
                 }
                 OnPropertyChanged("OccupationStatus");
             }
@@ -175,6 +163,45 @@ namespace AndrewTweddle.Tron.Core
             ClosestPlayer = source.ClosestPlayer;
             DegreeOfVertex = source.DegreeOfVertex;
             CompartmentStatus = source.CompartmentStatus;
+        }
+
+        public void Flip()
+        {
+            switch (OccupationStatus)
+            {
+                case OccupationStatus.You:
+                    OccupationStatus = OccupationStatus.Opponent;
+                    break;
+
+                case OccupationStatus.Opponent:
+                    OccupationStatus = OccupationStatus.You;
+                    break;
+
+                case OccupationStatus.YourWall:
+                    OccupationStatus = OccupationStatus.OpponentWall;
+                    break;
+
+                case OccupationStatus.OpponentWall:
+                    OccupationStatus = OccupationStatus.YourWall;
+                    break;
+
+                default:  // case OccupationStatus.Clear:
+                    break;
+            }
+
+            switch (ClosestPlayer)
+            {
+                case PlayerType.You:
+                    ClosestPlayer = PlayerType.Opponent;
+                    break;
+                case PlayerType.Opponent:
+                    ClosestPlayer = PlayerType.You;
+                    break;
+            }
+
+            int newDistanceFromOpponent = DistanceFromYou;
+            DistanceFromYou = DistanceFromOpponent;
+            DistanceFromOpponent = newDistanceFromOpponent;
         }
 
         public CellState[] GetAdjacentCellStates()

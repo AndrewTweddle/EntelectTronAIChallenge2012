@@ -672,6 +672,26 @@ namespace AndrewTweddle.Tron.Core
             yield return SouthPole;
         }
 
+        public IEnumerable<Position> GetPossibleNextPositions()
+        {
+            CellState fromCell;
+
+            if (PlayerToMoveNext == PlayerType.You)
+            {
+                fromCell = YourCell;
+            }
+            else
+            {
+                fromCell = OpponentsCell;
+            }
+
+            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates().Where(cs => cs.OccupationStatus == OccupationStatus.Clear);
+            foreach (CellState toCell in clearCells)
+            {
+                yield return toCell.Position;
+            }
+        }
+
         public IEnumerable<Move> GetPossibleNextMoves()
         {
             CellState fromCell;
@@ -705,6 +725,16 @@ namespace AndrewTweddle.Tron.Core
                 nextGameState.MakeMove(move);
                 yield return nextGameState;
             }
+        }
+
+        public bool IsValidPositionToMoveTo(Position positionToMoveTo)
+        {
+            return GetPossibleNextPositions().Contains(positionToMoveTo);
+        }
+
+        public bool IsValidMove(Move move)
+        {
+            return GetPossibleNextMoves().Contains(move);
         }
 
         public void MakeMove(Move move, bool performDijkstra = true)
@@ -928,37 +958,7 @@ namespace AndrewTweddle.Tron.Core
 
             foreach (CellState cellState in GetAllCellStates())
             {
-                switch (cellState.OccupationStatus)
-                {
-                    case OccupationStatus.You:
-                        cellState.OccupationStatus = OccupationStatus.Opponent;
-                        break;
-
-                    case OccupationStatus.Opponent:
-                        cellState.OccupationStatus = OccupationStatus.You;
-                        break;
-                    
-                    case OccupationStatus.YourWall:
-                        cellState.OccupationStatus = OccupationStatus.OpponentWall;
-                        break;
-
-                    case OccupationStatus.OpponentWall:
-                        cellState.OccupationStatus = OccupationStatus.YourWall;
-                        break;
-
-                    default:  // case OccupationStatus.Clear:
-                        break;
-                }
-
-                switch (cellState.ClosestPlayer)
-                {
-                    case PlayerType.You:
-                        cellState.ClosestPlayer = PlayerType.Opponent;
-                        break;
-                    case PlayerType.Opponent:
-                        cellState.ClosestPlayer = PlayerType.You;
-                        break;
-                }
+                cellState.Flip();
             }
 
             CellState newOpponentsOriginalCell = YourOriginalCell;

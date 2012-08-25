@@ -3,29 +3,92 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace AndrewTweddle.Tron.Core
 {
     public abstract class BaseNegaMaxSolver: BaseSolver
     {
+        #region Abstract methods
+
         protected abstract void Evaluate(SearchNode searchNode);
 
-        public int MaxDepth { get; private set; }
-        public SearchNode RootNode { get; private set; }
+        #endregion
 
-        protected BaseNegaMaxSolver(): base()
+
+        #region Private member variables
+
+        private int maxDepth;
+        private SearchNode rootNode;
+        private Type childNodeCollectionType;
+
+        #endregion
+
+
+        #region Public properties
+
+        public int MaxDepth
         {
-            MaxDepth = 6;
+            get
+            {
+                return maxDepth;
+            }
+            private set
+            {
+                maxDepth = value;
+                OnPropertyChanged("MaxDepth");
+            }
         }
 
-        public BaseNegaMaxSolver(int depth): base()
+        public SearchNode RootNode
+        {
+            get
+            {
+                return rootNode;
+            }
+            private set
+            {
+                rootNode = value;
+                OnPropertyChanged("RootNode");
+            }
+        }
+
+        public Type ChildNodeCollectionType
+        {
+            get
+            {
+                return childNodeCollectionType;
+            }
+            set
+            {
+                childNodeCollectionType = value;
+                OnPropertyChanged("ChildNodeCollectionType");
+            }
+        }
+
+        #endregion
+
+
+        #region Constructors
+
+        protected BaseNegaMaxSolver(): this(typeof(ObservableCollection<SearchNode>))
+        {
+        }
+
+        public BaseNegaMaxSolver(Type childNodeCollectionType, int depth = 6): base()
         {
             MaxDepth = depth;
+            childNodeCollectionType = childNodeCollectionType;
         }
+
+        #endregion
+
+
+        #region Protected methods
 
         protected override void DoSolve()
         {
-            RootNode = new SearchNode(Coordinator.CurrentGameState);
+            RootNode = new SearchNode(Coordinator.CurrentGameState, childNodeCollectionType);
             double evaluation = Negamax(RootNode);
             RootNode.Evaluation = evaluation;
 
@@ -55,6 +118,10 @@ namespace AndrewTweddle.Tron.Core
                 Debug.WriteLine("NegaMax found no best child");
             }
         }
+
+        #endregion
+
+        #region Private methods
 
         private double Negamax(SearchNode searchNode, int depth = 0, double alpha = double.NegativeInfinity, 
             double beta = double.PositiveInfinity)
@@ -115,5 +182,7 @@ namespace AndrewTweddle.Tron.Core
                 }
             }
         }
+
+        #endregion
     }
 }

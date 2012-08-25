@@ -6,16 +6,20 @@ using AndrewTweddle.Tron.Core;
 using AndrewTweddle.Tron.Bots;
 using AndrewTweddle.Tron.UI.GameBoard;
 using System.Collections.ObjectModel;
+using AndrewTweddle.Tron.UI.SearchTree;
 
 namespace AndrewTweddle.Tron.UI
 {
     public class MainViewModel: BaseViewModel
     {
         private GameStateViewModel gameStateViewModel;
+        private SearchTreeViewModel searchTreeViewModel;
         private ISolver player1Solver;
         private ISolver player2Solver;
         private Coordinator player1Coordinator;
         private Coordinator player2Coordinator;
+        private bool isPlayer1Human;
+        private bool isPlayer2Human;
         private bool isTurnOfPlayer1 = true;
         private bool isPaused = false;
         private bool isInProgress = false;
@@ -56,6 +60,32 @@ namespace AndrewTweddle.Tron.UI
             {
                 player2SolverType = value;
                 OnPropertyChanged("Player2SolverType");
+            }
+        }
+
+        public bool IsPlayer1Human
+        {
+            get
+            {
+                return isPlayer1Human;
+            }
+            set
+            {
+                isPlayer1Human = value;
+                OnPropertyChanged("IsPlayer1Human");
+            }
+        }
+
+        public bool IsPlayer2Human
+        {
+            get
+            {
+                return isPlayer2Human;
+            }
+            set
+            {
+                isPlayer2Human = value;
+                OnPropertyChanged("IsPlayer2Human");
             }
         }
 
@@ -117,6 +147,19 @@ namespace AndrewTweddle.Tron.UI
             {
                 gameStateViewModel = value;
                 OnPropertyChanged("GameStateViewModel");
+            }
+        }
+
+        public SearchTreeViewModel SearchTreeViewModel
+        {
+            get
+            {
+                return searchTreeViewModel;
+            }
+            set
+            {
+                searchTreeViewModel = value;
+                OnPropertyChanged("SearchTreeViewModel");
             }
         }
 
@@ -207,9 +250,12 @@ namespace AndrewTweddle.Tron.UI
             solverTypes.Add(typeof(CopyCatSolver));
             solverTypes.Add(typeof(ScaredyCatSolver));
             solverTypes.Add(typeof(RandomSolver));
+            solverTypes.Add(typeof(HumanSolver));
 
             GameStateViewModel = new GameStateViewModel();
             GameStateViewModel.GameState = new GameState();
+
+            SearchTreeViewModel = new SearchTreeViewModel();
         }
 
         public void StartGame()
@@ -223,6 +269,7 @@ namespace AndrewTweddle.Tron.UI
             
             /* Set up player 1 (red): */
             Player1Solver = Activator.CreateInstance(Player1SolverType) as ISolver;
+            IsPlayer1Human = (Player1Solver is HumanSolver);
             Player1Coordinator = new Coordinator(Player1Solver)
             {
                 IsInDebugMode = true,
@@ -231,6 +278,7 @@ namespace AndrewTweddle.Tron.UI
 
             /* Set up player 2 (blue): */
             Player2Solver = Activator.CreateInstance(Player2SolverType) as ISolver;
+            IsPlayer2Human = (Player2Solver is HumanSolver);
             Player2Coordinator = new Coordinator(Player2Solver)
             {
                 IsInDebugMode = true,
@@ -252,10 +300,34 @@ namespace AndrewTweddle.Tron.UI
                 if (IsTurnOfPlayer1)
                 {
                     coordinator = Player1Coordinator;
+                    if (IsPlayer1Human)
+                    {
+                        GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player1SelectedCellActivated;
+                    }
+                    /* Remove shoddy code... yack shaving...
+                    if (Player1Solver is BaseNegaMaxSolver)
+                    {
+                        BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player1Solver;
+                        nega.ChildNodeCollectionType = typeof(MTObservableCollection<SearchNode>);
+                        SearchTreeViewModel.RootNode = nega.RootNode;
+                    }
+                     */
                 }
                 else
                 {
                     coordinator = Player2Coordinator;
+                    if (IsPlayer2Human)
+                    {
+                        GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player2SelectedCellActivated;
+                    }
+                    /* Remove shoddy code... yack shaving...
+                    if (Player2Solver is BaseNegaMaxSolver)
+                    {
+                        BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player2Solver;
+                        nega.ChildNodeCollectionType = typeof(MTObservableCollection<SearchNode>);
+                        SearchTreeViewModel.RootNode = nega.RootNode;
+                    }
+                     */
                 }
                 coordinator.CurrentGameState = GameStateViewModel.GameState.Clone();
                 if (!IsTurnOfPlayer1)
@@ -268,9 +340,20 @@ namespace AndrewTweddle.Tron.UI
                 lock (coordinator.BestMoveLock)
                 {
                     GameState newGameState = coordinator.BestMoveSoFar;
-                    if (!isTurnOfPlayer1)
+                    if (IsTurnOfPlayer1)
+                    {
+                        if (IsPlayer1Human)
+                        {
+                            GameStateViewModel.SelectedCellActivated -= GameStateViewModel_Player1SelectedCellActivated;
+                        }
+                    }
+                    else
                     {
                         newGameState.FlipGameState();
+                        if (IsPlayer2Human)
+                        {
+                            GameStateViewModel.SelectedCellActivated -= GameStateViewModel_Player2SelectedCellActivated;
+                        }
                     }
                     GameStateViewModel.GameState.CopyFrom(newGameState);
                     IsTurnOfPlayer1 = !IsTurnOfPlayer1;
@@ -284,6 +367,16 @@ namespace AndrewTweddle.Tron.UI
             {
                 IsTurnInProgress = false;
             }
+        }
+
+        void GameStateViewModel_Player1SelectedCellActivated(object sender, EventArgs e)
+        {
+            (Player1Solver as HumanSolver).PositionMovedTo = GameStateViewModel.SelectedCellStateViewModel.CellState.Position;
+        }
+
+        void GameStateViewModel_Player2SelectedCellActivated(object sender, EventArgs e)
+        {
+            (Player2Solver as HumanSolver).PositionMovedTo = GameStateViewModel.SelectedCellStateViewModel.CellState.Position;
         }
 
         public void StopGame()

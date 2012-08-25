@@ -33,6 +33,7 @@ namespace AndrewTweddle.Tron.UI
                 mainViewModel = value;
                 DataContext = value;
                 MainGameStateView.ViewModel = value.GameStateViewModel;
+                SearchTreeView.ViewModel = value.SearchTreeViewModel;
             }
         }
 
@@ -92,6 +93,14 @@ namespace AndrewTweddle.Tron.UI
              * (since Pause & Resume could be pressed within the duration of a single turn:
              */
             if (!MainViewModel.IsTurnInProgress)
+            {
+                TakeNextTurnInASeparateThread();
+            }
+        }
+
+        private void StepGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(MainViewModel.IsTurnInProgress || MainViewModel.GameStateViewModel.GameState.IsGameOver))
             {
                 TakeNextTurnInASeparateThread();
             }

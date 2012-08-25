@@ -4,7 +4,7 @@
         xmlns:st="clr-namespace:AndrewTweddle.Tron.UI.SearchTree"
         xmlns:gb="clr-namespace:AndrewTweddle.Tron.UI.GameBoard"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
-        Title="MainWindow" Height="350" Width="800"
+        Title="MainWindow" Height="350" Width="850"
         WindowState="Maximized"
         >
     <Window.Resources>
@@ -129,15 +129,34 @@
                 </Button.Style>
                 Resume
             </Button>
+
+            <Button Name="StepGameButton" Margin="5" Click="StepGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsPaused}" Value="True" />
+                                    <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Step
+            </Button>
         </WrapPanel>
-        
-        <gb:GameStateView Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="MainGameStateView" />
+
+        <gb:GameStateView x:Name="MainGameStateView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
         <gb:CellStateDetailsView Grid.Row="1" Grid.Column="1" 
                                  x:Name="CellStateDetails"
                                  DataContext="{Binding ElementName=MainGameStateView,Path=DataContext.SelectedCellStateViewModel}" 
                                  />
-        <!--
-        <st:SearchTreeControl Grid.Row="0" Grid.Column="0" />
-        -->
+        <st:SearchTreeView x:Name="SearchTreeView" Grid.Row="2" Grid.Column="1" />
     </Grid>
 </Window>

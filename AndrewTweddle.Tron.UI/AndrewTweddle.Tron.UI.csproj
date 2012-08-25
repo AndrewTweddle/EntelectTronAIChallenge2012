@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="GameBoard\GameStateViewModel.cs" />
     <Compile Include="MainViewModel.cs" />
+    <Compile Include="MTObservableCollection.cs" />
     <Compile Include="SearchTree\SearchTreeView.xaml.cs">
       <DependentUpon>SearchTreeView.xaml</DependentUpon>
     </Compile>

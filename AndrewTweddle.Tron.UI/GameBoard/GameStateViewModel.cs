@@ -90,8 +90,19 @@ namespace AndrewTweddle.Tron.UI.GameBoard
             }
         }
 
+        public event EventHandler SelectedCellActivated;
+
         public GameStateViewModel()
         {
+        }
+
+        public void OnSelectedCellActivated()
+        {
+            if (SelectedCellActivated != null)
+            {
+                EventArgs args = new EventArgs();
+                SelectedCellActivated(this, args);
+            }
         }
     }
 }

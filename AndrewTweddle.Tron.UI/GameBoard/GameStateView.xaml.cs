@@ -43,5 +43,18 @@ namespace AndrewTweddle.Tron.UI.GameBoard
         {
             ViewModel = viewModel;
         }
+
+        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ViewModel.OnSelectedCellActivated();
+        }
+
+        private void ListBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ViewModel.OnSelectedCellActivated();
+            }
+        }
     }
 }
