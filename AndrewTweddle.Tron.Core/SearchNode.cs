@@ -15,13 +15,12 @@ namespace AndrewTweddle.Tron.Core
         private GameState gameState;
         private double evaluation;
         private SearchNode parentNode;
-        private ObservableCollection<SearchNode> childNodes;
+        private ObservableCollection<SearchNode> childNodes = new ObservableCollection<SearchNode>();
         private int depth;
         private ExpansionStatus expansionStatus;
         private EvaluationStatus evaluationStatus;
         private GameStateStoragePolicy gameStateStoragePolicy;
         private Move move;
-        private Type childNodeCollectionType;
 
         #endregion
 
@@ -139,19 +138,6 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public Type ChildNodeCollectionType
-        {
-            get
-            {
-                return childNodeCollectionType;
-            }
-            set
-            {
-                childNodeCollectionType = value;
-                OnPropertyChanged("ChildNodeCollectionType");
-            }
-        }
-
         #endregion
 
         #region Events
@@ -165,13 +151,11 @@ namespace AndrewTweddle.Tron.Core
         private SearchNode() { }
 
         /* This constuctor is for root nodes: */
-        public SearchNode(GameState rootGameState, Type childNodeCollectionType)
+        public SearchNode(GameState rootGameState)
         {
             // Always maintain a strong reference to the root game state:
             GameStateStoragePolicy = Core.GameStateStoragePolicy.StrongReference;
             GameState = rootGameState;
-            ChildNodeCollectionType = childNodeCollectionType;
-            childNodes = Activator.CreateInstance(childNodeCollectionType) as ObservableCollection<SearchNode>;
         }
 
         public SearchNode(SearchNode parentNode, Move move)
@@ -182,8 +166,6 @@ namespace AndrewTweddle.Tron.Core
                     "Incorrect constructor used to create the root search node (a game state must be provided)");
             }
             ParentNode = parentNode;
-            ChildNodeCollectionType = ParentNode.ChildNodeCollectionType;
-            childNodes = Activator.CreateInstance(ChildNodeCollectionType) as ObservableCollection<SearchNode>;
             Move = move;
             if (parentNode == null)
             {

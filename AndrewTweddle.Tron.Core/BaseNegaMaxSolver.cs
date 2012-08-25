@@ -20,7 +20,6 @@ namespace AndrewTweddle.Tron.Core
 
         private int maxDepth;
         private SearchNode rootNode;
-        private Type childNodeCollectionType;
 
         #endregion
 
@@ -53,32 +52,14 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public Type ChildNodeCollectionType
-        {
-            get
-            {
-                return childNodeCollectionType;
-            }
-            set
-            {
-                childNodeCollectionType = value;
-                OnPropertyChanged("ChildNodeCollectionType");
-            }
-        }
-
         #endregion
 
 
         #region Constructors
 
-        protected BaseNegaMaxSolver(): this(typeof(ObservableCollection<SearchNode>))
-        {
-        }
-
-        public BaseNegaMaxSolver(Type childNodeCollectionType, int depth = 6): base()
+        public BaseNegaMaxSolver(int depth = 6): base()
         {
             MaxDepth = depth;
-            childNodeCollectionType = childNodeCollectionType;
         }
 
         #endregion
@@ -88,7 +69,7 @@ namespace AndrewTweddle.Tron.Core
 
         protected override void DoSolve()
         {
-            RootNode = new SearchNode(Coordinator.CurrentGameState, childNodeCollectionType);
+            RootNode = new SearchNode(Coordinator.CurrentGameState);
             double evaluation = Negamax(RootNode);
             RootNode.Evaluation = evaluation;
 

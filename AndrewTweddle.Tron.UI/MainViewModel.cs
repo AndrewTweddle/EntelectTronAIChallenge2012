@@ -304,11 +304,10 @@ namespace AndrewTweddle.Tron.UI
                     {
                         GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player1SelectedCellActivated;
                     }
-                    /* Remove shoddy code... yack shaving...
+                    /* TODO: Get this working, despite the ObservableCollection<SearchNode> being updated on a different thread:
                     if (Player1Solver is BaseNegaMaxSolver)
                     {
                         BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player1Solver;
-                        nega.ChildNodeCollectionType = typeof(MTObservableCollection<SearchNode>);
                         SearchTreeViewModel.RootNode = nega.RootNode;
                     }
                      */
@@ -320,11 +319,10 @@ namespace AndrewTweddle.Tron.UI
                     {
                         GameStateViewModel.SelectedCellActivated += GameStateViewModel_Player2SelectedCellActivated;
                     }
-                    /* Remove shoddy code... yack shaving...
+                    /* TODO: Get this working, despite the ObservableCollection<SearchNode> being updated on a different thread:
                     if (Player2Solver is BaseNegaMaxSolver)
                     {
                         BaseNegaMaxSolver nega = (BaseNegaMaxSolver)Player2Solver;
-                        nega.ChildNodeCollectionType = typeof(MTObservableCollection<SearchNode>);
                         SearchTreeViewModel.RootNode = nega.RootNode;
                     }
                      */
