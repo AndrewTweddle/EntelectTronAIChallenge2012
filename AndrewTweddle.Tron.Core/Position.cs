@@ -18,6 +18,9 @@ namespace AndrewTweddle.Tron.Core
         [NonSerialized]
         private static readonly Position[,][] adjacentPositions = new Position[Constants.Columns,Constants.Rows][];
 
+        [NonSerialized]
+        private static readonly int[,] initialDegreesOfVertices = new int[Constants.Columns, Constants.Rows];
+
         public int X 
         {
             get
@@ -105,7 +108,9 @@ namespace AndrewTweddle.Tron.Core
                         }
                     }
 
-                    adjacentPositions[X, Y] = adjacentPositionsList.ToArray();
+                    Position[] adjacentPositionsArray = adjacentPositionsList.ToArray();
+                    adjacentPositions[X, Y] = adjacentPositionsArray;
+                    initialDegreesOfVertices[X, Y] = adjacentPositionsArray.Length;
                 }
             }
         }
@@ -175,6 +180,11 @@ namespace AndrewTweddle.Tron.Core
         public Position[] GetAdjacentPositions()
         {
             return adjacentPositions[X, Y];
+        }
+
+        public int GetInitialDegreeOfVertex()
+        {
+            return initialDegreesOfVertices[X, Y];
         }
 
         [field: NonSerialized]

@@ -60,6 +60,9 @@
       <DependentUpon>CellStateDetailsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GameBoard\CellStateViewModel.cs" />
+    <Compile Include="GameBoard\GameStateSummaryView.xaml.cs">
+      <DependentUpon>GameStateSummaryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GameBoard\GameStateView.xaml.cs">
       <DependentUpon>GameStateView.xaml</DependentUpon>
     </Compile>
@@ -70,6 +73,10 @@
     </Compile>
     <Compile Include="SearchTree\SearchTreeViewModel.cs" />
     <Page Include="GameBoard\CellStateDetailsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GameBoard\GameStateSummaryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -52,10 +52,6 @@
       <Project>{48EBBB82-4B49-4EC6-BEFA-D0ED8F696CF4}</Project>
       <Name>AndrewTweddle.Tron.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TronSdk\TronSdk.csproj">
-      <Project>{9921A306-480D-47E7-829C-9C065D1EB5F3}</Project>
-      <Name>TronSdk</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

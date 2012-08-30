@@ -41,6 +41,7 @@ namespace AndrewTweddle.Tron.Core
         {
             GameState = gameState;
             Position = new Position(x, y);
+            DegreeOfVertex = Position.GetInitialDegreeOfVertex();
         }
 
         public Position Position 
@@ -69,7 +70,7 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public OccupationStatus OccupationStatus 
+        public OccupationStatus OccupationStatus
         { 
             get
             {
@@ -79,9 +80,49 @@ namespace AndrewTweddle.Tron.Core
             {
                 if (value != OccupationStatus)
                 {
+                    bool wasFilled = (occupationStatus == OccupationStatus.OpponentWall || occupationStatus == OccupationStatus.YourWall);
+                    bool isBeingFilled = (value == OccupationStatus.OpponentWall || value == OccupationStatus.YourWall);
                     occupationStatus = value;
+                    OnPropertyChanged("OccupationStatus");
+
+                    /* Does degree of adjacent vertices need to be re-calculated: */
+                    if (wasFilled != isBeingFilled)
+                    {
+                        /* Update degree of vertex and its adjacent vertices: */
+                        RecalculateDegree();
+                        foreach (CellState adjacentCellState in GetAdjacentCellStates())
+                        {
+                            adjacentCellState.RecalculateDegree();
+                        }
+                    }
                 }
-                OnPropertyChanged("OccupationStatus");
+            }
+        }
+
+        public void RecalculateDegree()
+        {
+            switch (OccupationStatus)
+            {
+                case OccupationStatus.Clear:
+                case OccupationStatus.You:
+                case OccupationStatus.Opponent:
+                    int degree = 0;
+                    foreach (CellState adjacentCellState in GetAdjacentCellStates())
+                    {
+                        switch (adjacentCellState.OccupationStatus)
+                        {
+                            case OccupationStatus.Clear:
+                            case OccupationStatus.Opponent:
+                            case OccupationStatus.You:
+                                degree++;
+                                break;
+                        }
+                    }
+                    DegreeOfVertex = degree;
+                    break;
+                default:  // The cell is filled, so it's now connected to nothing...
+                    DegreeOfVertex = 0;
+                    break;
             }
         }
 
@@ -199,9 +240,61 @@ namespace AndrewTweddle.Tron.Core
                     break;
             }
 
+            switch (CompartmentStatus)
+            {
+                case CompartmentStatus.InOpponentsCompartment:
+                    CompartmentStatus = CompartmentStatus.InYourCompartment;
+                    break;
+                case CompartmentStatus.InYourCompartment:
+                    CompartmentStatus = CompartmentStatus.InOpponentsCompartment;
+                    break;
+            }
+
             int newDistanceFromOpponent = DistanceFromYou;
             DistanceFromYou = DistanceFromOpponent;
             DistanceFromOpponent = newDistanceFromOpponent;
+        }
+
+        public void ClearDijkstraStateForPlayer(PlayerType playerType)
+        {
+            if (playerType == PlayerType.You)
+            {
+                if (OccupationStatus != OccupationStatus.You)
+                {
+                    DistanceFromYou = int.MaxValue;
+                    switch (CompartmentStatus)
+                    {
+                        case CompartmentStatus.InYourCompartment:
+                            CompartmentStatus = CompartmentStatus.InOtherCompartment;
+                            break;
+                        case CompartmentStatus.InSharedCompartment:
+                            CompartmentStatus = CompartmentStatus.InOpponentsCompartment;
+                            break;
+                    }
+                }
+            }
+
+            if (playerType == PlayerType.Opponent)
+            {
+                if (OccupationStatus != OccupationStatus.Opponent)
+                {
+                    DistanceFromOpponent = int.MaxValue;
+                    switch (CompartmentStatus)
+                    {
+                        case CompartmentStatus.InOpponentsCompartment:
+                            CompartmentStatus = CompartmentStatus.InOtherCompartment;
+                            break;
+                        case CompartmentStatus.InSharedCompartment:
+                            CompartmentStatus = CompartmentStatus.InYourCompartment;
+                            break;
+                    }
+                }
+            }
+
+            if (OccupationStatus == Core.OccupationStatus.Clear)
+            {
+                ClosestPlayer = PlayerType.Unknown;
+            }
         }
 
         public CellState[] GetAdjacentCellStates()

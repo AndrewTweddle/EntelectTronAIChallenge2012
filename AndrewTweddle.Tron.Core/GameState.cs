@@ -38,6 +38,10 @@ namespace AndrewTweddle.Tron.Core
         private int numberOfCellsClosestToOpponent;
         private int totalDegreesOfCellsClosestToYou;
         private int totalDegreesOfCellsClosestToOpponent;
+        private DijkstraStatus yourDijkstraStatus;
+        private DijkstraStatus opponentsDijkstraStatus;
+        private int yourUpToDateDijkstraDistance;
+        private int opponentsUpToDateDijkstraDistance;
         
         public GameState()
         {
@@ -218,7 +222,7 @@ namespace AndrewTweddle.Tron.Core
         {
             get
             {
-                return !GetPossibleNextMoves().Any();
+                return !GetPossibleNextPositions().Any();
             }
         }
 
@@ -350,6 +354,58 @@ namespace AndrewTweddle.Tron.Core
             {
                 totalDegreesOfCellsClosestToOpponent = value;
                 OnPropertyChanged("TotalDegreesOfCellsClosestToOpponent");
+            }
+        }
+
+        public DijkstraStatus YourDijkstraStatus
+        {
+            get
+            {
+                return yourDijkstraStatus;
+            }
+            set
+            {
+                yourDijkstraStatus = value;
+                OnPropertyChanged("YourDijkstraStatus");
+            }
+        }
+
+        public DijkstraStatus OpponentsDijkstraStatus
+        {
+            get
+            {
+                return opponentsDijkstraStatus;
+            }
+            set
+            {
+                opponentsDijkstraStatus = value;
+                OnPropertyChanged("OpponentsDijkstraStatus");
+            }
+        }
+
+        public int YourUpToDateDijkstraDistance
+        {
+            get
+            {
+                return yourUpToDateDijkstraDistance;
+            }
+            set
+            {
+                yourUpToDateDijkstraDistance = value;
+                OnPropertyChanged("YourUpToDateDijkstraDistance");
+            }
+        }
+
+        public int OpponentsUpToDateDijkstraDistance
+        {
+            get
+            {
+                return opponentsUpToDateDijkstraDistance;
+            }
+            set
+            {
+                opponentsUpToDateDijkstraDistance = value;
+                OnPropertyChanged("OpponentsUpToDateDijkstraDistance");
             }
         }
 
@@ -512,26 +568,79 @@ namespace AndrewTweddle.Tron.Core
             ClearDijkstraProperties();
         }
 
-        public void ClearDijkstraProperties()
+        public void ClearDijkstraProperties(bool updateYourDijkstraProperties = true, bool updateOpponentsDijkstraProperties = true)
         {
             OpponentIsInSameCompartment = true;
+
             NumberOfCellsReachableByYou = 0;
-            NumberOfCellsReachableByOpponent = 0;
             TotalDegreesOfCellsReachableByYou = 0;
-            TotalDegreesOfCellsReachableByOpponent = 0;
             NumberOfCellsClosestToYou = 0;
-            NumberOfCellsClosestToOpponent = 0;
             TotalDegreesOfCellsClosestToYou = 0;
+            YourDijkstraStatus = DijkstraStatus.NotCalculated;
+            YourUpToDateDijkstraDistance = 0;
+
+            NumberOfCellsReachableByOpponent = 0;
+            TotalDegreesOfCellsReachableByOpponent = 0;
+            NumberOfCellsClosestToOpponent = 0;
             TotalDegreesOfCellsClosestToOpponent = 0;
+            OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+            OpponentsUpToDateDijkstraDistance = 0;
 
             IEnumerable<CellState> cells = GetAllCellStates();
             foreach (CellState cell in cells)
             {
-                cell.DistanceFromYou = int.MaxValue;
-                cell.DistanceFromOpponent = int.MaxValue;
-                cell.ClosestPlayer = PlayerType.Unknown;
-                cell.DegreeOfVertex = 0;
-                cell.CompartmentStatus = CompartmentStatus.InOtherCompartment;
+                switch (cell.OccupationStatus)
+                {
+                    case OccupationStatus.Clear:
+                        cell.DistanceFromYou = int.MaxValue;
+                        cell.DistanceFromOpponent = int.MaxValue;
+                        cell.ClosestPlayer = PlayerType.Unknown;
+                        cell.CompartmentStatus = CompartmentStatus.InOtherCompartment;
+                        break;
+                    case OccupationStatus.You:
+                        cell.DistanceFromYou = 0;
+                        cell.DistanceFromOpponent = int.MaxValue;
+                        cell.ClosestPlayer = PlayerType.You;
+                        cell.CompartmentStatus = CompartmentStatus.InYourCompartment;
+                        break;
+                    case OccupationStatus.Opponent:
+                        cell.DistanceFromOpponent = 0;
+                        cell.DistanceFromYou = int.MaxValue;
+                        cell.ClosestPlayer = PlayerType.Opponent;
+                        cell.CompartmentStatus = CompartmentStatus.InOpponentsCompartment;
+                        break;
+                }
+            }
+        }
+
+        public void ClearDijkstraPropertiesForPlayer(PlayerType playerType)
+        {
+            OpponentIsInSameCompartment = true;
+
+            if (playerType == PlayerType.You)
+            {
+                NumberOfCellsReachableByYou = 0;
+                TotalDegreesOfCellsReachableByYou = 0;
+                NumberOfCellsClosestToYou = 0;
+                TotalDegreesOfCellsClosestToYou = 0;
+                YourDijkstraStatus = DijkstraStatus.NotCalculated;
+                YourUpToDateDijkstraDistance = 0;
+            }
+
+            if (playerType == PlayerType.Opponent)
+            {
+                NumberOfCellsReachableByOpponent = 0;
+                TotalDegreesOfCellsReachableByOpponent = 0;
+                NumberOfCellsClosestToOpponent = 0;
+                TotalDegreesOfCellsClosestToOpponent = 0;
+                OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+                OpponentsUpToDateDijkstraDistance = 0;
+            }
+
+            IEnumerable<CellState> cells = GetAllCellStates();
+            foreach (CellState cell in cells)
+            {
+                cell.ClearDijkstraStateForPlayer(playerType);
             }
         }
 
@@ -660,6 +769,10 @@ namespace AndrewTweddle.Tron.Core
             NumberOfCellsClosestToOpponent = sourceGameState.NumberOfCellsClosestToOpponent;
             TotalDegreesOfCellsClosestToYou = sourceGameState.TotalDegreesOfCellsClosestToYou;
             TotalDegreesOfCellsClosestToOpponent = sourceGameState.TotalDegreesOfCellsClosestToOpponent;
+            YourDijkstraStatus = sourceGameState.YourDijkstraStatus;
+            OpponentsDijkstraStatus = sourceGameState.OpponentsDijkstraStatus;
+            YourUpToDateDijkstraDistance = sourceGameState.YourUpToDateDijkstraDistance;
+            OpponentsUpToDateDijkstraDistance = sourceGameState.OpponentsUpToDateDijkstraDistance;
         }
 
         public IEnumerable<CellState> GetAllCellStates()
@@ -790,6 +903,20 @@ namespace AndrewTweddle.Tron.Core
                 PlayerToMoveNext = PlayerType.Opponent;
                 YourWallLength += 1;
                 YourCell = toCell;
+
+                // Update Dijkstra status and distance:
+                YourDijkstraStatus = DijkstraStatus.NotCalculated;
+                YourUpToDateDijkstraDistance = 0;
+
+                if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
+                {
+                    if (OpponentsDijkstraStatus == DijkstraStatus.FullyCalculated
+                        || (OpponentsDijkstraStatus == DijkstraStatus.PartiallyCalculated && OpponentsUpToDateDijkstraDistance >= toCell.DistanceFromOpponent))
+                    {
+                        OpponentsDijkstraStatus = DijkstraStatus.PartiallyCalculated;
+                        OpponentsUpToDateDijkstraDistance = toCell.DistanceFromOpponent - 1;
+                    }
+                }
             }
             else
             {
@@ -798,6 +925,24 @@ namespace AndrewTweddle.Tron.Core
                 PlayerToMoveNext = PlayerType.You;
                 OpponentsWallLength++;
                 OpponentsCell = toCell;
+
+                // Update Dijkstra status and distance:
+                OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+                OpponentsUpToDateDijkstraDistance = 0;
+
+                if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
+                {
+                    if (YourDijkstraStatus == DijkstraStatus.FullyCalculated
+                        || (YourDijkstraStatus == DijkstraStatus.PartiallyCalculated && YourUpToDateDijkstraDistance >= toCell.DistanceFromYou))
+                    {
+                        YourDijkstraStatus = DijkstraStatus.PartiallyCalculated;
+                        YourUpToDateDijkstraDistance = toCell.DistanceFromYou - 1;
+                    }
+                }
+                else
+                {
+                    OpponentIsInSameCompartment = false;
+                }
             }
 
             if (performDijkstra)
@@ -934,7 +1079,7 @@ namespace AndrewTweddle.Tron.Core
             int yourX = rnd.Next(Constants.Columns);
             int yourY = rnd.Next(Constants.Rows - 2) + 1;
             int opponentsX = (yourX + Constants.Columns / 2) % Constants.Columns;
-            int opponentsY = Constants.SouthPoleY - yourY;
+            int opponentsY = yourY; // was: Constants.SouthPoleY - yourY;
             CellState yourCell = gameState[yourX, yourY];
             CellState opponentsCell = gameState[opponentsX, opponentsY];
             yourCell.OccupationStatus = OccupationStatus.You;
