@@ -3,9 +3,82 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-            
-    </Grid>
+             mc:Ignorable="d" >
+    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="10" Padding="10" Margin="10">
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+        
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="PlayerWhoMovedFirst" />
+            <Label Grid.Row="1" Grid.Column="0" Content="PlayerToMoveNext" />
+            <Label Grid.Row="2" Grid.Column="0" Content="YourCell" />
+            <Label Grid.Row="3" Grid.Column="0" Content="OpponentsCell" />
+            <Label Grid.Row="4" Grid.Column="0" Content="YourOriginalCell" />
+            <Label Grid.Row="5" Grid.Column="0" Content="OpponentsOriginalCell" />
+            <Label Grid.Row="6" Grid.Column="0" Content="YourWallLength" />
+            <Label Grid.Row="7" Grid.Column="0" Content="OpponentsWallLength" />
+            <Label Grid.Row="8" Grid.Column="0" Content="OpponentIsInSameCompartment" />
+            <Label Grid.Row="9" Grid.Column="0" Content="NumberOfCellsReachableByYou" />
+            <Label Grid.Row="10" Grid.Column="0" Content="NumberOfCellsReachableByOpponent" />
+            <Label Grid.Row="11" Grid.Column="0" Content="TotalDegreesOfCellsReachableByYou" />
+            <Label Grid.Row="12" Grid.Column="0" Content="TotalDegreesOfCellsReachableByOpponent" />
+            <Label Grid.Row="13" Grid.Column="0" Content="NumberOfCellsClosestToYou" />
+            <Label Grid.Row="14" Grid.Column="0" Content="NumberOfCellsClosestToOpponent" />
+            <Label Grid.Row="15" Grid.Column="0" Content="TotalDegreesOfCellsClosestToYou" />
+            <Label Grid.Row="16" Grid.Column="0" Content="TotalDegreesOfCellsClosestToOpponent" />
+            <Label Grid.Row="17" Grid.Column="0" Content="YourDijkstraStatus" />
+            <Label Grid.Row="18" Grid.Column="0" Content="OpponentsDijkstraStatus" />
+            <Label Grid.Row="19" Grid.Column="0" Content="YourUpToDateDijkstraDistance" />
+            <Label Grid.Row="20" Grid.Column="0" Content="OpponentsUpToDateDijkstraDistance" />
+
+            <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.PlayerWhoMovedFirst,Mode=OneWay}" />
+            <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.PlayerToMoveNext,Mode=OneWay}" />
+            <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourCell.Position,Mode=OneWay}" />
+            <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsCell.Position,Mode=OneWay}" />
+            <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourOriginalCell.Position,Mode=OneWay}" />
+            <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsOriginalCell,Mode=OneWay}" />
+            <TextBox Grid.Row="6" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourWallLength,Mode=OneWay}" />
+            <TextBox Grid.Row="7" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsWallLength,Mode=OneWay}" />
+            <TextBox Grid.Row="8" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentIsInSameCompartment,Mode=OneWay}" />
+            <TextBox Grid.Row="9" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.NumberOfCellsReachableByYou,Mode=OneWay}" />
+            <TextBox Grid.Row="10" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.NumberOfCellsReachableByOpponent,Mode=OneWay}" />
+            <TextBox Grid.Row="11" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsReachableByYou,Mode=OneWay}" />
+            <TextBox Grid.Row="12" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsReachableByOpponent,Mode=OneWay}" />
+            <TextBox Grid.Row="13" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.NumberOfCellsClosestToYou,Mode=OneWay}" />
+            <TextBox Grid.Row="14" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.NumberOfCellsClosestToOpponent,Mode=OneWay}" />
+            <TextBox Grid.Row="15" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsClosestToYou,Mode=OneWay}" />
+            <TextBox Grid.Row="16" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsClosestToOpponent,Mode=OneWay}" />
+            <TextBox Grid.Row="17" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourDijkstraStatus,Mode=OneWay}" />
+            <TextBox Grid.Row="18" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsDijkstraStatus,Mode=OneWay}" />
+            <TextBox Grid.Row="19" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourUpToDateDijkstraDistance,Mode=OneWay}" />
+            <TextBox Grid.Row="20" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsUpToDateDijkstraDistance,Mode=OneWay}" />
+        </Grid>
+    </Border>
 </UserControl>

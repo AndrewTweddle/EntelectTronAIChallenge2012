@@ -4,8 +4,7 @@
         xmlns:st="clr-namespace:AndrewTweddle.Tron.UI.SearchTree"
         xmlns:gb="clr-namespace:AndrewTweddle.Tron.UI.GameBoard"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
-        Title="MainWindow" Height="350" Width="850"
-        WindowState="Maximized"
+        Title="MainWindow" WindowState="Maximized"
         >
     <Window.Resources>
         <cm:BackgroundWorker
@@ -25,10 +24,11 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
-        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="3">
+        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="4">
             <Border BorderBrush="Red" Background="Pink" Padding="5">
                 <StackPanel Orientation="Horizontal">
                     <Label>Player 1:</Label>
@@ -156,6 +156,10 @@
         <gb:CellStateDetailsView Grid.Row="1" Grid.Column="1" 
                                  x:Name="CellStateDetails"
                                  DataContext="{Binding ElementName=MainGameStateView,Path=DataContext.SelectedCellStateViewModel}" 
+                                 />
+        <gb:GameStateSummaryView Grid.Row="1" Grid.Column="2"
+                                 x:Name="GameStateSummary"
+                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext}"
                                  />
         <st:SearchTreeView x:Name="SearchTreeView" Grid.Row="2" Grid.Column="1" />
     </Grid>

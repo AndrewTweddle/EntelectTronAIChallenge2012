@@ -340,7 +340,7 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 totalDegreesOfCellsClosestToYou = value;
-                OnPropertyChanged("TotalDegreesOfCellsClosestToYou ");
+                OnPropertyChanged("TotalDegreesOfCellsClosestToYou");
             }
         }
 
