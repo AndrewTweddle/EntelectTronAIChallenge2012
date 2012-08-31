@@ -10,6 +10,12 @@ namespace AndrewTweddle.Tron.Bots
     {
         public static readonly int reachableCellsThreshold = 50;
 
+        public bool IncludeDegreeOfVertexOfPoles
+        {
+            get;
+            set;
+        }
+
         protected override void Evaluate(SearchNode searchNode)
         {
             if (searchNode.GameState.IsGameOver)
@@ -27,20 +33,23 @@ namespace AndrewTweddle.Tron.Bots
             {
                 int totalDegreesDifference = searchNode.GameState.TotalDegreesOfCellsClosestToYou - searchNode.GameState.TotalDegreesOfCellsClosestToOpponent;
 
-                // Exclude the poles, since they have a large number of edges, which causes the algorithm to avoid filling the poles:
-                CellState[] poles = new CellState[]{ searchNode.GameState.NorthPole, searchNode.GameState.SouthPole };
-                foreach (CellState pole in poles)
+                if (!IncludeDegreeOfVertexOfPoles)
                 {
-                    if (pole.OccupationStatus == OccupationStatus.Clear)
+                    // Exclude the poles, since they have a large number of edges, which causes the algorithm to avoid filling the poles:
+                    CellState[] poles = new CellState[] { searchNode.GameState.NorthPole, searchNode.GameState.SouthPole };
+                    foreach (CellState pole in poles)
                     {
-                        switch (pole.ClosestPlayer)
+                        if (pole.OccupationStatus == OccupationStatus.Clear)
                         {
-                            case PlayerType.You:
-                                totalDegreesDifference -= pole.DegreeOfVertex;
-                                break;
-                            case PlayerType.Opponent:
-                                totalDegreesDifference += pole.DegreeOfVertex;
-                                break;
+                            switch (pole.ClosestPlayer)
+                            {
+                                case PlayerType.You:
+                                    totalDegreesDifference -= pole.DegreeOfVertex;
+                                    break;
+                                case PlayerType.Opponent:
+                                    totalDegreesDifference += pole.DegreeOfVertex;
+                                    break;
+                            }
                         }
                     }
                 }
