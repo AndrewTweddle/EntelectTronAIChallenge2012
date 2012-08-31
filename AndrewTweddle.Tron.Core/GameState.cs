@@ -42,6 +42,9 @@ namespace AndrewTweddle.Tron.Core
         private DijkstraStatus opponentsDijkstraStatus;
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
+
+        [OptionalField]
+        private bool isUsingIncrementalDijkstra;
         
         public GameState()
         {
@@ -409,6 +412,19 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public bool IsUsingIncrementalDijkstra
+        {
+            get
+            {
+                return isUsingIncrementalDijkstra;
+            }
+            set
+            {
+                isUsingIncrementalDijkstra = value;
+                OnPropertyChanged("IsUsingIncrementalDijkstra");
+            }
+        }
+
         #endregion
 
         public static GameState LoadGameState(string filePath, FileType fileType = FileType.Binary)
@@ -615,7 +631,8 @@ namespace AndrewTweddle.Tron.Core
 
         public void ClearDijkstraPropertiesForPlayer(PlayerType playerType)
         {
-            OpponentIsInSameCompartment = true;
+            // TODO: Why still here...
+            // OpponentIsInSameCompartment = true;
 
             if (playerType == PlayerType.You)
             {
@@ -773,6 +790,8 @@ namespace AndrewTweddle.Tron.Core
             OpponentsDijkstraStatus = sourceGameState.OpponentsDijkstraStatus;
             YourUpToDateDijkstraDistance = sourceGameState.YourUpToDateDijkstraDistance;
             OpponentsUpToDateDijkstraDistance = sourceGameState.OpponentsUpToDateDijkstraDistance;
+
+            IsUsingIncrementalDijkstra = sourceGameState.IsUsingIncrementalDijkstra;
         }
 
         public IEnumerable<CellState> GetAllCellStates()
@@ -908,14 +927,26 @@ namespace AndrewTweddle.Tron.Core
                 YourDijkstraStatus = DijkstraStatus.NotCalculated;
                 YourUpToDateDijkstraDistance = 0;
 
-                if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
+                if (IsUsingIncrementalDijkstra)
                 {
-                    if (OpponentsDijkstraStatus == DijkstraStatus.FullyCalculated
-                        || (OpponentsDijkstraStatus == DijkstraStatus.PartiallyCalculated && OpponentsUpToDateDijkstraDistance >= toCell.DistanceFromOpponent))
+                    if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                     {
-                        OpponentsDijkstraStatus = DijkstraStatus.PartiallyCalculated;
-                        OpponentsUpToDateDijkstraDistance = toCell.DistanceFromOpponent - 1;
+                        if (OpponentsDijkstraStatus == DijkstraStatus.FullyCalculated
+                            || (OpponentsDijkstraStatus == DijkstraStatus.PartiallyCalculated && OpponentsUpToDateDijkstraDistance >= toCell.DistanceFromOpponent))
+                        {
+                            OpponentsDijkstraStatus = DijkstraStatus.PartiallyCalculated;
+                            OpponentsUpToDateDijkstraDistance = toCell.DistanceFromOpponent - 1;
+                        }
                     }
+                    else
+                    {
+                        OpponentIsInSameCompartment = false;
+                    }
+                }
+                else
+                {
+                    OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+                    OpponentsUpToDateDijkstraDistance = 0;
                 }
             }
             else

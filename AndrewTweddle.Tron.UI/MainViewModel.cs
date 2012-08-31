@@ -260,13 +260,17 @@ namespace AndrewTweddle.Tron.UI
 
         public void StartGame()
         {
-            IsTurnOfPlayer1 = true;
-            IsInProgress = true;
-            IsPaused = false;
-
             GameState gameState = GameState.InitializeNewGameState();
             GameStateViewModel.GameState.CopyFrom(gameState);
-            
+            IsTurnOfPlayer1 = true;
+            ContinueWithANewOrLoadedGame();
+            IsPaused = false;
+        }
+
+        private void ContinueWithANewOrLoadedGame()
+        {
+            IsInProgress = true;
+
             /* Set up player 1 (red): */
             Player1Solver = Activator.CreateInstance(Player1SolverType) as ISolver;
             IsPlayer1Human = (Player1Solver is HumanSolver);
@@ -377,6 +381,20 @@ namespace AndrewTweddle.Tron.UI
         public void Resume()
         {
             IsPaused = false;
+        }
+
+        public void LoadGameState(string filePath, FileType fileType = FileType.Binary)
+        {
+            GameState loadedGameState = GameState.LoadGameState(filePath, fileType);
+            GameStateViewModel.GameState.CopyFrom(loadedGameState);
+            IsTurnOfPlayer1 = loadedGameState.PlayerToMoveNext == PlayerType.You;
+            IsPaused = true;
+            ContinueWithANewOrLoadedGame();
+        }
+
+        public void SaveGameState(string filePath, FileType fileType = FileType.Binary)
+        {
+            GameStateViewModel.GameState.SaveGameState(filePath, fileType);
         }
 
         public void DisplaySearchTree()

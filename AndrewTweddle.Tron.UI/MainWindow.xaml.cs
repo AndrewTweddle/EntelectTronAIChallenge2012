@@ -12,6 +12,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using Microsoft.Win32;
+using AndrewTweddle.Tron.Core;
+using System.Reflection;
 
 namespace AndrewTweddle.Tron.UI
 {
@@ -107,5 +110,41 @@ namespace AndrewTweddle.Tron.UI
                 TakeNextTurnInASeparateThread();
             }
         }
+
+        private void LoadGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Filter = "xml game state files (*.xml)|*.xml|binary game state files (*.bin)|*.bin",
+                InitialDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase),
+                CheckFileExists = true
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                FileType fileType = (System.IO.Path.GetExtension(filePath) == ".xml") ? FileType.Xml : FileType.Binary;
+                MainViewModel.LoadGameState(filePath, fileType);
+            }
+        }
+
+        private void SaveGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog
+            {
+                DefaultExt = ".xml",
+                Filter = "xml game state files (*.xml)|*.xml|binary game state files (*.bin)|*.bin",
+                FileName = String.Format("{0}.xml", DateTime.Now.ToString("yyyy-MM-dd_HHmmss")),
+                InitialDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase),
+                OverwritePrompt = true,
+                AddExtension = true
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                FileType fileType = (System.IO.Path.GetExtension(filePath) == ".xml") ? FileType.Xml : FileType.Binary;
+                MainViewModel.SaveGameState(filePath, fileType);
+            }
+        }
+
     }
 }

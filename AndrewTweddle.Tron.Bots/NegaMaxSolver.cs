@@ -31,14 +31,17 @@ namespace AndrewTweddle.Tron.Bots
                 CellState[] poles = new CellState[]{ searchNode.GameState.NorthPole, searchNode.GameState.SouthPole };
                 foreach (CellState pole in poles)
                 {
-                    switch (pole.ClosestPlayer)
+                    if (pole.OccupationStatus == OccupationStatus.Clear)
                     {
-                        case PlayerType.You:
-                            totalDegreesDifference -= pole.DegreeOfVertex;
-                            break;
-                        case PlayerType.Opponent:
-                            totalDegreesDifference += pole.DegreeOfVertex;
-                            break;
+                        switch (pole.ClosestPlayer)
+                        {
+                            case PlayerType.You:
+                                totalDegreesDifference -= pole.DegreeOfVertex;
+                                break;
+                            case PlayerType.Opponent:
+                                totalDegreesDifference += pole.DegreeOfVertex;
+                                break;
+                        }
                     }
                 }
 

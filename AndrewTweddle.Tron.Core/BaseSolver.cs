@@ -10,7 +10,7 @@ namespace AndrewTweddle.Tron.Core
     {
         protected abstract void DoSolve();
 
-        public void Solve()
+        public virtual void Solve()
         {
             if (Coordinator == null)
             {

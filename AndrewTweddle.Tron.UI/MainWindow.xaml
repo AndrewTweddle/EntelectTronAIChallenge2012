@@ -24,12 +24,11 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
-        <WrapPanel Orientation="Horizontal" Margin="5" Grid.ColumnSpan="4">
-            <Border BorderBrush="Red" Background="Pink" Padding="5">
+        <WrapPanel Orientation="Horizontal" Margin="2" Grid.ColumnSpan="1">
+            <Border BorderBrush="Red" Background="Pink" Padding="2">
                 <StackPanel Orientation="Horizontal">
                     <Label>Player 1:</Label>
                     <ComboBox x:Name="player1ComboBox" 
@@ -40,7 +39,7 @@
                               Width="200" />
                 </StackPanel>
             </Border>
-            <Border BorderBrush="Blue" Background="LightBlue" Padding="5">
+            <Border BorderBrush="Blue" Background="LightBlue" Padding="2">
                 <StackPanel Orientation="Horizontal">
                     <Label Foreground="White">Player 2:</Label>
                     <ComboBox x:Name="player2ComboBox" 
@@ -52,7 +51,7 @@
                 </StackPanel>
             </Border>
             
-            <Button Name="StartGameButton" Margin="5" Click="StartGameButton_Click">
+            <Button Name="StartGameButton" Margin="2" Click="StartGameButton_Click">
                 <Button.Style>
                     <Style>
                         <Style.Triggers>
@@ -74,7 +73,7 @@
                 Start
             </Button>
             
-            <Button Name="StopGameButton" Margin="5" Click="StopGameButton_Click">
+            <Button Name="StopGameButton" Margin="2" Click="StopGameButton_Click">
                 <Button.Style>
                     <Style>
                         <Style.Triggers>
@@ -90,7 +89,7 @@
                 Stop
             </Button>
             
-            <Button Name="PauseGameButton" Margin="5" Click="PauseGameButton_Click">
+            <Button Name="PauseGameButton" Margin="2" Click="PauseGameButton_Click">
                 <Button.Style>
                     <Style>
                         <Style.Triggers>
@@ -110,7 +109,7 @@
                 Pause
             </Button>
             
-            <Button Name="ResumeGameButton" Margin="5" Click="ResumeGameButton_Click">
+            <Button Name="ResumeGameButton" Margin="2" Click="ResumeGameButton_Click">
                 <Button.Style>
                     <Style>
                         <Style.Triggers>
@@ -130,7 +129,7 @@
                 Resume
             </Button>
 
-            <Button Name="StepGameButton" Margin="5" Click="StepGameButton_Click">
+            <Button Name="StepGameButton" Margin="2" Click="StepGameButton_Click">
                 <Button.Style>
                     <Style>
                         <Style.Triggers>
@@ -152,15 +151,51 @@
             </Button>
         </WrapPanel>
 
-        <gb:GameStateView x:Name="MainGameStateView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
-        <gb:CellStateDetailsView Grid.Row="1" Grid.Column="1" 
+        <WrapPanel Orientation="Horizontal" Margin="2" Grid.Column="1">
+            <Button Name="LoadGameButton" Margin="2" Click="LoadGameButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Load game...
+            </Button>
+
+            <Button Name="SaveGameButton" Margin="2" Click="SaveGameButton_Click" IsEnabled="True">
+                <!--
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInProgress}">
+                                <Setter Property="Button.IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                -->
+                Save game...
+            </Button>
+        </WrapPanel>
+
+        <gb:GameStateView x:Name="MainGameStateView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Margin="2" VerticalAlignment="Top" />
+        <gb:CellStateDetailsView Grid.Row="1" Grid.Column="1"
                                  x:Name="CellStateDetails"
-                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext.SelectedCellStateViewModel}" 
-                                 />
-        <gb:GameStateSummaryView Grid.Row="1" Grid.Column="2"
+                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext.SelectedCellStateViewModel}" />
+        <gb:GameStateSummaryView Grid.Row="2" Grid.Column="1"
                                  x:Name="GameStateSummary"
-                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext}"
-                                 />
-        <st:SearchTreeView x:Name="SearchTreeView" Grid.Row="2" Grid.Column="1" />
+                                 DataContext="{Binding ElementName=MainGameStateView,Path=DataContext}" />
+        <st:SearchTreeView x:Name="SearchTreeView" Grid.Column="2" Grid.RowSpan="3" />
     </Grid>
 </Window>

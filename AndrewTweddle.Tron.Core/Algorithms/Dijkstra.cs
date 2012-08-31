@@ -260,19 +260,29 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                                 cellState.Position.X, cellState.Position.Y));
                 }
 
-                switch (cellState.ClosestPlayer)
+                if (cellState.OccupationStatus == OccupationStatus.Clear)
                 {
-                    case PlayerType.You:
-                        numberOfCellsClosestToYou++;
-                        totalDegreesOfCellsClosestToYou += cellState.DegreeOfVertex;
-                        break;
+                    switch (cellState.ClosestPlayer)
+                    {
+                        case PlayerType.You:
+                            numberOfCellsClosestToYou++;
+                            totalDegreesOfCellsClosestToYou += cellState.DegreeOfVertex;
+                            break;
 
-                    case PlayerType.Opponent:
-                        numberOfCellsClosestToOpponent++;
-                        totalDegreesOfCellsClosestToOpponent += cellState.DegreeOfVertex;
-                        break;
+                        case PlayerType.Opponent:
+                            numberOfCellsClosestToOpponent++;
+                            totalDegreesOfCellsClosestToOpponent += cellState.DegreeOfVertex;
+                            break;
+                    }
                 }
             }
+
+#if DEBUG
+            if (numberOfCellsClosestToYou == 0 || numberOfCellsClosestToOpponent == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("Number of closest cells is zero");
+            }
+#endif
 
             gameState.NumberOfCellsClosestToYou = numberOfCellsClosestToYou;
             gameState.NumberOfCellsClosestToOpponent = numberOfCellsClosestToOpponent;
