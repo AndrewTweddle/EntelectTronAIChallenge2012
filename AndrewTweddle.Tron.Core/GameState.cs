@@ -961,18 +961,26 @@ namespace AndrewTweddle.Tron.Core
                 OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
                 OpponentsUpToDateDijkstraDistance = 0;
 
-                if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
+                if (IsUsingIncrementalDijkstra)
                 {
-                    if (YourDijkstraStatus == DijkstraStatus.FullyCalculated
-                        || (YourDijkstraStatus == DijkstraStatus.PartiallyCalculated && YourUpToDateDijkstraDistance >= toCell.DistanceFromYou))
+                    if (toCell.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                     {
-                        YourDijkstraStatus = DijkstraStatus.PartiallyCalculated;
-                        YourUpToDateDijkstraDistance = toCell.DistanceFromYou - 1;
+                        if (YourDijkstraStatus == DijkstraStatus.FullyCalculated
+                            || (YourDijkstraStatus == DijkstraStatus.PartiallyCalculated && YourUpToDateDijkstraDistance >= toCell.DistanceFromYou))
+                        {
+                            YourDijkstraStatus = DijkstraStatus.PartiallyCalculated;
+                            YourUpToDateDijkstraDistance = toCell.DistanceFromYou - 1;
+                        }
+                    }
+                    else
+                    {
+                        OpponentIsInSameCompartment = false;
                     }
                 }
                 else
                 {
-                    OpponentIsInSameCompartment = false;
+                    YourDijkstraStatus = DijkstraStatus.NotCalculated;
+                    YourUpToDateDijkstraDistance = 0;
                 }
             }
 
