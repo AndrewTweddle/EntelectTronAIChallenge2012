@@ -103,7 +103,7 @@ namespace AndrewTweddle.Tron.Core
             if (IsIterativeDeepeningEnabled)
             {
                 CurrentDepth = 0;
-                while (CurrentDepth <= MaxDepth)
+                while (CurrentDepth <= MaxDepth && SolverState == SolverState.Running)
                 {
                     CurrentDepth = CurrentDepth + 1;
                     RunNegaMaxAtAParticularDepth();
@@ -118,33 +118,44 @@ namespace AndrewTweddle.Tron.Core
 
         private void RunNegaMaxAtAParticularDepth()
         {
+            // TODO: Modify this to store the old and new search tree (old depth and new depth).
+            // The challenge is to be able to use the old search tree to sort the new tree by the most promising branch first.
             double evaluation = Negamax(RootNode);
-            RootNode.Evaluation = evaluation;
 
-            List<SearchNode> bestChildNodes = RootNode.ChildNodes.Where(
-                childNode => childNode.EvaluationStatus == EvaluationStatus.Evaluated && childNode.Evaluation == evaluation
-            ).ToList();
-
-            SearchNode chosenChildNode = null;
-            if (bestChildNodes.Count > 1)
+            if (SolverState == SolverState.Stopping)
             {
-                Random rnd = new Random();
-                int randomMoveIndex = rnd.Next(bestChildNodes.Count);
-                chosenChildNode = bestChildNodes[randomMoveIndex];
+                RootNode.EvaluationStatus = EvaluationStatus.Stopped;
             }
             else
-                if (bestChildNodes.Count == 1)
+            {
+                // A solution was found at this depth. Choose a best solution:
+                RootNode.Evaluation = evaluation;
+
+                List<SearchNode> bestChildNodes = RootNode.ChildNodes.Where(
+                    childNode => childNode.EvaluationStatus == EvaluationStatus.Evaluated && childNode.Evaluation == evaluation
+                ).ToList();
+
+                SearchNode chosenChildNode = null;
+                if (bestChildNodes.Count > 1)
                 {
-                    chosenChildNode = bestChildNodes[0];
+                    Random rnd = new Random();
+                    int randomMoveIndex = rnd.Next(bestChildNodes.Count);
+                    chosenChildNode = bestChildNodes[randomMoveIndex];
                 }
+                else
+                    if (bestChildNodes.Count == 1)
+                    {
+                        chosenChildNode = bestChildNodes[0];
+                    }
 
-            if (chosenChildNode != null)
-            {
-                Coordinator.SetBestMoveSoFar(chosenChildNode.GameState);
-            }
-            else
-            {
-                Debug.WriteLine("NegaMax found no best child");
+                if (chosenChildNode != null)
+                {
+                    Coordinator.SetBestMoveSoFar(chosenChildNode.GameState);
+                }
+                else
+                {
+                    Debug.WriteLine("NegaMax found no best child");
+                }
             }
         }
 

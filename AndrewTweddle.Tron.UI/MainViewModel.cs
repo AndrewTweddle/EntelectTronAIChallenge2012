@@ -323,10 +323,10 @@ namespace AndrewTweddle.Tron.UI
                     coordinator.CurrentGameState.FlipGameState();
                 }
 
-                // Run following in BackgroundWorkerThread:
                 try
                 {
-                    coordinator.RunWithTimer();
+                    coordinator.StartTime = DateTime.Now;
+                    coordinator.Run();
                 }
                 catch(Exception exc)
                 {

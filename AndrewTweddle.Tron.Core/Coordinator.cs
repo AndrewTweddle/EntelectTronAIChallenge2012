@@ -12,11 +12,9 @@ namespace AndrewTweddle.Tron.Core
 {
     public class Coordinator
     {
-        public static readonly int MAX_DURATION_IN_MILLISECONDS = 4000;
+        public static readonly int MAX_DURATION_IN_MILLISECONDS = 5000;
+        public static readonly int TIME_TO_WAIT_UNTIL_STOPPING_SOLVER_IN_MILLISECONDS = 4000;
         public static readonly int MAX_GRACE_PERIOD_TO_STOP_IN = 500;
-
-        private object solverTimerLock = new object();
-        private System.Threading.Timer solverTimer;
 
         public bool IsInDebugMode { get; set; }
         public bool IgnoreTimer { get; set; }
@@ -26,30 +24,10 @@ namespace AndrewTweddle.Tron.Core
         public GameState BestMoveSoFar { get; private set; }  // TODO: Replace with Move not GameState?
         public ISolver Solver { get; set; }
         public DateTime StartTime { get; set; }
-        public TimeSpan MaximumDuration { get; private set; }
         public Thread SolverThread { get; private set; }
         public ManualResetEvent OutputTriggeringEvent { get; private set; }
         public string BinaryGameStateFilePath { get; private set; }
         public string XmlGameStateFilePath { get; private set; }
-
-        public System.Threading.Timer SolverTimer
-        {
-            get
-            {
-                return solverTimer;
-            }
-            private set
-            {
-                if (solverTimer != value)
-                {
-                    if (solverTimer != null)
-                    {
-                        solverTimer.Dispose();
-                    }
-                    solverTimer = value;
-                }
-            }
-        }
 
         private Coordinator()
         {
@@ -60,19 +38,10 @@ namespace AndrewTweddle.Tron.Core
             BestMoveLock = new object();
             solver.Coordinator = this;
             Solver = solver;
-            MaximumDuration = TimeSpan.FromMilliseconds(MAX_DURATION_IN_MILLISECONDS);
         }
 
         public Coordinator(ISolver solver): this(solver, DateTime.Now)
         {
-        }
-
-        ~Coordinator()
-        {
-            if (SolverTimer != null)
-            {
-                SolverTimer = null;  // This causes the timer to be disposed
-            }
         }
 
         public void SetBestMoveSoFar(GameState bestMove)
@@ -83,16 +52,14 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public void SignalATimeout(object state)
-        {
-            if (OutputTriggeringEvent != null)
-            {
-                OutputTriggeringEvent.Set();
-            }
-        }
-
+        /// <summary>
+        /// This method is used to run the solver in a separate thread
+        /// </summary>
         private void RunTheSolver()
         {
+            /* Save the property value in a local variable, so that if the property is later changed, 
+             * this method won't affect the newly created ManualResetEvent:
+             */
             ManualResetEvent triggerOutputEvent = OutputTriggeringEvent;
             try
             {
@@ -108,7 +75,7 @@ namespace AndrewTweddle.Tron.Core
             finally
             {
                 /* Signal that the solver has run: */
-                if (triggerOutputEvent == null)
+                if (triggerOutputEvent != null)
                 {
                     triggerOutputEvent.Set();
                 }
@@ -120,7 +87,7 @@ namespace AndrewTweddle.Tron.Core
             Process process = Process.GetCurrentProcess();
             StartTime = process.StartTime;
             DateTime now = DateTime.Now;
-            if (StartTime + MaximumDuration < now)
+            if (StartTime + TimeSpan.FromMilliseconds(MAX_DURATION_IN_MILLISECONDS) < now)
             {
                 // Process start time has probably not been set, so guess a start time of 1 second ago:
                 StartTime = now.Subtract(TimeSpan.FromSeconds(1));
@@ -138,28 +105,11 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        /// <summary>
+        /// The StartTime property should be set before calling Run() (unless IgnoreTimer is set to true).
+        /// </summary>
         public void Run(IEnumerable<RawCellData> cells)
         {
-            /* Set up the thread signalling event: */
-            OutputTriggeringEvent = new ManualResetEvent(false /* Not signalled yet*/);
-
-            /* Set up a timer to signal when a move must be chosen by: */
-            if (!IgnoreTimer)
-            {
-                DateTime endTime = StartTime + MaximumDuration;
-                DateTime now = DateTime.Now;
-                TimeSpan remainingTime = endTime - now;
-                if (remainingTime <= TimeSpan.Zero)
-                {
-                    SignalATimeout(null);
-                }
-                else
-                {
-                    System.Threading.Timer timer = new System.Threading.Timer(SignalATimeout);
-                    timer.Change((long)remainingTime.TotalMilliseconds, Timeout.Infinite);
-                }
-            }
-
             /* Determine file paths: */
             string exeFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             BinaryGameStateFilePath = Path.Combine(exeFolder, "GameState.bin");
@@ -216,42 +166,15 @@ namespace AndrewTweddle.Tron.Core
 
         public void Run(GameState currentGameState)
         {
+            StartTime = DateTime.Now;
             CurrentGameState = currentGameState;
             Run();
         }
 
-        public void RunWithTimer()
-        {
-            if (!IgnoreTimer)
-            {
-                /* Set up the thread signalling event: */
-                if (OutputTriggeringEvent == null)
-                {
-                    OutputTriggeringEvent = new ManualResetEvent(false /* Not signalled yet*/);
-                }
-
-                DateTime now = DateTime.Now;
-                StartTime = now;
-                DateTime endTime = StartTime + MaximumDuration;
-                TimeSpan remainingTime = endTime - DateTime.Now;
-
-                if (remainingTime <= TimeSpan.Zero)
-                {
-                    SignalATimeout(null);
-                }
-                else
-                {
-                    lock (solverTimerLock)
-                    {
-                        SolverTimer = new System.Threading.Timer(SignalATimeout);
-                        SolverTimer.Change((long)remainingTime.TotalMilliseconds, Timeout.Infinite);
-                    }
-                }
-            }
-
-            Run();
-        }
-
+        /// <summary>
+        /// The StartTime property should be set before calling Run() (unless IgnoreTimer is set to true).
+        /// The CurrentGameState must also be set.
+        /// </summary>
         public void Run()
         {
             if (IgnoreTimer)
@@ -264,42 +187,39 @@ namespace AndrewTweddle.Tron.Core
             }
             else
             {
+                /* Create an event which can be triggered to signal that a move has been chosen by the solver: */
+                if (OutputTriggeringEvent == null)
+                {
+                    OutputTriggeringEvent = new ManualResetEvent(false /* Not signalled yet*/);
+                }
+                else
+                {
+                    OutputTriggeringEvent.Reset();
+                }
+
                 /* Run solver in a separate thread: */
                 SolverThread = new Thread(RunTheSolver);
                 SolverThread.Start();
                 try
                 {
                     /* Wait for solver to finish running, or for a timeout to occur: */
-                    OutputTriggeringEvent.WaitOne();
+                    DateTime timeAtWhichToStopSolver = StartTime.AddMilliseconds(TIME_TO_WAIT_UNTIL_STOPPING_SOLVER_IN_MILLISECONDS);
+                    TimeSpan remainingTime = timeAtWhichToStopSolver - DateTime.Now;
+                    TimeSpan minimumTimeToProvide = TimeSpan.FromMilliseconds(100);  // TODO: remove hard-coding of 0.1 seconds to make a move
+                    if (remainingTime <= minimumTimeToProvide)
+                    {
+                        remainingTime = minimumTimeToProvide;
+                    }
+
+                    /* Wait for the solver to finish running: */
+                    OutputTriggeringEvent.WaitOne(remainingTime);
+
+                    /* Stop the solver algorithm: */
+                    Solver.Stop();
                 }
                 finally
                 {
-                    // Stop the timer if it's still running:
-                    lock (solverTimerLock)
-                    {
-                        SolverTimer.Change(-1, -1);
-                        SolverTimer = null;
-                    }
-
-                    // Stop the solver algorithm:
-                    Solver.Stop();
-                    try
-                    {
-                        Thread.Sleep(TimeSpan.FromMilliseconds(MAX_GRACE_PERIOD_TO_STOP_IN));  // Wait 0.1 seconds before aborting
-
-                        if (Solver.SolverState != SolverState.NotRunning)
-                        {
-                            /* Stop the solver thread if it's still running: */
-                            if (SolverThread != null && SolverThread.IsAlive)
-                            {
-                                SolverThread.Abort();
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        SolverThread = null;
-                    }
+                    SolverThread = null;
                 }
             }
         }
