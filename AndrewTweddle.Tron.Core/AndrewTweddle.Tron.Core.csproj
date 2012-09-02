@@ -64,6 +64,7 @@
     <Compile Include="RawCellData.cs" />
     <Compile Include="RegexConstants.cs" />
     <Compile Include="SearchNode.cs" />
+    <Compile Include="SolverState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

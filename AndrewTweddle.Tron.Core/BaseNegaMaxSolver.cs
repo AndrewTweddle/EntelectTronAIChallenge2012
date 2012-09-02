@@ -18,6 +18,8 @@ namespace AndrewTweddle.Tron.Core
 
         #region Private member variables
 
+        private bool isIterativeDeepeningEnabled = true;
+        private int currentDepth;
         private int maxDepth;
         private SearchNode rootNode;
 
@@ -25,6 +27,32 @@ namespace AndrewTweddle.Tron.Core
 
 
         #region Public properties
+
+        public bool IsIterativeDeepeningEnabled
+        {
+            get
+            {
+                return isIterativeDeepeningEnabled;
+            }
+            set
+            {
+                isIterativeDeepeningEnabled = value;
+                OnPropertyChanged("IsIterativeDeepeningEnabled");
+            }
+        }
+
+        public int CurrentDepth
+        {
+            get
+            {
+                return currentDepth;
+            }
+            private set
+            {
+                currentDepth = value;
+                OnPropertyChanged("CurrentDepth");
+            }
+        }
 
         public int MaxDepth
         {
@@ -57,9 +85,10 @@ namespace AndrewTweddle.Tron.Core
 
         #region Constructors
 
-        public BaseNegaMaxSolver(int depth = 6): base()
+        public BaseNegaMaxSolver(bool isIterativeDeepeningEnabled = true, int maxDepth = 30): base()
         {
-            MaxDepth = depth;
+            IsIterativeDeepeningEnabled = isIterativeDeepeningEnabled;
+            MaxDepth = maxDepth;
         }
 
         #endregion
@@ -70,6 +99,25 @@ namespace AndrewTweddle.Tron.Core
         protected override void DoSolve()
         {
             RootNode = new SearchNode(Coordinator.CurrentGameState);
+
+            if (IsIterativeDeepeningEnabled)
+            {
+                CurrentDepth = 0;
+                while (CurrentDepth <= MaxDepth)
+                {
+                    CurrentDepth = CurrentDepth + 1;
+                    RunNegaMaxAtAParticularDepth();
+                }
+            }
+            else
+            {
+                CurrentDepth = MaxDepth;
+                RunNegaMaxAtAParticularDepth();
+            }
+        }
+
+        private void RunNegaMaxAtAParticularDepth()
+        {
             double evaluation = Negamax(RootNode);
             RootNode.Evaluation = evaluation;
 
@@ -109,7 +157,7 @@ namespace AndrewTweddle.Tron.Core
         {
             int multiplier = searchNode.GameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
 
-            if (depth >= MaxDepth)
+            if (depth >= CurrentDepth)
             {
                 Evaluate(searchNode);
                 return multiplier * searchNode.Evaluation;
@@ -118,10 +166,15 @@ namespace AndrewTweddle.Tron.Core
             {
                 searchNode.Expand();
 
+                if (SolverState == SolverState.Stopping)
+                {
+                    return 0.0;  // Calling code will check solver state and ignore the result
+                }
+
                 if (!searchNode.ChildNodes.Any())
                 {
                     /* Game is terminal: */
-                    Evaluate(searchNode);  // TODO: Why not just return PositiveInfinity?
+                    Evaluate(searchNode);
                     return multiplier * searchNode.Evaluation;
                 }
                 else
@@ -129,31 +182,44 @@ namespace AndrewTweddle.Tron.Core
                     double max = double.NegativeInfinity;
                     bool pruning = false;
 
-                    foreach (SearchNode childNode in searchNode.ChildNodes)
+                    foreach (SearchNode childNode in searchNode.ChildNodes.OrderByDescending(snode => snode.Evaluation))
                     {
-                        if (pruning)
+                        if (SolverState == SolverState.Stopping)
                         {
-                            childNode.EvaluationStatus = EvaluationStatus.Pruned;
+                            childNode.EvaluationStatus = EvaluationStatus.Stopped;
                         }
                         else
-                        {
-                            double evaluation = -Negamax(childNode, depth + 1, -beta, -alpha);
-                            childNode.Evaluation = evaluation;
+                            if (pruning)
+                            {
+                                childNode.EvaluationStatus = EvaluationStatus.Pruned;
+                            }
+                            else
+                            {
+                                double evaluation = -Negamax(childNode, depth + 1, -beta, -alpha);
+                                if (SolverState == SolverState.Stopping)
+                                {
+                                    childNode.EvaluationStatus = EvaluationStatus.Stopped;
+                                    return 0.0;
+                                }
+                                else
+                                {
+                                    childNode.Evaluation = evaluation;
 
-                            // Alpha-beta pruning:
-                            if (evaluation > max)
-                            {
-                                max = evaluation;
+                                    // Alpha-beta pruning:
+                                    if (evaluation > max)
+                                    {
+                                        max = evaluation;
+                                    }
+                                    if (evaluation > alpha)
+                                    {
+                                        alpha = evaluation;
+                                    }
+                                    if (alpha >= beta)
+                                    {
+                                        pruning = true;
+                                    }
+                                }
                             }
-                            if (evaluation > alpha)
-                            {
-                                alpha = evaluation;
-                            }
-                            if (alpha >= beta)
-                            {
-                                pruning = true;
-                            }
-                        }
                     }
                     if (pruning)
                     {

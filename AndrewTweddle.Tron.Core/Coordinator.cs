@@ -12,7 +12,11 @@ namespace AndrewTweddle.Tron.Core
 {
     public class Coordinator
     {
-        public static readonly int MAX_DURATION_IN_MILLISECONDS = 4500;
+        public static readonly int MAX_DURATION_IN_MILLISECONDS = 4000;
+        public static readonly int MAX_GRACE_PERIOD_TO_STOP_IN = 500;
+
+        private object solverTimerLock = new object();
+        private System.Threading.Timer solverTimer;
 
         public bool IsInDebugMode { get; set; }
         public bool IgnoreTimer { get; set; }
@@ -28,6 +32,25 @@ namespace AndrewTweddle.Tron.Core
         public string BinaryGameStateFilePath { get; private set; }
         public string XmlGameStateFilePath { get; private set; }
 
+        public System.Threading.Timer SolverTimer
+        {
+            get
+            {
+                return solverTimer;
+            }
+            private set
+            {
+                if (solverTimer != value)
+                {
+                    if (solverTimer != null)
+                    {
+                        solverTimer.Dispose();
+                    }
+                    solverTimer = value;
+                }
+            }
+        }
+
         private Coordinator()
         {
         }
@@ -42,6 +65,14 @@ namespace AndrewTweddle.Tron.Core
 
         public Coordinator(ISolver solver): this(solver, DateTime.Now)
         {
+        }
+
+        ~Coordinator()
+        {
+            if (SolverTimer != null)
+            {
+                SolverTimer = null;  // This causes the timer to be disposed
+            }
         }
 
         public void SetBestMoveSoFar(GameState bestMove)
@@ -62,13 +93,26 @@ namespace AndrewTweddle.Tron.Core
 
         private void RunTheSolver()
         {
-            if (Solver != null)
+            ManualResetEvent triggerOutputEvent = OutputTriggeringEvent;
+            try
             {
-                Solver.Solve();
+                if (Solver != null)
+                {
+                    Solver.Solve();
+                }
             }
-
-            /* Signal that the solver has run: */
-            OutputTriggeringEvent.Set();
+            catch (Exception exc)
+            {
+                throw;  // Just to have somewhere to put a breakpoint
+            }
+            finally
+            {
+                /* Signal that the solver has run: */
+                if (triggerOutputEvent == null)
+                {
+                    triggerOutputEvent.Set();
+                }
+            }
         }
 
         public void Run(string tronGameFilePath)
@@ -176,6 +220,38 @@ namespace AndrewTweddle.Tron.Core
             Run();
         }
 
+        public void RunWithTimer()
+        {
+            if (!IgnoreTimer)
+            {
+                /* Set up the thread signalling event: */
+                if (OutputTriggeringEvent == null)
+                {
+                    OutputTriggeringEvent = new ManualResetEvent(false /* Not signalled yet*/);
+                }
+
+                DateTime now = DateTime.Now;
+                StartTime = now;
+                DateTime endTime = StartTime + MaximumDuration;
+                TimeSpan remainingTime = endTime - DateTime.Now;
+
+                if (remainingTime <= TimeSpan.Zero)
+                {
+                    SignalATimeout(null);
+                }
+                else
+                {
+                    lock (solverTimerLock)
+                    {
+                        SolverTimer = new System.Threading.Timer(SignalATimeout);
+                        SolverTimer.Change((long)remainingTime.TotalMilliseconds, Timeout.Infinite);
+                    }
+                }
+            }
+
+            Run();
+        }
+
         public void Run()
         {
             if (IgnoreTimer)
@@ -198,10 +274,31 @@ namespace AndrewTweddle.Tron.Core
                 }
                 finally
                 {
-                    /* Stop the solver thread if it's still running: */
-                    if (SolverThread != null && SolverThread.IsAlive)
+                    // Stop the timer if it's still running:
+                    lock (solverTimerLock)
                     {
-                        SolverThread.Abort();
+                        SolverTimer.Change(-1, -1);
+                        SolverTimer = null;
+                    }
+
+                    // Stop the solver algorithm:
+                    Solver.Stop();
+                    try
+                    {
+                        Thread.Sleep(TimeSpan.FromMilliseconds(MAX_GRACE_PERIOD_TO_STOP_IN));  // Wait 0.1 seconds before aborting
+
+                        if (Solver.SolverState != SolverState.NotRunning)
+                        {
+                            /* Stop the solver thread if it's still running: */
+                            if (SolverThread != null && SolverThread.IsAlive)
+                            {
+                                SolverThread.Abort();
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        SolverThread = null;
                     }
                 }
             }

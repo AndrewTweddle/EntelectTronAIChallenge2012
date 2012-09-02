@@ -60,7 +60,15 @@ namespace AndrewTweddle.Tron.UI
 
         private void BackgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            MainViewModel.TakeNextTurn();
+            try
+            {
+                MainViewModel.TakeNextTurn();
+            }
+            catch (Exception exc)
+            {
+                // Just to create somewhere to put a breakpoint:
+                throw exc;
+            }
         }
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)

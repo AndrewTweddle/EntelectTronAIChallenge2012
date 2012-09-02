@@ -191,26 +191,32 @@ namespace AndrewTweddle.Tron.Core
 
         public void Expand()
         {
-            IEnumerable<Move> possibleMoves = GameState.GetPossibleNextMoves();
-            IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move)).ToList();
-            if (childNodes.Any())
+            if (ExpansionStatus != Core.ExpansionStatus.FullyExpanded)
             {
-                childSearchNodes = childSearchNodes.Where(child => !childNodes.Contains(child)).ToList();
-            }
-            if (childSearchNodes.Any())
-            {
-                foreach (SearchNode childSearchNode in childSearchNodes)
+                IEnumerable<Move> possibleMoves = GameState.GetPossibleNextMoves();
+                IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move)).ToList();
+                if (childNodes.Any())
                 {
-                    childNodes.Add(childSearchNode);
+                    childSearchNodes = childSearchNodes.Where(child => !childNodes.Contains(child)).ToList();
                 }
-            }
-            ExpansionStatus = ExpansionStatus.FullyExpanded;
-            if (GameStateStoragePolicy == GameStateStoragePolicy.StrongReferenceOnRootAndLeafNodeOnly
-                && ParentNode != null && gameState != null)
-            {
-                /* This is no longer a leaf node, so change reference from a strong to a weak reference: */
-                weakReferenceToGameState = new WeakReference(gameState);
-                gameState = null;
+                if (childSearchNodes.Any())
+                {
+                    foreach (SearchNode childSearchNode in childSearchNodes)
+                    {
+                        if (ExpansionStatus != Core.ExpansionStatus.PartiallyExpanded || !childSearchNodes.Contains(childSearchNode))
+                        {
+                            childNodes.Add(childSearchNode);
+                        }
+                    }
+                }
+                ExpansionStatus = ExpansionStatus.FullyExpanded;
+                if (GameStateStoragePolicy == GameStateStoragePolicy.StrongReferenceOnRootAndLeafNodeOnly
+                    && ParentNode != null && gameState != null)
+                {
+                    /* This is no longer a leaf node, so change reference from a strong to a weak reference: */
+                    weakReferenceToGameState = new WeakReference(gameState);
+                    gameState = null;
+                }
             }
         }
 

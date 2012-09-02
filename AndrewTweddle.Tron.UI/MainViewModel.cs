@@ -277,7 +277,7 @@ namespace AndrewTweddle.Tron.UI
             Player1Coordinator = new Coordinator(Player1Solver)
             {
                 IsInDebugMode = true,
-                IgnoreTimer = true
+                IgnoreTimer = IsPlayer1Human
             };
 
             /* Set up player 2 (blue): */
@@ -286,7 +286,7 @@ namespace AndrewTweddle.Tron.UI
             Player2Coordinator = new Coordinator(Player2Solver)
             {
                 IsInDebugMode = true,
-                IgnoreTimer = true
+                IgnoreTimer = IsPlayer2Human
             };
         }
 
@@ -324,10 +324,21 @@ namespace AndrewTweddle.Tron.UI
                 }
 
                 // Run following in BackgroundWorkerThread:
-                coordinator.Run();
+                try
+                {
+                    coordinator.RunWithTimer();
+                }
+                catch(Exception exc)
+                {
+                    System.Diagnostics.Debug.WriteLine(exc);
+                }
                 lock (coordinator.BestMoveLock)
                 {
                     GameState newGameState = coordinator.BestMoveSoFar;
+                    if (newGameState == null)
+                    {
+                        throw new ApplicationException("The solver did not choose a move");
+                    }
                     if (IsTurnOfPlayer1)
                     {
                         if (IsPlayer1Human)

@@ -5,11 +5,10 @@ using System.Text;
 
 namespace AndrewTweddle.Tron.Core
 {
-    public enum EvaluationStatus: byte
+    public enum SolverState
     {
-        Unevaluated = 0,
-        Evaluated = 1,
-        Pruned = 2,
-        Stopped = 3
+        NotRunning = 0,
+        Running = 1,
+        Stopping = 2
     }
 }
