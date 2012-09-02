@@ -216,6 +216,15 @@ namespace AndrewTweddle.Tron.Core
 
                     /* Stop the solver algorithm: */
                     Solver.Stop();
+
+                    /* Wait for solver to stop: */
+                    int milliSecondsUntilSolverStopped = 0;
+                    while (!(Solver.SolverState == SolverState.NotRunning))
+                    {
+                        Thread.Sleep(10);
+                        milliSecondsUntilSolverStopped += 10;
+                    }
+                    System.Diagnostics.Debug.WriteLine("Time for solver to stop: {0}", TimeSpan.FromMilliseconds(milliSecondsUntilSolverStopped));
                 }
                 finally
                 {

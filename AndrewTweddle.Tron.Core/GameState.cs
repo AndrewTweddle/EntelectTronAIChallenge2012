@@ -874,7 +874,7 @@ namespace AndrewTweddle.Tron.Core
             // Check that the move has the correct player:
             if (move.PlayerType != PlayerToMoveNext)
             {
-                string errorMessage = String.Format("Attempt to {0} is invalid because the other player has the turn", move.PlayerType);
+                string errorMessage = String.Format("Attempt to {0} is invalid because it's the other player's turn", move);
                 throw new InvalidOperationException(errorMessage);
             }
 

@@ -155,7 +155,7 @@ namespace AndrewTweddle.Tron.Core
         {
             // Always maintain a strong reference to the root game state:
             GameStateStoragePolicy = Core.GameStateStoragePolicy.StrongReference;
-            GameState = rootGameState;
+            GameState = rootGameState.Clone();
         }
 
         public SearchNode(SearchNode parentNode, Move move)
@@ -197,17 +197,12 @@ namespace AndrewTweddle.Tron.Core
                 IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move)).ToList();
                 if (childNodes.Any())
                 {
+                    // Only include child search nodes which aren't already in the list of children:
                     childSearchNodes = childSearchNodes.Where(child => !childNodes.Contains(child)).ToList();
                 }
-                if (childSearchNodes.Any())
+                foreach (SearchNode childSearchNode in childSearchNodes)
                 {
-                    foreach (SearchNode childSearchNode in childSearchNodes)
-                    {
-                        if (ExpansionStatus != Core.ExpansionStatus.PartiallyExpanded || !childSearchNodes.Contains(childSearchNode))
-                        {
-                            childNodes.Add(childSearchNode);
-                        }
-                    }
+                    childNodes.Add(childSearchNode);
                 }
                 ExpansionStatus = ExpansionStatus.FullyExpanded;
                 if (GameStateStoragePolicy == GameStateStoragePolicy.StrongReferenceOnRootAndLeafNodeOnly

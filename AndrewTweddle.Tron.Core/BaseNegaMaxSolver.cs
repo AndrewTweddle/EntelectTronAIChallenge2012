@@ -166,7 +166,16 @@ namespace AndrewTweddle.Tron.Core
         private double Negamax(SearchNode searchNode, int depth = 0, double alpha = double.NegativeInfinity, 
             double beta = double.PositiveInfinity)
         {
-            int multiplier = searchNode.GameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
+            int multiplier;
+            if (searchNode.ParentNode == null)
+            {
+                multiplier = searchNode.GameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
+            }
+            else
+            {
+                // A more efficient way, since it doesn't cause game states to be re-generated:
+                multiplier = searchNode.Move.PlayerType == PlayerType.Opponent ? 1 : -1;
+            }
 
             if (depth >= CurrentDepth)
             {
