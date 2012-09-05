@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Dijkstra.cs" />
+    <Compile Include="Algorithms\ShortestPathAlgorithmUsingHashSets.cs" />
+    <Compile Include="Algorithms\ShortestPathAlgorithmUsingBFSQueue.cs" />
     <Compile Include="BaseNegaMaxSolver.cs" />
     <Compile Include="BaseSolver.cs" />
     <Compile Include="CellState.cs" />
