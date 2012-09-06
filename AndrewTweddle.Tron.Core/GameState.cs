@@ -131,13 +131,13 @@ namespace AndrewTweddle.Tron.Core
         {
             get
             {
-                if (pos.IsNorthPole)
+                if (pos.Y == Constants.NorthPoleY)
                 {
-                    return NorthPole;
+                    return northPole;
                 }
-                if (pos.IsSouthPole)
+                if (pos.Y == Constants.SouthPoleY)
                 {
-                    return SouthPole;
+                    return southPole;
                 }
                 return cells[pos.X, pos.Y-1];
             }
