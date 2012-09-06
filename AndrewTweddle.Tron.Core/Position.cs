@@ -133,7 +133,7 @@ namespace AndrewTweddle.Tron.Core
 
         public override bool Equals(object obj)
         {
-            if (obj is Position)
+            if (obj is Position && obj != null)
             {
                 Position otherPosition = (Position)obj;
                 if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
@@ -148,6 +148,24 @@ namespace AndrewTweddle.Tron.Core
             return false;
         }
 
+        public static bool operator ==(Position position1, Position position2)
+        {
+            if (object.ReferenceEquals(position1, null))
+            {
+                if (object.ReferenceEquals(position2, null))
+                {
+                    return true;
+                }
+                return false;
+            }
+            return position1.Equals(position2);
+        }
+
+        public static bool operator !=(Position position1, Position position2)
+        {
+            return !(position1 == position2);
+        }
+
         public override string ToString()
         {
             return String.Format("({0}, {1})", X, Y);
@@ -157,7 +175,7 @@ namespace AndrewTweddle.Tron.Core
         {
             get
             {
-                return Y == Constants.NorthPoleY;
+                return y == Constants.NorthPoleY;
             }
         }
 
@@ -165,7 +183,7 @@ namespace AndrewTweddle.Tron.Core
         {
             get
             {
-                return Y == Constants.SouthPoleY;
+                return y == Constants.SouthPoleY;
             }
         }
 
