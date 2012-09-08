@@ -24,7 +24,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             return cellState.DistanceFromOpponent;
         }
 
-        public override void SetDistance(CellState cellState, int distance, HashSet<CellState> reachableCells)
+        public override void SetDistance(CellState cellState, int distance, LinkedList<CellState> reachableCells)
         {
             cellState.DistanceFromOpponent = distance;
             cellState.CompartmentStatus |= CompartmentStatus.InOpponentsCompartment;

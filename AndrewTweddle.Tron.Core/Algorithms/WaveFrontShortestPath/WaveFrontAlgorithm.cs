@@ -13,7 +13,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             Stopwatch swatch = Stopwatch.StartNew();
 
             gameState.ClearDijkstraProperties();
-            HashSet<CellState> reachableCells = new HashSet<CellState>();
+            LinkedList<CellState> reachableCells = new LinkedList<CellState>();
 
             CalculateDistancesFromAPlayer(gameState, PlayerType.You, reachableCells);
 
@@ -27,7 +27,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             Debug.WriteLine(String.Format("Dijkstra with {1} spaces filled took {0} ", swatch.Elapsed, gameState.OpponentsWallLength + gameState.YourWallLength + 2));
         }
 
-        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, HashSet<CellState> reachableCells)
+        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, LinkedList<CellState> reachableCells)
         {
             CellState startingCell = null;
             PlayerCalculator calculator = null;
@@ -119,7 +119,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             }
         }
 
-        private static void CalculateClosestVertices(GameState gameState, HashSet<CellState> reachableCells)
+        private static void CalculateClosestVertices(GameState gameState, LinkedList<CellState> reachableCells)
         {
             int numberOfCellsClosestToYou = 0;
             int numberOfCellsClosestToOpponent = 0;

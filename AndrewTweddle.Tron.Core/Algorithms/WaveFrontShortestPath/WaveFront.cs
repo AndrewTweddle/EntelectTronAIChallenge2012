@@ -59,7 +59,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             return waveFront;
         }
 
-        public IEnumerable<WaveFront> ContractAndCalculate(GameState gameState, int distance, PlayerCalculator calculator, HashSet<CellState> reachableCells)
+        public IEnumerable<WaveFront> ContractAndCalculate(GameState gameState, int distance, PlayerCalculator calculator, LinkedList<CellState> reachableCells)
         {
             bool isWesternMostPoint = true;
             WaveFront newFront = null;

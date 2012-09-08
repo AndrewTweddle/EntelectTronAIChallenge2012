@@ -49,8 +49,8 @@ namespace AndrewTweddle.Tron.Core
 
         public Position(int x, int y)
         {
-            X = x;
-            Y = y;
+            this.x = x;
+            this.y = y;
         }
 
         static Position()
@@ -58,15 +58,15 @@ namespace AndrewTweddle.Tron.Core
             /* Cache adjacent positions to speed up enumeration: */
             Position newPosition;
 
-            for (int X = 0; X < Constants.Columns; X++)
+            for (int xiter = 0; xiter < Constants.Columns; xiter++)
             {
-                for (int Y = 0; Y < Constants.Rows; Y++)
+                for (int yiter = 0; yiter < Constants.Rows; yiter++)
                 {
                     List<Position> adjacentPositionsList = new List<Position>();
 
-                    if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
+                    if (yiter == Constants.SouthPoleY || yiter == Constants.NorthPoleY)
                     {
-                        int y = (Y == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
+                        int y = (yiter == Constants.NorthPoleY) ? Constants.ArcticCircleY : Constants.AntarcticCircleY;
                         for (int x = 0; x < Constants.Columns; x++)
                         {
                             newPosition = new Position(x, y);
@@ -76,41 +76,41 @@ namespace AndrewTweddle.Tron.Core
                     else
                     {
                         // West:
-                        newPosition = new Position((X + Constants.Columns - 1) % Constants.Columns, Y);
+                        newPosition = new Position((xiter + Constants.Columns - 1) % Constants.Columns, yiter);
                         adjacentPositionsList.Add(newPosition);
 
                         // East:
-                        newPosition = new Position((X + 1) % Constants.Columns, Y);
+                        newPosition = new Position((xiter + 1) % Constants.Columns, yiter);
                         adjacentPositionsList.Add(newPosition);
 
                         // North:
-                        if (Y == Constants.ArcticCircleY)
+                        if (yiter == Constants.ArcticCircleY)
                         {
                             newPosition = new Position(Constants.NorthPoleX, Constants.NorthPoleY);
                             adjacentPositionsList.Add(newPosition);
                         }
                         else
                         {
-                            newPosition = new Position(X, Y - 1);
+                            newPosition = new Position(xiter, yiter - 1);
                             adjacentPositionsList.Add(newPosition);
                         }
 
                         // South:
-                        if (Y == Constants.AntarcticCircleY)
+                        if (yiter == Constants.AntarcticCircleY)
                         {
                             newPosition = new Position(Constants.SouthPoleX, Constants.SouthPoleY);
                             adjacentPositionsList.Add(newPosition);
                         }
                         else
                         {
-                            newPosition = new Position(X, Y + 1);
+                            newPosition = new Position(xiter, yiter + 1);
                             adjacentPositionsList.Add(newPosition);
                         }
                     }
 
                     Position[] adjacentPositionsArray = adjacentPositionsList.ToArray();
-                    adjacentPositions[X, Y] = adjacentPositionsArray;
-                    initialDegreesOfVertices[X, Y] = adjacentPositionsArray.Length;
+                    adjacentPositions[xiter, yiter] = adjacentPositionsArray;
+                    initialDegreesOfVertices[xiter, yiter] = adjacentPositionsArray.Length;
                 }
             }
         }
@@ -119,13 +119,13 @@ namespace AndrewTweddle.Tron.Core
         {
             if (hashCode == 0)
             {
-                if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
+                if (y == Constants.SouthPoleY || y == Constants.NorthPoleY)
                 {
-                    hashCode = Y + 1;
+                    hashCode = y + 1;
                 }
                 else
                 {
-                    hashCode = 31 * X + Y + 1;
+                    hashCode = 31 * x + y + 1;
                 }
             }
             return hashCode;
@@ -136,13 +136,13 @@ namespace AndrewTweddle.Tron.Core
             if (obj is Position && obj != null)
             {
                 Position otherPosition = (Position)obj;
-                if (Y == Constants.SouthPoleY || Y == Constants.NorthPoleY)
+                if (y == Constants.SouthPoleY || y == Constants.NorthPoleY)
                 {
-                    return otherPosition.Y == Y;
+                    return otherPosition.y == y;
                 }
                 else
                 {
-                    return otherPosition.Y == Y && otherPosition.X == X;
+                    return otherPosition.y == y && otherPosition.x == x;
                 }
             }
             return false;
@@ -168,7 +168,7 @@ namespace AndrewTweddle.Tron.Core
 
         public override string ToString()
         {
-            return String.Format("({0}, {1})", X, Y);
+            return String.Format("({0}, {1})", x, y);
         }
 
         public bool IsNorthPole
@@ -197,12 +197,12 @@ namespace AndrewTweddle.Tron.Core
 
         public Position[] GetAdjacentPositions()
         {
-            return adjacentPositions[X, Y];
+            return adjacentPositions[x, y];
         }
 
         public int GetInitialDegreeOfVertex()
         {
-            return initialDegreesOfVertices[X, Y];
+            return initialDegreesOfVertices[x, y];
         }
 
         [field: NonSerialized]

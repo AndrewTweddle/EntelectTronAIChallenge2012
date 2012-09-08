@@ -13,9 +13,9 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
         public abstract bool IsCellOccupied(CellState cellState);
         public abstract int GetExistingDistance(CellState cellState);
 
-        public virtual void SetDistance(CellState cellState, int distance, HashSet<CellState> reachableCells)
+        public virtual void SetDistance(CellState cellState, int distance, LinkedList<CellState> reachableCells)
         {
-            reachableCells.Add(cellState);
+            reachableCells.AddLast(cellState);
             NumberOfCellsReachable = NumberOfCellsReachable + 1;
             TotalDegreesOfCellsReachable = TotalDegreesOfCellsReachable + cellState.DegreeOfVertex;
         }
