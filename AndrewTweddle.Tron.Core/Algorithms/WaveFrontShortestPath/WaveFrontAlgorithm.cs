@@ -46,7 +46,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
 
             /* Set up the initial wave fronts, all for a single point (the player's position): */
             Position startPoint = startingCell.Position;
-            List<WaveFront> currentWaveFronts = new List<WaveFront>();
+            LinkedList<WaveFront> currentWaveFronts = new LinkedList<WaveFront>();
             if (startingCell == gameState.NorthPole)
             {
                 WaveFront waveFront = new SouthTravellingPolarWaveFront
@@ -54,7 +54,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                     WesternPoint = startPoint,
                     EasternPoint = startPoint
                 };
-                currentWaveFronts.Add(waveFront);
+                currentWaveFronts.AddLast(waveFront);
             }
             else
                 if (startingCell == gameState.SouthPole)
@@ -64,7 +64,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                         WesternPoint = startPoint,
                         EasternPoint = startPoint
                     };
-                    currentWaveFronts.Add(waveFront);
+                    currentWaveFronts.AddLast(waveFront);
                 }
                 else
                 {
@@ -76,23 +76,26 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                         waveFront.WesternPoint = waveFront.EasternPoint = startPoint;
                         waveFront.IsWesternPointShared = true;
                         waveFront.IsEasternPointShared = true;
-                        currentWaveFronts.Add(waveFront);
+                        currentWaveFronts.AddLast(waveFront);
                     }
                 }
 
             /* Iteratively expand the wave fronts until there are none left to expand: */
             int nextDistance = 0;
-            List<WaveFront> nextWaveFronts;
+            LinkedList<WaveFront> nextWaveFronts;
 
             while (currentWaveFronts.Count > 0)
             {
                 nextDistance++;
-                nextWaveFronts = new List<WaveFront>();
+                nextWaveFronts = new LinkedList<WaveFront>();
                 foreach (WaveFront currentWaveFront in currentWaveFronts)
                 {
                     WaveFront expandedWaveFront = currentWaveFront.Expand();
                     IEnumerable<WaveFront> newWaveFronts = expandedWaveFront.ContractAndCalculate(gameState, nextDistance, calculator, reachableCells);
-                    nextWaveFronts.AddRange(newWaveFronts);
+                    foreach (WaveFront newWaveFront in newWaveFronts)
+                    {
+                        nextWaveFronts.AddLast(newWaveFront);
+                    }
                 }
                 currentWaveFronts = nextWaveFronts;
             }

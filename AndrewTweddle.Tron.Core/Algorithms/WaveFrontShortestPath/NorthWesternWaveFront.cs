@@ -12,59 +12,18 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             get { return WaveDirection.NW; }
         }
 
-        protected override WaveDirection AdjacentDirectionOnEasternEdge
+        protected override Position ExpandWesternPoint()
         {
-            get { return WaveDirection.NE; }
+            int newWestX = NormalizedX(WesternPoint.X - 1);
+            Position newWesternPoint = new Position(newWestX, WesternPoint.Y);
+            return newWesternPoint;
         }
 
-        protected override WaveDirection AdjacentDirectionOnWesternEdge
+        protected override Position ExpandEasternPoint()
         {
-            get { return WaveDirection.SW; }
-        }
-
-        protected override WaveDirection DirectionOfReflectedPolarWaveFront
-        {
-            get { return WaveDirection.S; }
-        }
-
-        protected override int ChangeInYAsXIncreases
-        {
-            get
-            {
-                return -1;
-            }
-        }
-
-        protected override int XWestAdjustment
-        {
-            get
-            {
-                return -1;
-            }
-        }
-
-        protected override int YWestAdjustment
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        protected override int XEastAdjustment
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        protected override int YEastAdjustment
-        {
-            get
-            {
-                return -1;
-            }
+            int newEastY = EasternPoint.Y - 1;
+            Position newEasternPoint = new Position(EasternPoint.X, newEastY);
+            return newEasternPoint;
         }
 
         public override IEnumerable<Position> GetPointsFromWestToEast()
@@ -90,7 +49,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                         {
                             nextX = 0;
                         }
-                        int nextY = nextPos.Y + ChangeInYAsXIncreases;
+                        int nextY = nextPos.Y - 1;
                         nextPos = new Position(nextX, nextY);
                     }
                     yield return nextPos;
@@ -98,25 +57,27 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
             }
         }
 
+        protected override WaveFront CreateWaveFrontWithSameDirection()
+        {
+            WaveFront waveFront = new NorthWesternWaveFront();
+            return waveFront;
+        }
+
         protected override WaveFront CreateAPointWaveOnTheWesternEdge(Position position)
         {
-            WaveFront adjacentFrontOnWesternSide = WaveFrontFactory.CreateWaveFront(AdjacentDirectionOnWesternEdge);
+            WaveFront adjacentFrontOnWesternSide = new SouthWesternWaveFront();
             adjacentFrontOnWesternSide.WesternPoint = position;
             adjacentFrontOnWesternSide.EasternPoint = position;
-
-            // TODO: *** Following depends on the direction of the adjacent edge
-            adjacentFrontOnWesternSide.IsWesternPointShared = false;
-            adjacentFrontOnWesternSide.IsEasternPointShared = true;
+            adjacentFrontOnWesternSide.IsWesternPointShared = true;
+            adjacentFrontOnWesternSide.IsEasternPointShared = false;
             return adjacentFrontOnWesternSide;
         }
 
         protected override WaveFront CreateAPointWaveOnTheEasternEdge(Position position)
         {
-            WaveFront newFront = WaveFrontFactory.CreateWaveFront(AdjacentDirectionOnEasternEdge);
+            WaveFront newFront = new NorthEasternWaveFront();
             newFront.WesternPoint = position;
             newFront.EasternPoint = position;
-
-            // TODO: *** Following depends on the direction of the adjacent edge
             newFront.IsWesternPointShared = true;
             newFront.IsEasternPointShared = false;
             return newFront;
@@ -124,7 +85,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
 
         protected override WaveFront CreateAReflectedPolarWaveFront(Position position)
         {
-            WaveFront polarWaveFront = WaveFrontFactory.CreateWaveFront(DirectionOfReflectedPolarWaveFront);
+            WaveFront polarWaveFront = new SouthTravellingPolarWaveFront();
             polarWaveFront.WesternPoint = position;
             polarWaveFront.EasternPoint = position;
             return polarWaveFront;

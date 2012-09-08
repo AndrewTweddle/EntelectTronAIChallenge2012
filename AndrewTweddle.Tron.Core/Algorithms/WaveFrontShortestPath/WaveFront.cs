@@ -8,24 +8,19 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
     public abstract class WaveFront
     {
         public abstract WaveDirection Direction { get; }
-        protected abstract WaveDirection AdjacentDirectionOnWesternEdge { get; }
-        protected abstract WaveDirection AdjacentDirectionOnEasternEdge { get; }
-        protected abstract WaveDirection DirectionOfReflectedPolarWaveFront { get; }
-
-        /// <summary>
-        /// This is used to determine the Y coordinate of the next point in the method GetPointsFromWestToEast()
-        /// </summary>
-        protected abstract int ChangeInYAsXIncreases { get; }
-
-        protected abstract int XWestAdjustment { get; }
-        protected abstract int YWestAdjustment { get; }
-        protected abstract int XEastAdjustment { get; }
-        protected abstract int YEastAdjustment { get; }
 
         public bool IsWesternPointShared { get; set; }
         public bool IsEasternPointShared { get; set; }
         public Position WesternPoint { get; set; }
         public Position EasternPoint { get; set; }
+
+        public abstract IEnumerable<Position> GetPointsFromWestToEast();
+        protected abstract WaveFront CreateWaveFrontWithSameDirection();
+        protected abstract WaveFront CreateAPointWaveOnTheWesternEdge(Position position);
+        protected abstract WaveFront CreateAPointWaveOnTheEasternEdge(Position position);
+        protected abstract WaveFront CreateAReflectedPolarWaveFront(Position position);
+        protected abstract Position ExpandWesternPoint();
+        protected abstract Position ExpandEasternPoint();
 
         public override string ToString()
         {
@@ -52,16 +47,11 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
         // The expand method is virtual since a wave starting at a pole will need to expand differently:
         public virtual WaveFront Expand()
         {
-            int newWestX = NormalizedX(WesternPoint.X + XWestAdjustment);
-            int newWestY = WesternPoint.Y + YWestAdjustment;
-            Position newWesternPoint = new Position(newWestX, newWestY);
-
-            int newEastX = NormalizedX(EasternPoint.X + XEastAdjustment);
-            int newEastY = EasternPoint.Y + YEastAdjustment;
-            Position newEasternPoint = new Position(newEastX, newEastY);
+            Position newWesternPoint = ExpandWesternPoint();
+            Position newEasternPoint = ExpandEasternPoint();
 
             // Create a new wave front with the same direction:
-            WaveFront waveFront = WaveFrontFactory.CreateWaveFront(Direction);
+            WaveFront waveFront = CreateWaveFrontWithSameDirection();
             waveFront.WesternPoint = newWesternPoint;
             waveFront.EasternPoint = newEasternPoint;
             waveFront.IsWesternPointShared = IsWesternPointShared;
@@ -202,10 +192,5 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                 newFront = null;
             }
         }
-
-        public abstract IEnumerable<Position> GetPointsFromWestToEast();
-        protected abstract WaveFront CreateAPointWaveOnTheWesternEdge(Position position);
-        protected abstract WaveFront CreateAPointWaveOnTheEasternEdge(Position position);
-        protected abstract WaveFront CreateAReflectedPolarWaveFront(Position position);
     }
 }
