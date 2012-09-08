@@ -27,6 +27,15 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
         public Position WesternPoint { get; set; }
         public Position EasternPoint { get; set; }
 
+        public override string ToString()
+        {
+            if (WesternPoint == EasternPoint)
+            {
+                return String.Format("{0} at {1}", Direction, WesternPoint);
+            }
+            return String.Format("{0} between {1} and {2}", Direction, WesternPoint, EasternPoint);
+        }
+
         protected int NormalizedX(int x)
         {
             if (x == -1)
@@ -111,7 +120,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                     int existingDistance = calculator.GetExistingDistance(cellState);
                     if (existingDistance <= distance)
                     {
-                        isPointOnNewFront = (isWesternMostPoint && IsWesternPointShared && (existingDistance == distance));
+                        isPointOnNewFront = (existingDistance == distance) && !position.IsPole
+                            && (   (isWesternMostPoint && IsWesternPointShared)
+                                || (position == EasternPoint && IsEasternPointShared)
+                               );
                         /* This will be false except when this is the shared point on the Western-most edge.
                          * If it's a shared point then the adjacent front may have already set the distance.
                          * So we assume that the distance has already been set by the adjacent front.
@@ -139,6 +151,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                             polarWaveFront.EasternPoint = position;
                             yield return polarWaveFront;
                             isPointOnNewFront = false;
+                            isWesternPointShared = false;
                         }
                         else
                             if (!IsWesternPointShared)
@@ -147,32 +160,61 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                                 WaveFront adjacentFrontOnWesternSide = WaveFrontFactory.CreateWaveFront(AdjacentDirectionOnWesternEdge);
                                 adjacentFrontOnWesternSide.WesternPoint = position;
                                 adjacentFrontOnWesternSide.EasternPoint = position;
+
+                                // TODO: *** Following depends on the direction of the adjacent edge
                                 adjacentFrontOnWesternSide.IsWesternPointShared = false;
                                 adjacentFrontOnWesternSide.IsEasternPointShared = true;
+
+                                yield return adjacentFrontOnWesternSide;
 
                                 isWesternPointShared = true;
                             }
                     }
-                    isWesternMostPoint = false;
                 }
 
                 if (isPointOnNewFront)
                 {
-                    if (newFront == null)
+                    if (position.IsPole)
                     {
-                        /* Create a new front in the same direction for this next segment of the original wave front: */
-                        newFront = WaveFrontFactory.CreateWaveFront(Direction);
-                        newFront.WesternPoint = position;
-                        newFront.IsWesternPointShared = isWesternPointShared;
-                        isWesternPointShared = false;
+                        /* Note: The following code assumes that this is a diagonal front.
+                         * There is a very small chance that this is a polar front that has reached the opposite pole.
+                         * 
+                         * TODO: Fix this.
+                         * 
+                         * /
+
+                        /* End off current front (if there is one): */
+                        if (newFront != null)
+                        {
+                            newFront.EasternPoint = easternMostPositionOfNewFront;
+                            newFront.IsEasternPointShared = false;
+                            yield return newFront;
+                            newFront = null;
+                        }
+
+                        /* Create a polar wave front going in the opposite direction: */
+                        WaveFront polarWaveFront = WaveFrontFactory.CreateWaveFront(DirectionOfReflectedPolarWaveFront);
+                        polarWaveFront.WesternPoint = position;
+                        polarWaveFront.EasternPoint = position;
+                        yield return polarWaveFront;
+                        isPointOnNewFront = false;
                     }
                     else
                     {
+                        if (newFront == null)
+                        {
+                            /* Create a new front in the same direction for this next segment of the original wave front: */
+                            newFront = WaveFrontFactory.CreateWaveFront(Direction);
+                            newFront.WesternPoint = position;
+                            newFront.IsWesternPointShared = isWesternPointShared;
+                            isWesternPointShared = false;
+                        }
                         easternMostPositionOfNewFront = position;
                     }
                 }
                 else
                 {
+                    /* End the front currently being built: */
                     if (newFront != null)
                     {
                         newFront.EasternPoint = easternMostPositionOfNewFront;
@@ -181,13 +223,18 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                         newFront = null;
                     }
                 }
+
+                // No longer the western-most point
+                isWesternMostPoint = false;
             }
 
             if (newFront != null)
             {
+                bool isEasternPointShared = IsEasternPointShared;
+
                 // End off the Eastern-most front:
                 newFront.EasternPoint = EasternPoint;
-                newFront.IsEasternPointShared = IsEasternPointShared;
+                newFront.IsEasternPointShared = true;
                 yield return newFront;
 
                 if (!IsEasternPointShared)
@@ -196,8 +243,12 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
                     newFront = WaveFrontFactory.CreateWaveFront(AdjacentDirectionOnEasternEdge);
                     newFront.WesternPoint = this.EasternPoint;
                     newFront.EasternPoint = this.EasternPoint;
-                    newFront.IsWesternPointShared = false;
-                    newFront.IsEasternPointShared = true;
+
+                    // TODO: *** Following depends on the direction of the adjacent edge
+                    newFront.IsWesternPointShared = true;
+                    newFront.IsEasternPointShared = false;
+
+                    yield return newFront;
                 }
             }
         }

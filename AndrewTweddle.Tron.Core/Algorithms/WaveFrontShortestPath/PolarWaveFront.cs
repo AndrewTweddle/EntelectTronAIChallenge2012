@@ -26,11 +26,11 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
         {
             if (WesternPoint.IsPole)
             {
-                int newWestX = 0;
+                int newWestX = NormalizedX(EasternPoint.X+1);
                 int newWestY = WesternPoint.Y + YWestAdjustment;
                 Position newWesternPoint = new Position(newWestX, newWestY);
 
-                int newEastX = Constants.Columns - 1;
+                int newEastX = NormalizedX(WesternPoint.X-1);
                 int newEastY = newWestY;
                 Position newEasternPoint = new Position(newEastX, newEastY);
 
