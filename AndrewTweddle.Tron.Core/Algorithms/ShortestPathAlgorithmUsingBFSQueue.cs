@@ -17,7 +17,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 gameState.ClearDijkstraProperties();
             }
 
-            HashSet<CellState> reachableCells = new HashSet<CellState>();
+            LinkedList<CellState> reachableCells = new LinkedList<CellState>();
 
             CalculateDistancesFromAPlayer(gameState, PlayerType.You, reachableCells);
 
@@ -36,7 +36,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
          * 2. Test carefully!
          * 3. Fix bug in disconnected state, where opponents compartment is shown without Dijkstra distances.
          */
-        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, HashSet<CellState> reachableCells)
+        private static void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, LinkedList<CellState> reachableCells)
         {
             int nextDistance = 0;
             int numberOfCellsReachable = 0;
@@ -93,7 +93,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                             && (cellState.CompartmentStatus == compartmentStatus || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                             && (distance <= upToDateDijkstraDistance))
                         {
-                            reachableCells.Add(cellState);
+                            reachableCells.AddLast(cellState);
                             numberOfCellsReachable++;
                             totalDegreesOfCellsReachable += cellState.DegreeOfVertex;
                             if (distance == upToDateDijkstraDistance)
@@ -137,7 +137,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
                                     // HashSets automatically filter out duplicates, so no need to check:
                                     cellsToExpand.Enqueue(adjacentCell);
-                                    reachableCells.Add(adjacentCell);
+                                    reachableCells.AddLast(adjacentCell);
                                 }
                                 break;
                         }
@@ -210,7 +210,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             }
         }
 
-        private static void CalculateClosestVertices(GameState gameState, HashSet<CellState> reachableCells)
+        private static void CalculateClosestVertices(GameState gameState, LinkedList<CellState> reachableCells)
         {
             int numberOfCellsClosestToYou = 0;
             int numberOfCellsClosestToOpponent = 0;
