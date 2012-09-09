@@ -249,6 +249,7 @@ namespace AndrewTweddle.Tron.UI
             solverTypes.Add(typeof(NegaMaxSolver));
             solverTypes.Add(typeof(RandomSolver));
             solverTypes.Add(typeof(HumanSolver));
+            solverTypes.Add(typeof(SloaneNegaMaxSolver));
 
             GameStateViewModel = new GameStateViewModel();
             GameStateViewModel.GameState = new GameState();
