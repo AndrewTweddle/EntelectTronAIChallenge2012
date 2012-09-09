@@ -247,8 +247,6 @@ namespace AndrewTweddle.Tron.UI
         {
             solverTypes = new ObservableCollection<Type>();
             solverTypes.Add(typeof(NegaMaxSolver));
-            solverTypes.Add(typeof(CopyCatSolver));
-            solverTypes.Add(typeof(ScaredyCatSolver));
             solverTypes.Add(typeof(RandomSolver));
             solverTypes.Add(typeof(HumanSolver));
 
