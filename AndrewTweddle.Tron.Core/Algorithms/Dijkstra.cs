@@ -11,8 +11,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
     {
         public static void Perform(GameState gameState, bool calculateDistancesFromOpponent = true)
         {
-            // WaveFrontAlgorithm.Perform(gameState, calculateDistancesFromOpponent);
-            ShortestPathAlgorithmUsingBFSQueue.Perform(gameState, calculateDistancesFromOpponent);
+            WaveFrontAlgorithm.Perform(gameState, calculateDistancesFromOpponent);
+            // ShortestPathAlgorithmUsingBFSQueue.Perform(gameState, calculateDistancesFromOpponent);
         }
     }
 }

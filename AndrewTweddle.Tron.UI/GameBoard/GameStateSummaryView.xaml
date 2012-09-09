@@ -63,7 +63,7 @@
             <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourCell.Position,Mode=OneWay}" />
             <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsCell.Position,Mode=OneWay}" />
             <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourOriginalCell.Position,Mode=OneWay}" />
-            <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsOriginalCell,Mode=OneWay}" />
+            <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsOriginalCell.Position,Mode=OneWay}" />
             <TextBox Grid.Row="6" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourWallLength,Mode=OneWay}" />
             <TextBox Grid.Row="7" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsWallLength,Mode=OneWay}" />
             <TextBox Grid.Row="8" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentIsInSameCompartment,Mode=OneWay}" />
