@@ -519,6 +519,12 @@ namespace AndrewTweddle.Tron.Core
                         case OccupationStatus.OpponentWall:
                             opponentsWallLength++;
                             break;
+                        case OccupationStatus.You:
+                            YourCell = cellState;
+                            break;
+                        case OccupationStatus.Opponent:
+                            OpponentsCell = cellState;
+                            break;
                         default:
                             break;
                     }
