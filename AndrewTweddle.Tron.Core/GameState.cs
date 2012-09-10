@@ -42,6 +42,7 @@ namespace AndrewTweddle.Tron.Core
         private DijkstraStatus opponentsDijkstraStatus;
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
+        private List<BiconnectedComponent> biconnectedComponents;
 
         [OptionalField]
         private bool isUsingIncrementalDijkstra;
@@ -898,7 +899,7 @@ namespace AndrewTweddle.Tron.Core
             MoveToPosition(move.To, performDijkstra);
         }
 
-        public void MoveToPosition(Position position, bool performDijkstra = true)
+        public void MoveToPosition(Position position, bool performDijkstra = true, bool shouldCalculatedBiconnectedComponents = true)
         {
             CellState fromCell = PlayerToMoveNext == PlayerType.You ? YourCell : OpponentsCell;
             CellState toCell = this[position];
@@ -993,6 +994,12 @@ namespace AndrewTweddle.Tron.Core
             if (performDijkstra)
             {
                 Dijkstra.Perform(this);
+            }
+
+            if (shouldCalculatedBiconnectedComponents)
+            {
+                BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                bcAlg.Calculate(this);
             }
         }
 
@@ -1117,7 +1124,7 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
-        public static GameState InitializeNewGameState(bool performDijkstra = true)
+        public static GameState InitializeNewGameState(bool performDijkstra = true, bool shouldCalculateBiconnectedComponents = true)
         {
             GameState gameState = new GameState();
             Random rnd = new Random();
@@ -1138,6 +1145,11 @@ namespace AndrewTweddle.Tron.Core
             if (performDijkstra)
             {
                 Dijkstra.Perform(gameState);
+            }
+            if (shouldCalculateBiconnectedComponents)
+            {
+                BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                bcAlg.Calculate(gameState);
             }
             return gameState;
         }
@@ -1193,5 +1205,27 @@ namespace AndrewTweddle.Tron.Core
                 PropertyChanged(this, args);
             }
         }
+
+        #region Biconnected components methods
+
+        public void AddBiconnectedComponent(BiconnectedComponent component)
+        {
+            if (biconnectedComponents == null)
+            {
+                biconnectedComponents = new List<BiconnectedComponent>();
+            }
+            biconnectedComponents.Add(component);
+        }
+
+        public IEnumerable<BiconnectedComponent> GetBiconnectedComponents()
+        {
+            if (biconnectedComponents == null)
+            {
+                biconnectedComponents = new List<BiconnectedComponent>();
+            }
+            return biconnectedComponents;
+        }
+
+        #endregion
     }
 }

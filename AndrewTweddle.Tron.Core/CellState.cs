@@ -20,6 +20,21 @@ namespace AndrewTweddle.Tron.Core
         private int degreeOfVertex;
         private CompartmentStatus compartmentStatus;
 
+        #region Fields for biconnected components algorithm:
+
+        [NonSerialized]
+        private bool visited;
+        [NonSerialized]
+        private int dfsDepth;
+        [NonSerialized]
+        private int dfsLow;
+        [NonSerialized]
+        private CellState parentCellState;
+        [NonSerialized]
+        private HashSet<BiconnectedComponent> biconnectedComponents;
+
+        #endregion
+
         public GameState GameState
         {
             get
@@ -191,6 +206,91 @@ namespace AndrewTweddle.Tron.Core
                 compartmentStatus = value;
                 OnPropertyChanged("CompartmentStatus");
             }
+        }
+
+        #endregion
+
+        #region Biconnected Components Algorithm
+
+        public bool Visited
+        {
+            get
+            {
+                return visited;
+            }
+            set
+            {
+                visited = value;
+                // For performance: OnPropertyChanged("Visited");
+            }
+        }
+
+        public int DfsDepth
+        {
+            get
+            {
+                return dfsDepth;
+            }
+            set
+            {
+                dfsDepth = value;
+                // For performance: OnPropertyChanged("DfsDepth");
+            }
+        }
+
+        public int DfsLow
+        {
+            get
+            {
+                return dfsLow;
+            }
+            set
+            {
+                dfsLow = value;
+                // For performance: OnPropertyChanged("DfsLow");
+            }
+        }
+
+        public CellState ParentCellState
+        {
+            get
+            {
+                return parentCellState;
+            }
+            set
+            {
+                parentCellState = value;
+                // For performance: OnPropertyChanged("ParentCellState");
+            }
+        }
+
+        /// <summary>
+        /// A cut vertex belongs to multiple biconnected components
+        /// </summary>
+        public bool IsACutVertex
+        {
+            get
+            {
+                return (biconnectedComponents != null && biconnectedComponents.Count > 1);
+            }
+        }
+
+        public void AddBiconnectedComponent(BiconnectedComponent component)
+        {
+            if (biconnectedComponents == null)
+            {
+                biconnectedComponents = new HashSet<BiconnectedComponent>();
+            }
+            biconnectedComponents.Add(component);
+        }
+
+        public IEnumerable<BiconnectedComponent> GetBiconnectedComponents()
+        {
+            if (biconnectedComponents == null)
+            {
+                biconnectedComponents = new HashSet<BiconnectedComponent>();
+            }
+            return biconnectedComponents;
         }
 
         #endregion
