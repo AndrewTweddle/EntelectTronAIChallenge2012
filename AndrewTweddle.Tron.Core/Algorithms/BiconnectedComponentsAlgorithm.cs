@@ -8,7 +8,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 {
     public class BiconnectedComponentsAlgorithm
     {
-        int count = 0;
+        int count;
+        int nextComponentNumber;
         Stack<Edge> edgeStack;
 
         public void Calculate(GameState gameState)
@@ -17,6 +18,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             Stopwatch swatch = Stopwatch.StartNew();
 #endif
             count = 0;
+            nextComponentNumber = 1;
+
             edgeStack = new Stack<Edge>();
             Queue<CellState> cellsToVisit = new Queue<CellState>();
 
@@ -38,6 +41,13 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                     Visit(nextCellToVisit);
                 }
                 cellsToVisitCount--;
+            }
+
+            // Calculate the components adjacent to each component as well as the statistics of each component:
+            foreach (BiconnectedComponent component in gameState.GetBiconnectedComponents())
+            {
+                component.CalculateAdjacentComponents();
+                component.CalculateMetricsOfComponent();
             }
 #if DEBUG
             swatch.Stop();
@@ -68,15 +78,16 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                         if (adjacentCellState.DfsLow >= startCellState.DfsDepth)
                         {
                             // Create a biconnected component
-                            BiconnectedComponent component = new BiconnectedComponent();
+                            BiconnectedComponent component = new BiconnectedComponent(nextComponentNumber);
+                            nextComponentNumber++;
                             startCellState.GameState.AddBiconnectedComponent(component);
 
                             Edge poppedEdge = null;
                             do
                             {
                                 poppedEdge = edgeStack.Pop();
-                                component.AddCell(poppedEdge.EndVertex);
                                 component.AddCell(poppedEdge.StartVertex);
+                                component.AddCell(poppedEdge.EndVertex);
                                 poppedEdge.StartVertex.AddBiconnectedComponent(component);
                                 poppedEdge.EndVertex.AddBiconnectedComponent(component);
                             }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.ComponentModel;
+using System.IO;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -32,6 +33,8 @@ namespace AndrewTweddle.Tron.Core
         private CellState parentCellState;
         [NonSerialized]
         private HashSet<BiconnectedComponent> biconnectedComponents;
+        [NonSerialized]
+        private string biconnectedComponentsListing;
 
         #endregion
 
@@ -44,7 +47,9 @@ namespace AndrewTweddle.Tron.Core
             private set
             {
                 gameState = value;
+#if DEBUG
                 OnPropertyChanged("GameState");
+#endif
             }
         }
 
@@ -68,7 +73,9 @@ namespace AndrewTweddle.Tron.Core
             private set
             {
                 position = value;
+#if DEBUG
                 OnPropertyChanged("Position");
+#endif
             }
         }
         
@@ -81,7 +88,9 @@ namespace AndrewTweddle.Tron.Core
             internal set
             {
                 moveNumber = value;
+#if DEBUG
                 OnPropertyChanged("MoveNumber");
+#endif
             }
         }
 
@@ -98,7 +107,9 @@ namespace AndrewTweddle.Tron.Core
                     bool wasFilled = (occupationStatus == OccupationStatus.OpponentWall || occupationStatus == OccupationStatus.YourWall);
                     bool isBeingFilled = (value == OccupationStatus.OpponentWall || value == OccupationStatus.YourWall);
                     occupationStatus = value;
+#if DEBUG
                     OnPropertyChanged("OccupationStatus");
+#endif
 
                     /* Does degree of adjacent vertices need to be re-calculated: */
                     if (wasFilled != isBeingFilled)
@@ -152,7 +163,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 distanceFromYou = value;
+#if DEBUG
                 OnPropertyChanged("DistanceFromYou");
+#endif
             }
         }
 
@@ -165,7 +178,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 distanceFromOpponent = value;
+#if DEBUG
                 OnPropertyChanged("DistanceFromOpponent");
+#endif
             }
         }
 
@@ -178,7 +193,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 closestPlayer = value;
+#if DEBUG
                 OnPropertyChanged("ClosestPlayer");
+#endif
             }
         }
 
@@ -191,7 +208,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 degreeOfVertex = value;
+#if DEBUG
                 OnPropertyChanged("DegreeOfVertex");
+#endif
             }
         }
 
@@ -204,7 +223,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 compartmentStatus = value;
+#if DEBUG
                 OnPropertyChanged("CompartmentStatus");
+#endif
             }
         }
 
@@ -221,7 +242,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 visited = value;
-                // For performance: OnPropertyChanged("Visited");
+#if DEBUG
+                OnPropertyChanged("Visited");
+#endif
             }
         }
 
@@ -234,7 +257,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 dfsDepth = value;
-                // For performance: OnPropertyChanged("DfsDepth");
+#if DEBUG
+                OnPropertyChanged("DfsDepth");
+#endif
             }
         }
 
@@ -247,7 +272,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 dfsLow = value;
-                // For performance: OnPropertyChanged("DfsLow");
+#if DEBUG
+                OnPropertyChanged("DfsLow");
+#endif
             }
         }
 
@@ -260,7 +287,28 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 parentCellState = value;
-                // For performance: OnPropertyChanged("ParentCellState");
+#if DEBUG
+                OnPropertyChanged("ParentCellState");
+#endif
+            }
+        }
+
+        public string BiconnectedComponentsListing
+        {
+            get
+            {
+                if (biconnectedComponentsListing == null)
+                {
+                    BiconnectedComponentsListing = CalculateBiconnectedComponentsListing();
+                }
+                return biconnectedComponentsListing;
+            }
+            set
+            {
+                biconnectedComponentsListing = value;
+#if DEBUG
+                OnPropertyChanged("BiconnectedComponentsListing");
+#endif
             }
         }
 
@@ -281,7 +329,36 @@ namespace AndrewTweddle.Tron.Core
             {
                 biconnectedComponents = new HashSet<BiconnectedComponent>();
             }
+            int countBefore = biconnectedComponents.Count;
             biconnectedComponents.Add(component);
+            int countAfter = biconnectedComponents.Count;
+
+            if (countAfter != countBefore)
+            {
+                if (countBefore == 1)
+                {
+                    // It has just become a cut vertex. Update both components accordingly:
+                    foreach (BiconnectedComponent existingComponent in biconnectedComponents)
+                    {
+                        if (existingComponent != component)
+                        {
+                            existingComponent.AddCutVertex(this);
+                        }
+                    }
+                }
+                else
+                    if (countBefore > 1)
+                    {
+                        // It was already a cut vertex. So just add as a cut vertex to the new component:
+                        component.AddCutVertex(this);
+                    }
+
+                // If in use, update the string listing of the components:
+                if (biconnectedComponentsListing != null)
+                {
+                    BiconnectedComponentsListing = CalculateBiconnectedComponentsListing();
+                }
+            }
         }
 
         public IEnumerable<BiconnectedComponent> GetBiconnectedComponents()
@@ -304,6 +381,12 @@ namespace AndrewTweddle.Tron.Core
             ClosestPlayer = source.ClosestPlayer;
             DegreeOfVertex = source.DegreeOfVertex;
             CompartmentStatus = source.CompartmentStatus;
+
+            // Biconnected components properties:
+            Visited = source.Visited;
+            DfsDepth = source.DfsDepth;
+            DfsLow = source.DfsLow;
+            BiconnectedComponentsListing = source.BiconnectedComponentsListing;
         }
 
         public void Flip()
@@ -436,5 +519,15 @@ namespace AndrewTweddle.Tron.Core
                 PropertyChanged(this, args);
             }
         }
+
+        private string CalculateBiconnectedComponentsListing()
+        {
+            return String.Join(", ", 
+                GetBiconnectedComponents()
+                    .OrderBy(bcComponent => bcComponent.ComponentNumber)
+                    .Select(bcComponent => bcComponent.ComponentNumber.ToString())
+            );
+        }
+
     }
 }

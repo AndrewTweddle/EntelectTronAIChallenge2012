@@ -30,7 +30,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 x = value;
+#if DEBUG
                 OnPropertyChanged("X");
+#endif
             }
         }
 
@@ -43,7 +45,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 y = value;
+#if DEBUG
                 OnPropertyChanged("Y");
+#endif
             }
         }
 
