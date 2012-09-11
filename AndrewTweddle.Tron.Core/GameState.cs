@@ -10,6 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using AndrewTweddle.Tron.Core.Algorithms;
 using System.ComponentModel;
+using AndrewTweddle.Tron.Core.Evaluators;
 
 namespace AndrewTweddle.Tron.Core
 {
@@ -42,6 +43,8 @@ namespace AndrewTweddle.Tron.Core
         private DijkstraStatus opponentsDijkstraStatus;
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
+
+        [NonSerialized]
         private List<BiconnectedComponent> biconnectedComponents;
 
         [OptionalField]
@@ -999,7 +1002,7 @@ namespace AndrewTweddle.Tron.Core
             if (shouldCalculatedBiconnectedComponents)
             {
                 BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
-                bcAlg.Calculate(this);
+                bcAlg.Calculate(this, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
             }
         }
 
@@ -1149,7 +1152,7 @@ namespace AndrewTweddle.Tron.Core
             if (shouldCalculateBiconnectedComponents)
             {
                 BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
-                bcAlg.Calculate(gameState);
+                bcAlg.Calculate(gameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
             }
             return gameState;
         }

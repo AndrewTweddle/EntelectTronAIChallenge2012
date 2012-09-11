@@ -14,14 +14,10 @@ namespace AndrewTweddle.Tron.Core
 
         #region Metrics
 
-        private int numberOfCellsReachableByYou;
-        private int numberOfCellsReachableByOpponent;
-        private int totalDegreesOfCellsReachableByYou;
-        private int totalDegreesOfCellsReachableByOpponent;
-        private int numberOfCellsClosestToYou;
-        private int numberOfCellsClosestToOpponent;
-        private int totalDegreesOfCellsClosestToYou;
-        private int totalDegreesOfCellsClosestToOpponent;
+        private Metrics yourMetricsForComponentOnly = new Metrics();
+        private Metrics opponentsMetricsForComponentOnly = new Metrics();
+        private Metrics subtreeMetricsForYou;
+        private Metrics subtreeMetricsForOpponent;
 
         #endregion
 
@@ -33,124 +29,60 @@ namespace AndrewTweddle.Tron.Core
 
         #region Properties for metrics
 
-        public int NumberOfCellsReachableByYou
+        public Metrics YourMetricsForComponentOnly
         {
             get
             {
-                return numberOfCellsReachableByYou;
-            }
-            set
-            {
-                numberOfCellsReachableByYou = value;
-#if DEBUG
-                OnPropertyChanged("NumberOfCellsReachableByYou");
-#endif
+                return yourMetricsForComponentOnly;
             }
         }
 
-        public int NumberOfCellsReachableByOpponent
+        public Metrics OpponentsMetricsForComponentOnly
         {
             get
             {
-                return numberOfCellsReachableByOpponent;
-            }
-            set
-            {
-                numberOfCellsReachableByOpponent = value;
-#if DEBUG
-                OnPropertyChanged("NumberOfCellsReachableByOpponent");
-#endif
+                return opponentsMetricsForComponentOnly;
             }
         }
 
-        public int TotalDegreesOfCellsReachableByYou
+        public Metrics SubtreeMetricsForYou
         {
             get
             {
-                return totalDegreesOfCellsReachableByYou;
-            }
-            set
-            {
-                totalDegreesOfCellsReachableByYou = value;
-#if DEBUG
-                OnPropertyChanged("TotalDegreesOfCellsReachableByYou");
-#endif
+                return subtreeMetricsForYou;
             }
         }
 
-        public int TotalDegreesOfCellsReachableByOpponent
+        public Metrics SubtreeMetricsForOpponent
         {
             get
             {
-                return totalDegreesOfCellsReachableByOpponent;
-            }
-            set
-            {
-                totalDegreesOfCellsReachableByOpponent = value;
-#if DEBUG
-                OnPropertyChanged("TotalDegreesOfCellsReachableByOpponent");
-#endif
+                return subtreeMetricsForOpponent;
             }
         }
 
-        public int NumberOfCellsClosestToYou
+        public CellState EntryVertexForYou
         {
-            get
-            {
-                return numberOfCellsClosestToYou;
-            }
-            set
-            {
-                numberOfCellsClosestToYou = value;
-#if DEBUG
-                OnPropertyChanged("NumberOfCellsClosestToYou");
-#endif
-            }
+            get;
+            set;
         }
 
-        public int NumberOfCellsClosestToOpponent
+        public CellState ExitVertexForYou
         {
-            get
-            {
-                return numberOfCellsClosestToOpponent;
-            }
-            set
-            {
-                numberOfCellsClosestToOpponent = value;
-#if DEBUG
-                OnPropertyChanged("NumberOfCellsClosestToOpponent");
-#endif
-            }
+            get;
+            set;
         }
 
-        public int TotalDegreesOfCellsClosestToYou
+        public CellState EntryVertexForOpponent
         {
-            get
-            {
-                return totalDegreesOfCellsClosestToYou;
-            }
-            set
-            {
-                totalDegreesOfCellsClosestToYou = value;
-#if DEBUG
-                OnPropertyChanged("TotalDegreesOfCellsClosestToYou");
-#endif
-            }
+            get;
+            set;
         }
 
-        public int TotalDegreesOfCellsClosestToOpponent
+        public CellState ExitVertexForOpponent
         {
-            get
-            {
-                return totalDegreesOfCellsClosestToOpponent;
-            }
-            set
-            {
-                totalDegreesOfCellsClosestToOpponent = value;
-#if DEBUG
-                OnPropertyChanged("TotalDegreesOfCellsClosestToOpponent");
-#endif
-            }
+            get;
+            set;
         }
 
         #endregion
@@ -236,7 +168,7 @@ namespace AndrewTweddle.Tron.Core
                     }
 
                     // Update opponents metrics:
-                    if (cellState.CompartmentStatus == CompartmentStatus.InYourCompartment || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
+                    if (cellState.CompartmentStatus == CompartmentStatus.InOpponentsCompartment || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                     {
                         numberOfCellsReachableByOpponent++;
                         totalDegreesOfCellsReachableByOpponent += cellState.DegreeOfVertex;
@@ -249,18 +181,95 @@ namespace AndrewTweddle.Tron.Core
                 }
             }
 
-            NumberOfCellsReachableByYou = numberOfCellsReachableByYou;
-            NumberOfCellsReachableByOpponent = numberOfCellsReachableByOpponent;
-            TotalDegreesOfCellsReachableByYou = totalDegreesOfCellsReachableByYou;
-            TotalDegreesOfCellsReachableByOpponent = totalDegreesOfCellsReachableByOpponent;
-            NumberOfCellsClosestToYou = numberOfCellsClosestToYou;
-            NumberOfCellsClosestToOpponent = numberOfCellsClosestToOpponent;
-            TotalDegreesOfCellsClosestToYou = totalDegreesOfCellsClosestToYou;
-            TotalDegreesOfCellsClosestToOpponent = totalDegreesOfCellsClosestToOpponent;
+            yourMetricsForComponentOnly.NumberOfCellsReachableByPlayer = numberOfCellsReachableByYou;
+            yourMetricsForComponentOnly.TotalDegreesOfCellsReachableByPlayer = totalDegreesOfCellsReachableByYou;
+            yourMetricsForComponentOnly.NumberOfCellsClosestToPlayer = numberOfCellsClosestToYou;
+            yourMetricsForComponentOnly.TotalDegreesOfCellsClosestToPlayer = totalDegreesOfCellsClosestToYou;
+
+            opponentsMetricsForComponentOnly.NumberOfCellsReachableByPlayer = numberOfCellsReachableByOpponent;
+            opponentsMetricsForComponentOnly.TotalDegreesOfCellsReachableByPlayer = totalDegreesOfCellsReachableByOpponent;
+            opponentsMetricsForComponentOnly.NumberOfCellsClosestToPlayer = numberOfCellsClosestToOpponent;
+            opponentsMetricsForComponentOnly.TotalDegreesOfCellsClosestToPlayer = totalDegreesOfCellsClosestToOpponent;
         }
 
         // TODO: Add CompartmentStatus property and a method to calculate it
 
+        public void CalculateSubtreeMetricsForPlayer(PlayerType playerType, MetricsEvaluator evaluator, CellState entryVertex)
+        {
+            switch (playerType)
+            {
+                case PlayerType.You:
+                    CalculateSubtreeMetricsForYou(evaluator, entryVertex);
+                    break;
+                case PlayerType.Opponent:
+                    CalculateSubtreeMetricsForOpponent(evaluator, entryVertex);
+                    break;
+            }
+        }
+
+        public void CalculateSubtreeMetricsForYou(MetricsEvaluator evaluator, CellState entryVertex)
+        {
+            EntryVertexForYou = entryVertex;
+            CellState bestCutVertex = null;
+            double valueOfBestCutVertex = double.NegativeInfinity;
+
+            foreach (CellState cutVertex in cutVertices)
+            {
+                if (cutVertex != entryVertex && cutVertex.OccupationStatus != OccupationStatus.Opponent)
+                {
+                    cutVertex.CalculateSubtreeMetricsForYou(evaluator, this);
+                    Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForYou;
+                    double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
+                    if (valueOfCutVertex >= valueOfBestCutVertex)
+                    {
+                        valueOfBestCutVertex = valueOfCutVertex;
+                        bestCutVertex = cutVertex;
+                    }
+                }
+            }
+
+            ExitVertexForYou = bestCutVertex;
+            if (bestCutVertex == null)
+            {
+                subtreeMetricsForYou = yourMetricsForComponentOnly.Clone();
+            }
+            else
+            {
+                subtreeMetricsForYou = yourMetricsForComponentOnly + bestCutVertex.SubtreeMetricsForYou;
+            }
+        }
+
+        public void CalculateSubtreeMetricsForOpponent(MetricsEvaluator evaluator, CellState entryVertex)
+        {
+            EntryVertexForOpponent = entryVertex;
+            CellState bestCutVertex = null;
+            double valueOfBestCutVertex = double.NegativeInfinity;
+
+            foreach (CellState cutVertex in cutVertices)
+            {
+                if (cutVertex != entryVertex && cutVertex.OccupationStatus != OccupationStatus.You)
+                {
+                    cutVertex.CalculateSubtreeMetricsForOpponent(evaluator, this);
+                    Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForOpponent;
+                    double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
+                    if (valueOfCutVertex >= valueOfBestCutVertex)
+                    {
+                        valueOfBestCutVertex = valueOfCutVertex;
+                        bestCutVertex = cutVertex;
+                    }
+                }
+            }
+
+            ExitVertexForOpponent = bestCutVertex;
+            if (bestCutVertex == null)
+            {
+                subtreeMetricsForOpponent = opponentsMetricsForComponentOnly.Clone();
+            }
+            else
+            {
+                subtreeMetricsForOpponent = opponentsMetricsForComponentOnly + bestCutVertex.SubtreeMetricsForOpponent;
+            }
+        }
 
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;

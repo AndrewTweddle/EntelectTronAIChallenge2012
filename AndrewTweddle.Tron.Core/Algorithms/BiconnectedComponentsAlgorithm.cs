@@ -12,7 +12,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
         int nextComponentNumber;
         Stack<Edge> edgeStack;
 
-        public void Calculate(GameState gameState)
+        public void Calculate(GameState gameState, MetricsEvaluator evaluator)
         {
 #if DEBUG
             Stopwatch swatch = Stopwatch.StartNew();
@@ -43,12 +43,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 cellsToVisitCount--;
             }
 
-            // Calculate the components adjacent to each component as well as the statistics of each component:
-            foreach (BiconnectedComponent component in gameState.GetBiconnectedComponents())
-            {
-                component.CalculateAdjacentComponents();
-                component.CalculateMetricsOfComponent();
-            }
+            PerformPostProcessingOnBiconnectedComponents(gameState, evaluator);
 #if DEBUG
             swatch.Stop();
             Debug.WriteLine(String.Format("Biconnected components algorithm with {1} spaces filled took {0} ", swatch.Elapsed, gameState.OpponentsWallLength + gameState.YourWallLength + 2));
@@ -115,6 +110,78 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                         }
                 }
             }
+        }
+
+        private void PerformPostProcessingOnBiconnectedComponents(GameState gameState, MetricsEvaluator evaluator)
+        {
+            // Calculate the components adjacent to each component as well as the statistics of each component:
+            foreach (BiconnectedComponent component in gameState.GetBiconnectedComponents())
+            {
+                component.CalculateAdjacentComponents();
+                component.CalculateMetricsOfComponent();
+            }
+
+            // Calculate the metrics based on a tree of components reachable by you:
+            CalculateYourOverallMetrics(gameState, evaluator);
+            CalculateOpponentsOverallMetrics(gameState, evaluator);
+        }
+
+        private void CalculateYourOverallMetrics(GameState gameState, MetricsEvaluator evaluator)
+        {
+            Metrics overallMetrics;
+            if (gameState.YourCell.IsACutVertex)
+            {
+                gameState.YourCell.CalculateSubtreeMetricsForYou(evaluator, null /* No entry component */);
+                overallMetrics = gameState.YourCell.SubtreeMetricsForYou;
+            }
+            else
+            {
+                BiconnectedComponent playersComponent = gameState.YourCell.GetBiconnectedComponents().FirstOrDefault();
+                if (playersComponent == null)
+                {
+                    // The player has no more moves left - there are no edges leading from the cell, and hence no components to be part of!
+                    overallMetrics = new Metrics();
+                }
+                else
+                {
+                    playersComponent.CalculateSubtreeMetricsForYou(evaluator, gameState.YourCell);
+                    overallMetrics = playersComponent.SubtreeMetricsForYou;
+                }
+            }
+
+            gameState.NumberOfCellsClosestToYou = overallMetrics.NumberOfCellsClosestToPlayer;
+            gameState.NumberOfCellsReachableByYou = overallMetrics.NumberOfCellsReachableByPlayer;
+            gameState.TotalDegreesOfCellsClosestToYou = overallMetrics.TotalDegreesOfCellsClosestToPlayer;
+            gameState.TotalDegreesOfCellsReachableByYou = overallMetrics.TotalDegreesOfCellsReachableByPlayer;
+        }
+
+        private void CalculateOpponentsOverallMetrics(GameState gameState, MetricsEvaluator evaluator)
+        {
+            Metrics overallMetrics;
+            if (gameState.OpponentsCell.IsACutVertex)
+            {
+                gameState.OpponentsCell.CalculateSubtreeMetricsForOpponent(evaluator, null /* No entry component */);
+                overallMetrics = gameState.OpponentsCell.SubtreeMetricsForOpponent;
+            }
+            else
+            {
+                BiconnectedComponent playersComponent = gameState.OpponentsCell.GetBiconnectedComponents().FirstOrDefault();
+                if (playersComponent == null)
+                {
+                    // The player has no more moves left - there are no edges leading from the cell, and hence no components to be part of!
+                    overallMetrics = new Metrics();
+                }
+                else
+                {
+                    playersComponent.CalculateSubtreeMetricsForOpponent(evaluator, gameState.OpponentsCell);
+                    overallMetrics = playersComponent.SubtreeMetricsForOpponent;
+                }
+            }
+
+            gameState.NumberOfCellsClosestToOpponent = overallMetrics.NumberOfCellsClosestToPlayer;
+            gameState.NumberOfCellsReachableByOpponent = overallMetrics.NumberOfCellsReachableByPlayer;
+            gameState.TotalDegreesOfCellsClosestToOpponent = overallMetrics.TotalDegreesOfCellsClosestToPlayer;
+            gameState.TotalDegreesOfCellsReachableByOpponent = overallMetrics.TotalDegreesOfCellsReachableByPlayer;
         }
     }
 }

@@ -35,6 +35,18 @@ namespace AndrewTweddle.Tron.Core
         private HashSet<BiconnectedComponent> biconnectedComponents;
         [NonSerialized]
         private string biconnectedComponentsListing;
+        [NonSerialized]
+        private Metrics subtreeMetricsForYou;
+        [NonSerialized]
+        private Metrics subtreeMetricsForOpponent;
+        [NonSerialized]
+        private BiconnectedComponent entryComponentForYou;
+        [NonSerialized]
+        private BiconnectedComponent exitComponentForYou;
+        [NonSerialized]
+        private BiconnectedComponent entryComponentForOpponent;
+        [NonSerialized]
+        private BiconnectedComponent exitComponentForOpponent;
 
         #endregion
 
@@ -323,6 +335,96 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public Metrics SubtreeMetricsForYou
+        {
+            get
+            {
+                return subtreeMetricsForYou;
+            }
+            set
+            {
+                subtreeMetricsForYou = value;
+#if DEBUG
+                OnPropertyChanged("SubtreeMetricsForYou");
+#endif
+            }
+        }
+
+        public Metrics SubtreeMetricsForOpponent
+        {
+            get
+            {
+                return subtreeMetricsForOpponent;
+            }
+            set
+            {
+                subtreeMetricsForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("SubtreeMetricsForOpponent");
+#endif
+            }
+        }
+
+        public BiconnectedComponent EntryComponentForYou
+        {
+            get
+            {
+                return entryComponentForYou;
+            }
+            set
+            {
+                entryComponentForYou = value;
+#if DEBUG
+                OnPropertyChanged("EntryComponentForYou");
+#endif
+            }
+        }
+
+        public BiconnectedComponent ExitComponentForYou
+        {
+            get
+            {
+                return exitComponentForYou;
+            }
+            set
+            {
+                exitComponentForYou = value;
+#if DEBUG
+                OnPropertyChanged("ExitComponentForYou");
+#endif
+            }
+        }
+
+        public BiconnectedComponent EntryComponentForOpponent
+        {
+            get
+            {
+                return entryComponentForOpponent;
+            }
+            set
+            {
+                entryComponentForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("EntryComponentForOpponent");
+#endif
+            }
+        }
+
+        public BiconnectedComponent ExitComponentForOpponent
+        {
+            get
+            {
+                return exitComponentForOpponent;
+            }
+            set
+            {
+                exitComponentForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("ExitComponentForOpponent");
+#endif
+            }
+        }
+
         public void AddBiconnectedComponent(BiconnectedComponent component)
         {
             if (biconnectedComponents == null)
@@ -529,5 +631,105 @@ namespace AndrewTweddle.Tron.Core
             );
         }
 
+
+        public void CalculateSubtreeMetricsForYou(MetricsEvaluator evaluator, BiconnectedComponent entryComponent)
+        {
+            EntryComponentForYou = entryComponent;
+            BiconnectedComponent bestComponent = null;
+            double valueOfBestComponent = double.NegativeInfinity;
+
+            foreach (BiconnectedComponent component in biconnectedComponents)
+            {
+                if (component != entryComponent) // TODO: && component.OccupationStatus != OccupationStatus.Opponent)
+                {
+                    component.CalculateSubtreeMetricsForYou(evaluator, this);
+                    Metrics componentSubtreeMetrics = component.SubtreeMetricsForYou;
+
+                    double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
+                    if (valueOfComponent >= valueOfBestComponent)
+                    {
+                        valueOfBestComponent = valueOfComponent;
+                        bestComponent = component;
+                    }
+                }
+            }
+
+            ExitComponentForYou = bestComponent;
+            Metrics yourMetricsForCutVertexOnly = CalculateYourMetricsForCellStateOnly();
+            if (bestComponent == null)
+            {
+                subtreeMetricsForYou = yourMetricsForCutVertexOnly;
+            }
+            else
+            {
+                subtreeMetricsForYou = yourMetricsForCutVertexOnly + bestComponent.SubtreeMetricsForYou;
+            }
+        }
+
+        public void CalculateSubtreeMetricsForOpponent(MetricsEvaluator evaluator, BiconnectedComponent entryComponent)
+        {
+            EntryComponentForOpponent = entryComponent;
+            BiconnectedComponent bestComponent = null;
+            double valueOfBestComponent = double.NegativeInfinity;
+
+            foreach (BiconnectedComponent component in biconnectedComponents)
+            {
+                if (component != entryComponent) // TODO: && component.OccupationStatus != OccupationStatus.You)
+                {
+                    component.CalculateSubtreeMetricsForOpponent(evaluator, this);
+                    Metrics componentSubtreeMetrics = component.SubtreeMetricsForOpponent;
+
+                    double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
+                    if (valueOfComponent >= valueOfBestComponent)
+                    {
+                        valueOfBestComponent = valueOfComponent;
+                        bestComponent = component;
+                    }
+                }
+            }
+
+            ExitComponentForOpponent = bestComponent;
+            Metrics opponentsMetricsForCutVertexOnly = CalculateOpponentsMetricsForCellStateOnly();
+            if (bestComponent == null)
+            {
+                subtreeMetricsForOpponent = opponentsMetricsForCutVertexOnly;
+            }
+            else
+            {
+                subtreeMetricsForOpponent = opponentsMetricsForCutVertexOnly + bestComponent.SubtreeMetricsForOpponent;
+            }
+        }
+
+        private Metrics CalculateYourMetricsForCellStateOnly()
+        {
+            Metrics metrics = new Metrics();
+            if (ClosestPlayer == PlayerType.You)
+            {
+                metrics.NumberOfCellsClosestToPlayer = 1;
+                metrics.TotalDegreesOfCellsClosestToPlayer = DegreeOfVertex;
+            }
+            if (CompartmentStatus == CompartmentStatus.InYourCompartment || CompartmentStatus == CompartmentStatus.InSharedCompartment)
+            {
+                metrics.NumberOfCellsReachableByPlayer = 1;
+                metrics.TotalDegreesOfCellsReachableByPlayer = DegreeOfVertex;
+            }
+            return metrics;
+        }
+
+        private Metrics CalculateOpponentsMetricsForCellStateOnly()
+        {
+            Metrics metrics = new Metrics();
+            if (ClosestPlayer == PlayerType.Opponent)
+            {
+                metrics.NumberOfCellsClosestToPlayer = 1;
+                metrics.TotalDegreesOfCellsClosestToPlayer = DegreeOfVertex;
+            }
+            if (CompartmentStatus == CompartmentStatus.InOpponentsCompartment || CompartmentStatus == CompartmentStatus.InSharedCompartment)
+            {
+                metrics.NumberOfCellsReachableByPlayer = 1;
+                metrics.TotalDegreesOfCellsReachableByPlayer = DegreeOfVertex;
+            }
+            return metrics;
+        }
     }
 }
