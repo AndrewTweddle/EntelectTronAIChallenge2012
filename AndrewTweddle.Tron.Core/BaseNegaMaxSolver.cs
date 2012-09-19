@@ -177,6 +177,12 @@ namespace AndrewTweddle.Tron.Core
 
                 if (chosenChildNode != null)
                 {
+#if DEBUG
+                    // Perform algorithms on chosen node, since search nodes no longer do this (except at leaf nodes):
+                    Dijkstra.Perform(chosenChildNode.GameState);
+                    BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                    bcAlg.Calculate(chosenChildNode.GameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+#endif
                     Coordinator.SetBestMoveSoFar(chosenChildNode.GameState);
                 }
                 else
