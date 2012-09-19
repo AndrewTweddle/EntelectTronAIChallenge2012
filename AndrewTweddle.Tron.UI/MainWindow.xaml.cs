@@ -129,9 +129,17 @@ namespace AndrewTweddle.Tron.UI
             };
             if (dialog.ShowDialog() == true)
             {
-                string filePath = dialog.FileName;
-                FileType fileType = (System.IO.Path.GetExtension(filePath) == ".xml") ? FileType.Xml : FileType.Binary;
-                MainViewModel.LoadGameState(filePath, fileType);
+                MainViewModel.LoadedFilePath = dialog.FileName;
+                MainViewModel.LoadedFileType = (System.IO.Path.GetExtension(dialog.FileName) == ".xml") ? FileType.Xml : FileType.Binary;
+                MainViewModel.LoadGameState();
+            }
+        }
+
+        private void ReloadGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(MainViewModel.LoadedFilePath))
+            {
+                MainViewModel.LoadGameState();
             }
         }
 
@@ -154,5 +162,31 @@ namespace AndrewTweddle.Tron.UI
             }
         }
 
+        private void GoBackToMoveNumberButton_Click(object sender, RoutedEventArgs e)
+        {
+            int moveNumber;
+            bool validMoveNumber = int.TryParse(moveNumberTextBox.Text, out moveNumber);
+            if (validMoveNumber)
+            {
+                validMoveNumber = moveNumber > 0;
+            }
+            if (!validMoveNumber)
+            {
+                MessageBox.Show("Please specify a valid move number", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // TODO: Check that move number is not in the future
+
+            PlayerType playerWhoMovedLast;
+            bool validPlayer = Enum.TryParse(PlayerWhoMovedLastComboBox.Text, out playerWhoMovedLast);
+            if (!validPlayer)
+            {
+                MessageBox.Show("Please specify which player should be the one who moved last", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            MainViewModel.GoBackToMoveNumber(playerWhoMovedLast, moveNumber);
+        }
     }
 }

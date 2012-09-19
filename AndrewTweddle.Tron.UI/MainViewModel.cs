@@ -24,10 +24,38 @@ namespace AndrewTweddle.Tron.UI
         private bool isPaused = false;
         private bool isInProgress = false;
         private bool isTurnInProgress = false;
+        private string loadedFilePath;
+        private FileType loadedFileType;
 
         private ObservableCollection<Type> solverTypes;
         private Type player1SolverType;
         private Type player2SolverType;
+
+        public string LoadedFilePath
+        {
+            get
+            {
+                return loadedFilePath;
+            }
+            set
+            {
+                loadedFilePath = value;
+                OnPropertyChanged("LoadedFilePath");
+            }
+        }
+
+        public FileType LoadedFileType
+        {
+            get
+            {
+                return loadedFileType;
+            }
+            set
+            {
+                loadedFileType = value;
+                OnPropertyChanged("LoadedFileType");
+            }
+        }
 
         public ObservableCollection<Type> SolverTypes
         {
@@ -47,6 +75,10 @@ namespace AndrewTweddle.Tron.UI
             {
                 player1SolverType = value;
                 OnPropertyChanged("Player1SolverType");
+                if (IsInProgress)
+                {
+                    ContinueWithANewOrLoadedGame();
+                }
             }
         }
 
@@ -60,6 +92,10 @@ namespace AndrewTweddle.Tron.UI
             {
                 player2SolverType = value;
                 OnPropertyChanged("Player2SolverType");
+                if (IsInProgress)
+                {
+                    ContinueWithANewOrLoadedGame();
+                }
             }
         }
 
@@ -250,6 +286,8 @@ namespace AndrewTweddle.Tron.UI
             solverTypes.Add(typeof(RandomSolver));
             solverTypes.Add(typeof(HumanSolver));
             solverTypes.Add(typeof(SloaneNegaMaxSolver));
+            solverTypes.Add(typeof(ConfigurableNegaMaxSolver1));
+            solverTypes.Add(typeof(ConfigurableNegaMaxSolver2));
 
             GameStateViewModel = new GameStateViewModel();
             GameStateViewModel.GameState = new GameState();
@@ -393,9 +431,9 @@ namespace AndrewTweddle.Tron.UI
             IsPaused = false;
         }
 
-        public void LoadGameState(string filePath, FileType fileType = FileType.Binary)
+        public void LoadGameState()
         {
-            GameState loadedGameState = GameState.LoadGameState(filePath, fileType);
+            GameState loadedGameState = GameState.LoadGameState(LoadedFilePath, LoadedFileType);
             GameStateViewModel.GameState.CopyFrom(loadedGameState);
             IsTurnOfPlayer1 = loadedGameState.PlayerToMoveNext == PlayerType.You;
             IsPaused = true;
@@ -405,6 +443,14 @@ namespace AndrewTweddle.Tron.UI
         public void SaveGameState(string filePath, FileType fileType = FileType.Binary)
         {
             GameStateViewModel.GameState.SaveGameState(filePath, fileType);
+        }
+
+        public void GoBackToMoveNumber(PlayerType playerWhoMovedLast, int moveNumber)
+        {
+            GameStateViewModel.GameState.GoBackToTurn(playerWhoMovedLast, moveNumber);
+            IsTurnOfPlayer1 = GameStateViewModel.GameState.PlayerToMoveNext == PlayerType.You;
+            IsPaused = true;
+            ContinueWithANewOrLoadedGame();
         }
 
         public void DisplaySearchTree()

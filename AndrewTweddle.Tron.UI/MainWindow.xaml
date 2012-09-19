@@ -36,7 +36,24 @@
                               ItemsSource="{Binding SolverTypes}" 
                               DisplayMemberPath="Name" 
                               SelectedItem="{Binding Path=Player1SolverType}" 
-                              Width="200" />
+                              Width="200">
+                        <ComboBox.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="ComboBox.IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="ComboBox.IsEnabled" Value="False" />
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
                 </StackPanel>
             </Border>
             <Border BorderBrush="Blue" Background="LightBlue" Padding="2">
@@ -47,7 +64,24 @@
                               ItemsSource="{Binding SolverTypes}" 
                               DisplayMemberPath="Name" 
                               SelectedItem="{Binding Path=Player2SolverType}" 
-                              Width="200"  />
+                              Width="200">
+                        <ComboBox.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="ComboBox.IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="ComboBox.IsEnabled" Value="False" />
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
                 </StackPanel>
             </Border>
             
@@ -169,7 +203,23 @@
                         <Setter Property="Button.IsEnabled" Value="False" />
                     </Style>
                 </Button.Style>
-                Load game...
+                Load...
+            </Button>
+
+            <Button Name="ReloadGameButton" Margin="2" Click="ReloadGameButton_Click" IsEnabled="True">
+                <!--
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInProgress}">
+                                <Setter Property="Button.IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                -->
+                Reload
             </Button>
 
             <Button Name="SaveGameButton" Margin="2" Click="SaveGameButton_Click" IsEnabled="True">
@@ -185,8 +235,34 @@
                     </Style>
                 </Button.Style>
                 -->
-                Save game...
+                Save...
             </Button>
+
+            <Button x:Name="GoBackToMoveNumberButton" Click="GoBackToMoveNumberButton_Click">
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <!-- Binding="{Binding Path=IsPaused}" Value="True"> -->
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsTurnInProgress}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                Go to 
+            </Button>
+            <TextBox x:Name="moveNumberTextBox" Width="35" Margin="5"/>
+            <Label>for</Label>
+            <ComboBox x:Name="PlayerWhoMovedLastComboBox" Width="75" Height="23">
+                <ComboBoxItem>You</ComboBoxItem>
+                <ComboBoxItem>Opponent</ComboBoxItem>
+            </ComboBox>
         </WrapPanel>
 
         <gb:GameStateView x:Name="MainGameStateView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Margin="2" VerticalAlignment="Top" />
