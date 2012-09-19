@@ -18,8 +18,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <!-- Make space available for game state...
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                -->
             </Grid.RowDefinitions>
         
             <Grid.ColumnDefinitions>
@@ -57,12 +59,13 @@
             <Label Grid.Row="9">Biconnected components:</Label>
             <TextBox Grid.Row="9" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.BiconnectedComponentsListing,Mode=OneWay}" />
 
+            <!-- Free up space, now that debugging has taken place...
             <Label Grid.Row="10">DFS depth:</Label>
             <TextBox Grid.Row="10" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DfsDepth,Mode=OneWay}" />
 
             <Label Grid.Row="11">DFS low:</Label>
             <TextBox Grid.Row="11" Grid.Column="1" IsReadOnly="True" Text="{Binding Path=CellState.DfsLow,Mode=OneWay}" />
-
+            -->
         </Grid>
     </Border>
 </UserControl>

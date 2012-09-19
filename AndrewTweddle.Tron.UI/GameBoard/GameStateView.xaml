@@ -14,27 +14,6 @@
         </Style>
     </UserControl.Resources>
     <StackPanel Orientation="Vertical">
-        <!--
-        <Border>
-            <Grid x:Name="GameStateSummaryGrid">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                
-                <Label>Red walls: </Label>
-                <TextBox Grid.Column="1" Margin="5" IsReadOnly="True" Text="{Binding Path=GameState.YourWallLength,Mode=OneWay}" />
-
-                <Label Grid.Row="1">Blue walls:</Label>
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="5" IsReadOnly="True" Text="{Binding Path=GameState.OpponentsWallLength,Mode=OneWay}" />
-            </Grid>
-        </Border>
-        -->
         <Grid Background="Beige" TextBlock.TextAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
