@@ -18,6 +18,8 @@ namespace AndrewTweddle.Tron.Core
         private Metrics opponentsMetricsForComponentOnly = new Metrics();
         private Metrics subtreeMetricsForYou;
         private Metrics subtreeMetricsForOpponent;
+        private bool isSubTreeVisitedForYou;
+        private bool isSubTreeVisitedForOpponent;
 
         #endregion
 
@@ -85,6 +87,36 @@ namespace AndrewTweddle.Tron.Core
             set;
         }
 
+        public bool IsSubTreeVisitedForYou
+        {
+            get
+            {
+                return isSubTreeVisitedForYou;
+            }
+            set
+            {
+                isSubTreeVisitedForYou = value;
+#if DEBUG
+                OnPropertyChanged("IsSubTreeVisitedForYou");
+#endif
+            }
+        }
+
+        public bool IsSubTreeVisitedForOpponent
+        {
+            get
+            {
+                return isSubTreeVisitedForOpponent;
+            }
+            set
+            {
+                isSubTreeVisitedForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("IsSubTreeVisitedForOpponent");
+#endif
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -150,20 +182,39 @@ namespace AndrewTweddle.Tron.Core
             int numberOfCellsClosestToOpponent = 0;
             int totalDegreesOfCellsClosestToYou = 0;
             int totalDegreesOfCellsClosestToOpponent = 0;
+            int totalSumOfDistancesFromYouOnYourClosestCells = 0;
+            int totalSumOfDistancesFromOpponentOnYourClosestCells = 0;
+            int totalSumOfDistancesFromYouOnOpponentsClosestCells = 0;
+            int totalSumOfDistancesFromOpponentOnOpponentsClosestCells = 0;
 
             foreach (CellState cellState in GetCells())
             {
                 if (!cellState.IsACutVertex)
                 {
+                    bool isAPole = cellState.Position.IsPole;
+                        // Ignore degrees of a pole, as they are typically large, which skews evaluations based on them
+
+                    // Cap distances at 900, otherwise unreachable cells / light cycle's cell is int.MaxValue, which makes all other values meaningless:
+                    int distanceFromYou = cellState.DistanceFromYou > 900 ? 900 : cellState.DistanceFromYou;
+                    int distanceFromOpponent = cellState.DistanceFromOpponent > 900 ? 900 : cellState.DistanceFromOpponent;
+
                     // Update your metrics:
                     if (cellState.CompartmentStatus == CompartmentStatus.InYourCompartment || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                     {
                         numberOfCellsReachableByYou++;
-                        totalDegreesOfCellsReachableByYou += cellState.DegreeOfVertex;
+                        if (!isAPole)
+                        {
+                            totalDegreesOfCellsReachableByYou += cellState.DegreeOfVertex;
+                        }
                         if (cellState.ClosestPlayer == PlayerType.You)
                         {
                             numberOfCellsClosestToYou++;
-                            totalDegreesOfCellsClosestToYou += cellState.DegreeOfVertex;
+                            if (!isAPole)
+                            {
+                                totalDegreesOfCellsClosestToYou += cellState.DegreeOfVertex;
+                            }
+                            totalSumOfDistancesFromYouOnYourClosestCells += distanceFromYou;
+                            totalSumOfDistancesFromOpponentOnYourClosestCells += distanceFromOpponent;
                         }
                     }
 
@@ -171,11 +222,19 @@ namespace AndrewTweddle.Tron.Core
                     if (cellState.CompartmentStatus == CompartmentStatus.InOpponentsCompartment || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                     {
                         numberOfCellsReachableByOpponent++;
-                        totalDegreesOfCellsReachableByOpponent += cellState.DegreeOfVertex;
+                        if (!isAPole)
+                        {
+                            totalDegreesOfCellsReachableByOpponent += cellState.DegreeOfVertex;
+                        }
                         if (cellState.ClosestPlayer == PlayerType.Opponent)
                         {
                             numberOfCellsClosestToOpponent++;
-                            totalDegreesOfCellsClosestToOpponent += cellState.DegreeOfVertex;
+                            if (!isAPole)
+                            {
+                                totalDegreesOfCellsClosestToOpponent += cellState.DegreeOfVertex;
+                            }
+                            totalSumOfDistancesFromYouOnOpponentsClosestCells += distanceFromYou;
+                            totalSumOfDistancesFromOpponentOnOpponentsClosestCells += distanceFromOpponent;
                         }
                     }
                 }
@@ -185,11 +244,15 @@ namespace AndrewTweddle.Tron.Core
             yourMetricsForComponentOnly.TotalDegreesOfCellsReachableByPlayer = totalDegreesOfCellsReachableByYou;
             yourMetricsForComponentOnly.NumberOfCellsClosestToPlayer = numberOfCellsClosestToYou;
             yourMetricsForComponentOnly.TotalDegreesOfCellsClosestToPlayer = totalDegreesOfCellsClosestToYou;
+            yourMetricsForComponentOnly.SumOfDistancesFromThisPlayerOnClosestCells = totalSumOfDistancesFromYouOnYourClosestCells;
+            yourMetricsForComponentOnly.SumOfDistancesFromOtherPlayerOnClosestCells = totalSumOfDistancesFromOpponentOnYourClosestCells;
 
             opponentsMetricsForComponentOnly.NumberOfCellsReachableByPlayer = numberOfCellsReachableByOpponent;
             opponentsMetricsForComponentOnly.TotalDegreesOfCellsReachableByPlayer = totalDegreesOfCellsReachableByOpponent;
             opponentsMetricsForComponentOnly.NumberOfCellsClosestToPlayer = numberOfCellsClosestToOpponent;
             opponentsMetricsForComponentOnly.TotalDegreesOfCellsClosestToPlayer = totalDegreesOfCellsClosestToOpponent;
+            opponentsMetricsForComponentOnly.SumOfDistancesFromThisPlayerOnClosestCells = totalSumOfDistancesFromOpponentOnOpponentsClosestCells;
+            opponentsMetricsForComponentOnly.SumOfDistancesFromOtherPlayerOnClosestCells = totalSumOfDistancesFromYouOnOpponentsClosestCells;
         }
 
         // TODO: Add CompartmentStatus property and a method to calculate it
@@ -212,20 +275,36 @@ namespace AndrewTweddle.Tron.Core
             EntryVertexForYou = entryVertex;
             CellState bestCutVertex = null;
             double valueOfBestCutVertex = double.NegativeInfinity;
+            int branchCount = 0;
 
+            // TODO: Order the cut vertices from most promising to least promising, in case there is a cycle:
             foreach (CellState cutVertex in cutVertices)
             {
                 if (cutVertex != entryVertex && cutVertex.OccupationStatus != OccupationStatus.Opponent)
                 {
-                    cutVertex.CalculateSubtreeMetricsForYou(evaluator, this);
-                    Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForYou;
-                    double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
-                    if (valueOfCutVertex >= valueOfBestCutVertex)
+                    if (cutVertex.IsSubTreeVisitedForYou)
                     {
-                        valueOfBestCutVertex = valueOfCutVertex;
-                        bestCutVertex = cutVertex;
+                        System.Diagnostics.Debug.WriteLine("Cut vertex {0} not being visited, as it has been visited previously for You");
+                    }
+                    else
+                    {
+                        cutVertex.CalculateSubtreeMetricsForYou(evaluator, this);
+                        Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForYou;
+                        double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
+                        if (valueOfCutVertex >= valueOfBestCutVertex)
+                        {
+                            valueOfBestCutVertex = valueOfCutVertex;
+                            bestCutVertex = cutVertex;
+                        }
+                        branchCount += cutVertexSubtreeMetrics.NumberOfComponentBranchesInTree;
                     }
                 }
+            }
+
+            // If this is a leaf component, then its branchCount is 1:
+            if (branchCount == 0)
+            {
+                branchCount = 1;
             }
 
             ExitVertexForYou = bestCutVertex;
@@ -237,6 +316,8 @@ namespace AndrewTweddle.Tron.Core
             {
                 subtreeMetricsForYou = yourMetricsForComponentOnly + bestCutVertex.SubtreeMetricsForYou;
             }
+            subtreeMetricsForYou.NumberOfComponentBranchesInTree = branchCount;
+            IsSubTreeVisitedForYou = true;
         }
 
         public void CalculateSubtreeMetricsForOpponent(MetricsEvaluator evaluator, CellState entryVertex)
@@ -244,20 +325,36 @@ namespace AndrewTweddle.Tron.Core
             EntryVertexForOpponent = entryVertex;
             CellState bestCutVertex = null;
             double valueOfBestCutVertex = double.NegativeInfinity;
+            int branchCount = 0;
 
+            // TODO: Order the cut vertices from most promising to least promising, in case there is a cycle:
             foreach (CellState cutVertex in cutVertices)
             {
                 if (cutVertex != entryVertex && cutVertex.OccupationStatus != OccupationStatus.You)
                 {
-                    cutVertex.CalculateSubtreeMetricsForOpponent(evaluator, this);
-                    Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForOpponent;
-                    double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
-                    if (valueOfCutVertex >= valueOfBestCutVertex)
+                    if (cutVertex.IsSubTreeVisitedForOpponent)
                     {
-                        valueOfBestCutVertex = valueOfCutVertex;
-                        bestCutVertex = cutVertex;
+                        System.Diagnostics.Debug.WriteLine("Cut vertex {0} not being visited, as it has been visited previously for Opponent");
+                    }
+                    else
+                    {
+                        cutVertex.CalculateSubtreeMetricsForOpponent(evaluator, this);
+                        Metrics cutVertexSubtreeMetrics = cutVertex.SubtreeMetricsForOpponent;
+                        double valueOfCutVertex = evaluator.Evaluate(cutVertexSubtreeMetrics);
+                        if (valueOfCutVertex >= valueOfBestCutVertex)
+                        {
+                            valueOfBestCutVertex = valueOfCutVertex;
+                            bestCutVertex = cutVertex;
+                        }
+                        branchCount += cutVertexSubtreeMetrics.NumberOfComponentBranchesInTree;
                     }
                 }
+            }
+
+            // If this is a leaf component, then its branchCount is 1:
+            if (branchCount == 0)
+            {
+                branchCount = 1;
             }
 
             ExitVertexForOpponent = bestCutVertex;
@@ -269,6 +366,9 @@ namespace AndrewTweddle.Tron.Core
             {
                 subtreeMetricsForOpponent = opponentsMetricsForComponentOnly + bestCutVertex.SubtreeMetricsForOpponent;
             }
+
+            subtreeMetricsForOpponent.NumberOfComponentBranchesInTree = branchCount;
+            IsSubTreeVisitedForOpponent = true;
         }
 
         [field: NonSerialized]

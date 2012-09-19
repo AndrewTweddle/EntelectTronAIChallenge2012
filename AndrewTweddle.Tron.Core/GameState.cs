@@ -44,6 +44,19 @@ namespace AndrewTweddle.Tron.Core
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
 
+        [OptionalField]
+        private int sumOfDistancesFromYouOnYourClosestCells;
+        [OptionalField]
+        private int sumOfDistancesFromOpponentOnYourClosestCells;
+        [OptionalField]
+        private int sumOfDistancesFromYouOnOpponentsClosestCells;
+        [OptionalField]
+        private int sumOfDistancesFromOpponentOnOpponentsClosestCells;
+        [OptionalField]
+        private int numberOfComponentBranchesInYourTree;
+        [OptionalField]
+        private int numberOfComponentBranchesInOpponentsTree;
+
         [NonSerialized]
         private List<BiconnectedComponent> biconnectedComponents;
 
@@ -338,6 +351,66 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public int SumOfDistancesFromYouOnYourClosestCells
+        {
+            get
+            {
+                return sumOfDistancesFromYouOnYourClosestCells;
+            }
+            set
+            {
+                sumOfDistancesFromYouOnYourClosestCells = value;
+#if DEBUG
+                OnPropertyChanged("SumOfDistancesFromYouOnYourClosestCells");
+#endif
+            }
+        }
+
+        public int SumOfDistancesFromOpponentOnYourClosestCells
+        {
+            get
+            {
+                return sumOfDistancesFromOpponentOnYourClosestCells;
+            }
+            set
+            {
+                sumOfDistancesFromOpponentOnYourClosestCells = value;
+#if DEBUG
+                OnPropertyChanged("SumOfDistancesFromOpponentOnYourClosestCells");
+#endif
+            }
+        }
+
+        public int SumOfDistancesFromYouOnOpponentsClosestCells
+        {
+            get
+            {
+                return sumOfDistancesFromYouOnOpponentsClosestCells;
+            }
+            set
+            {
+                sumOfDistancesFromYouOnOpponentsClosestCells = value;
+#if DEBUG
+                OnPropertyChanged("SumOfDistancesFromYouOnOpponentsClosestCells");
+#endif
+            }
+        }
+
+        public int SumOfDistancesFromOpponentOnOpponentsClosestCells
+        {
+            get
+            {
+                return sumOfDistancesFromOpponentOnOpponentsClosestCells;
+            }
+            set
+            {
+                sumOfDistancesFromOpponentOnOpponentsClosestCells = value;
+#if DEBUG
+                OnPropertyChanged("SumOfDistancesFromOpponentOnOpponentsClosestCells");
+#endif
+            }
+        }
+
         public int TotalDegreesOfCellsClosestToYou 
         { 
             get
@@ -361,6 +434,36 @@ namespace AndrewTweddle.Tron.Core
             {
                 totalDegreesOfCellsClosestToOpponent = value;
                 OnPropertyChanged("TotalDegreesOfCellsClosestToOpponent");
+            }
+        }
+
+        public int NumberOfComponentBranchesInYourTree
+        {
+            get
+            {
+                return numberOfComponentBranchesInYourTree;
+            }
+            set
+            {
+                numberOfComponentBranchesInYourTree = value;
+#if DEBUG
+                OnPropertyChanged("NumberOfComponentBranchesInYourTree");
+#endif
+            }
+        }
+
+        public int NumberOfComponentBranchesInOpponentsTree
+        {
+            get
+            {
+                return numberOfComponentBranchesInOpponentsTree;
+            }
+            set
+            {
+                numberOfComponentBranchesInOpponentsTree = value;
+#if DEBUG
+                OnPropertyChanged("NumberOfComponentBranchesInOpponentsTree");
+#endif
             }
         }
 
@@ -796,6 +899,10 @@ namespace AndrewTweddle.Tron.Core
             NumberOfCellsClosestToOpponent = sourceGameState.NumberOfCellsClosestToOpponent;
             TotalDegreesOfCellsClosestToYou = sourceGameState.TotalDegreesOfCellsClosestToYou;
             TotalDegreesOfCellsClosestToOpponent = sourceGameState.TotalDegreesOfCellsClosestToOpponent;
+            SumOfDistancesFromYouOnYourClosestCells = sourceGameState.sumOfDistancesFromYouOnYourClosestCells;
+            SumOfDistancesFromYouOnOpponentsClosestCells = sourceGameState.SumOfDistancesFromYouOnOpponentsClosestCells;
+            SumOfDistancesFromOpponentOnOpponentsClosestCells = sourceGameState.SumOfDistancesFromOpponentOnOpponentsClosestCells;
+            SumOfDistancesFromOpponentOnYourClosestCells = sourceGameState.SumOfDistancesFromOpponentOnYourClosestCells;
             YourDijkstraStatus = sourceGameState.YourDijkstraStatus;
             OpponentsDijkstraStatus = sourceGameState.OpponentsDijkstraStatus;
             YourUpToDateDijkstraDistance = sourceGameState.YourUpToDateDijkstraDistance;
@@ -1195,6 +1302,108 @@ namespace AndrewTweddle.Tron.Core
             int newTotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByYou;
             TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByOpponent;
             TotalDegreesOfCellsReachableByOpponent = newTotalDegreesOfCellsReachableByOpponent;
+        }
+
+        public void RecalculateDegreesOfVertices()
+        {
+            foreach (CellState cellState in GetAllCellStates())
+            {
+                cellState.RecalculateDegree();
+            }
+        }
+
+        public void GoBackToTurn(PlayerType playerWhoMovedLast, int moveNumber, bool performDijkstra = true, bool shouldCalculatedBiconnectedComponents = true)
+        {
+            if (moveNumber <= 0)
+            {
+                throw new ArgumentException("Invalid attempt to go back to earlier than turn 1");
+            }
+
+            int otherPlayersLastMoveNumber = (playerWhoMovedLast == PlayerWhoMovedFirst) ? moveNumber - 1 : moveNumber;
+            PlayerToMoveNext = (playerWhoMovedLast == PlayerType.You) ? PlayerType.Opponent : PlayerType.You;
+
+            int lastMoveNumberForYou = 0;
+            int lastMoveNumberForOpponent = 0;
+
+            switch (playerWhoMovedLast)
+            {
+                case PlayerType.You:
+                    lastMoveNumberForYou = moveNumber;
+                    lastMoveNumberForOpponent = otherPlayersLastMoveNumber;
+                    break;
+
+                case PlayerType.Opponent:
+                    lastMoveNumberForYou = otherPlayersLastMoveNumber;
+                    lastMoveNumberForOpponent = moveNumber;
+                    break;
+            }
+
+            foreach (CellState cellState in GetAllCellStates())
+            {
+                switch (cellState.OccupationStatus)
+                {
+                    case OccupationStatus.Opponent:
+                        if (cellState.MoveNumber > lastMoveNumberForOpponent)
+                        {
+                            cellState.OccupationStatus = OccupationStatus.Clear;
+                        }
+                        break;
+                    case OccupationStatus.OpponentWall:
+                        if (cellState.MoveNumber == lastMoveNumberForOpponent)
+                        {
+                            cellState.OccupationStatus = OccupationStatus.Opponent;
+                            OpponentsCell = cellState;
+                        }
+                        else
+                            if (cellState.MoveNumber > lastMoveNumberForOpponent)
+                            {
+                                cellState.OccupationStatus = OccupationStatus.Clear;
+                            }
+                        break;
+                    case OccupationStatus.You:
+                        if (cellState.MoveNumber > lastMoveNumberForYou)
+                        {
+                            cellState.OccupationStatus = OccupationStatus.Clear;
+                        }
+                        break;
+                    case OccupationStatus.YourWall:
+                        if (cellState.MoveNumber == lastMoveNumberForYou)
+                        {
+                            cellState.OccupationStatus = OccupationStatus.You;
+                            YourCell = cellState;
+                        }
+                        else
+                            if (cellState.MoveNumber > lastMoveNumberForYou)
+                            {
+                                cellState.OccupationStatus = OccupationStatus.Clear;
+                            }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            YourWallLength = lastMoveNumberForYou;
+            OpponentsWallLength = lastMoveNumberForOpponent;
+
+            // Update Dijkstra status and distance:
+            YourDijkstraStatus = DijkstraStatus.NotCalculated;
+            YourUpToDateDijkstraDistance = 0;
+            OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+            OpponentsUpToDateDijkstraDistance = 0;
+
+            RecalculateDegreesOfVertices();
+
+            if (performDijkstra)
+            {
+                Dijkstra.Perform(this);
+            }
+
+            if (shouldCalculatedBiconnectedComponents)
+            {
+                BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                bcAlg.Calculate(this, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+            }
         }
 
         [field: NonSerialized]

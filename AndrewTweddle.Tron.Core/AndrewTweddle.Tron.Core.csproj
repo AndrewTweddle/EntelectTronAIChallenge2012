@@ -61,6 +61,7 @@
     <Compile Include="Algorithms\WaveFrontShortestPath\WaveFrontAlgorithm.cs" />
     <Compile Include="Algorithms\WaveFrontShortestPath\YouCalculator.cs" />
     <Compile Include="BaseNegaMaxSolver.cs" />
+    <Compile Include="BaseNegaMaxSolverWithMetricsWeightings.cs" />
     <Compile Include="BaseSolver.cs" />
     <Compile Include="BiconnectedComponent.cs" />
     <Compile Include="CellState.cs" />
@@ -79,7 +80,10 @@
     <Compile Include="ISolver.cs" />
     <Compile Include="Metrics.cs" />
     <Compile Include="MetricsEvaluator.cs" />
+    <Compile Include="MetricsWeightings.cs" />
     <Compile Include="Move.cs" />
+    <Compile Include="NegaMaxSolverWithConfigurationFilesInExeFolder.cs" />
+    <Compile Include="NegaMaxSolverWithFileBasedWeightings.cs" />
     <Compile Include="OccupationStatus.cs" />
     <Compile Include="PlayerType.cs" />
     <Compile Include="Position.cs" />

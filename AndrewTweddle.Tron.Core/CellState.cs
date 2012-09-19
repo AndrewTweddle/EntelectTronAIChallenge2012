@@ -40,6 +40,10 @@ namespace AndrewTweddle.Tron.Core
         [NonSerialized]
         private Metrics subtreeMetricsForOpponent;
         [NonSerialized]
+        private bool isSubTreeVisitedForYou;
+        [NonSerialized]
+        private bool isSubTreeVisitedForOpponent;
+        [NonSerialized]
         private BiconnectedComponent entryComponentForYou;
         [NonSerialized]
         private BiconnectedComponent exitComponentForYou;
@@ -425,6 +429,36 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public bool IsSubTreeVisitedForYou
+        {
+            get
+            {
+                return isSubTreeVisitedForYou;
+            }
+            set
+            {
+                isSubTreeVisitedForYou = value;
+#if DEBUG
+                OnPropertyChanged("IsSubTreeVisitedForYou");
+#endif
+            }
+        }
+
+        public bool IsSubTreeVisitedForOpponent
+        {
+            get
+            {
+                return isSubTreeVisitedForOpponent;
+            }
+            set
+            {
+                isSubTreeVisitedForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("IsSubTreeVisitedForOpponent");
+#endif
+            }
+        }
+
         public void AddBiconnectedComponent(BiconnectedComponent component)
         {
             if (biconnectedComponents == null)
@@ -442,10 +476,7 @@ namespace AndrewTweddle.Tron.Core
                     // It has just become a cut vertex. Update both components accordingly:
                     foreach (BiconnectedComponent existingComponent in biconnectedComponents)
                     {
-                        if (existingComponent != component)
-                        {
-                            existingComponent.AddCutVertex(this);
-                        }
+                        existingComponent.AddCutVertex(this);
                     }
                 }
                 else
@@ -470,6 +501,22 @@ namespace AndrewTweddle.Tron.Core
                 biconnectedComponents = new HashSet<BiconnectedComponent>();
             }
             return biconnectedComponents;
+        }
+
+        public void ClearBiconnectedComponentProperties()
+        {
+            Visited = false;
+            ParentCellState = null;
+            biconnectedComponents = null;
+            IsSubTreeVisitedForYou = false;
+            IsSubTreeVisitedForOpponent = false;
+            BiconnectedComponentsListing = String.Empty;
+            EntryComponentForYou = null;
+            ExitComponentForYou = null;
+            EntryComponentForOpponent = null;
+            ExitComponentForOpponent = null;
+            SubtreeMetricsForYou = Metrics.Zero;
+            SubtreeMetricsForOpponent = Metrics.Zero;
         }
 
         #endregion
@@ -631,27 +678,42 @@ namespace AndrewTweddle.Tron.Core
             );
         }
 
-
         public void CalculateSubtreeMetricsForYou(MetricsEvaluator evaluator, BiconnectedComponent entryComponent)
         {
             EntryComponentForYou = entryComponent;
             BiconnectedComponent bestComponent = null;
             double valueOfBestComponent = double.NegativeInfinity;
+            int branchCount = 0;
 
+            // TODO: Order the components from most promising to least promising, in case there is a cycle:
             foreach (BiconnectedComponent component in biconnectedComponents)
             {
                 if (component != entryComponent) // TODO: && component.OccupationStatus != OccupationStatus.Opponent)
                 {
-                    component.CalculateSubtreeMetricsForYou(evaluator, this);
-                    Metrics componentSubtreeMetrics = component.SubtreeMetricsForYou;
-
-                    double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
-                    if (valueOfComponent >= valueOfBestComponent)
+                    if (component.IsSubTreeVisitedForYou)
                     {
-                        valueOfBestComponent = valueOfComponent;
-                        bestComponent = component;
+                        System.Diagnostics.Debug.WriteLine("Component {0} not being visited, as it has been visited previously for You");
+                    }
+                    else
+                    {
+                        component.CalculateSubtreeMetricsForYou(evaluator, this);
+                        Metrics componentSubtreeMetrics = component.SubtreeMetricsForYou;
+
+                        double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
+                        if (valueOfComponent >= valueOfBestComponent)
+                        {
+                            valueOfBestComponent = valueOfComponent;
+                            bestComponent = component;
+                        }
+                        branchCount += componentSubtreeMetrics.NumberOfComponentBranchesInTree;
                     }
                 }
+            }
+
+            // If this is a leaf cut vertex, then its branchCount is 1:
+            if (branchCount == 0)
+            {
+                branchCount = 1;
             }
 
             ExitComponentForYou = bestComponent;
@@ -664,6 +726,9 @@ namespace AndrewTweddle.Tron.Core
             {
                 subtreeMetricsForYou = yourMetricsForCutVertexOnly + bestComponent.SubtreeMetricsForYou;
             }
+
+            subtreeMetricsForYou.NumberOfComponentBranchesInTree = branchCount;
+            IsSubTreeVisitedForYou = true;
         }
 
         public void CalculateSubtreeMetricsForOpponent(MetricsEvaluator evaluator, BiconnectedComponent entryComponent)
@@ -671,21 +736,37 @@ namespace AndrewTweddle.Tron.Core
             EntryComponentForOpponent = entryComponent;
             BiconnectedComponent bestComponent = null;
             double valueOfBestComponent = double.NegativeInfinity;
+            int branchCount = 0;
 
+            // TODO: Order the components from most promising to least promising, in case there is a cycle:
             foreach (BiconnectedComponent component in biconnectedComponents)
             {
                 if (component != entryComponent) // TODO: && component.OccupationStatus != OccupationStatus.You)
                 {
-                    component.CalculateSubtreeMetricsForOpponent(evaluator, this);
-                    Metrics componentSubtreeMetrics = component.SubtreeMetricsForOpponent;
-
-                    double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
-                    if (valueOfComponent >= valueOfBestComponent)
+                    if (component.IsSubTreeVisitedForOpponent)
                     {
-                        valueOfBestComponent = valueOfComponent;
-                        bestComponent = component;
+                        System.Diagnostics.Debug.WriteLine("Component {0} not being visited, as it has been visited previously for Opponent");
+                    }
+                    else
+                    {
+                        component.CalculateSubtreeMetricsForOpponent(evaluator, this);
+                        Metrics componentSubtreeMetrics = component.SubtreeMetricsForOpponent;
+
+                        double valueOfComponent = evaluator.Evaluate(componentSubtreeMetrics);
+                        if (valueOfComponent >= valueOfBestComponent)
+                        {
+                            valueOfBestComponent = valueOfComponent;
+                            bestComponent = component;
+                        }
+                        branchCount += componentSubtreeMetrics.NumberOfComponentBranchesInTree;
                     }
                 }
+            }
+
+            // If this is a leaf cut vertex, then its branchCount is 1:
+            if (branchCount == 0)
+            {
+                branchCount = 1;
             }
 
             ExitComponentForOpponent = bestComponent;
@@ -698,15 +779,24 @@ namespace AndrewTweddle.Tron.Core
             {
                 subtreeMetricsForOpponent = opponentsMetricsForCutVertexOnly + bestComponent.SubtreeMetricsForOpponent;
             }
+
+            subtreeMetricsForOpponent.NumberOfComponentBranchesInTree = branchCount;
+            IsSubTreeVisitedForOpponent = true;
         }
 
         private Metrics CalculateYourMetricsForCellStateOnly()
         {
+            // Cap distances at 900, otherwise unreachable cells / light cycle's cell is int.MaxValue, which makes all other values meaningless:
+            int cappedDistanceFromYou = DistanceFromYou > 900 ? 900 : DistanceFromYou;
+            int cappedDistanceFromOpponent = DistanceFromOpponent > 900 ? 900 : DistanceFromOpponent;
+
             Metrics metrics = new Metrics();
             if (ClosestPlayer == PlayerType.You)
             {
                 metrics.NumberOfCellsClosestToPlayer = 1;
                 metrics.TotalDegreesOfCellsClosestToPlayer = DegreeOfVertex;
+                metrics.SumOfDistancesFromThisPlayerOnClosestCells = cappedDistanceFromYou;
+                metrics.SumOfDistancesFromOtherPlayerOnClosestCells = cappedDistanceFromOpponent;
             }
             if (CompartmentStatus == CompartmentStatus.InYourCompartment || CompartmentStatus == CompartmentStatus.InSharedCompartment)
             {
@@ -718,11 +808,17 @@ namespace AndrewTweddle.Tron.Core
 
         private Metrics CalculateOpponentsMetricsForCellStateOnly()
         {
+            // Cap distances at 900, otherwise unreachable cells / light cycle's cell is int.MaxValue, which makes all other values meaningless:
+            int cappedDistanceFromYou = DistanceFromYou > 900 ? 900 : DistanceFromYou;
+            int cappedDistanceFromOpponent = DistanceFromOpponent > 900 ? 900 : DistanceFromOpponent;
+
             Metrics metrics = new Metrics();
             if (ClosestPlayer == PlayerType.Opponent)
             {
                 metrics.NumberOfCellsClosestToPlayer = 1;
                 metrics.TotalDegreesOfCellsClosestToPlayer = DegreeOfVertex;
+                metrics.SumOfDistancesFromThisPlayerOnClosestCells = cappedDistanceFromOpponent;
+                metrics.SumOfDistancesFromOtherPlayerOnClosestCells = cappedDistanceFromYou;
             }
             if (CompartmentStatus == CompartmentStatus.InOpponentsCompartment || CompartmentStatus == CompartmentStatus.InSharedCompartment)
             {

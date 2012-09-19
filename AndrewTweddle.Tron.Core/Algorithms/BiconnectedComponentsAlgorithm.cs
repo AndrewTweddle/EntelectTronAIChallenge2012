@@ -27,8 +27,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             {
                 if (cellState.OccupationStatus != OccupationStatus.YourWall && cellState.OccupationStatus != OccupationStatus.OpponentWall)
                 {
-                    cellState.Visited = false;
-                    cellState.ParentCellState = null;
+                    cellState.ClearBiconnectedComponentProperties();
                     cellsToVisit.Enqueue(cellState);
                 }
             }
@@ -140,7 +139,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 if (playersComponent == null)
                 {
                     // The player has no more moves left - there are no edges leading from the cell, and hence no components to be part of!
-                    overallMetrics = new Metrics();
+                    overallMetrics = Metrics.Zero;
                 }
                 else
                 {
@@ -153,6 +152,9 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             gameState.NumberOfCellsReachableByYou = overallMetrics.NumberOfCellsReachableByPlayer;
             gameState.TotalDegreesOfCellsClosestToYou = overallMetrics.TotalDegreesOfCellsClosestToPlayer;
             gameState.TotalDegreesOfCellsReachableByYou = overallMetrics.TotalDegreesOfCellsReachableByPlayer;
+            gameState.SumOfDistancesFromYouOnYourClosestCells = overallMetrics.SumOfDistancesFromThisPlayerOnClosestCells;
+            gameState.SumOfDistancesFromOpponentOnYourClosestCells = overallMetrics.SumOfDistancesFromOtherPlayerOnClosestCells;
+            gameState.NumberOfComponentBranchesInYourTree = overallMetrics.NumberOfComponentBranchesInTree;
         }
 
         private void CalculateOpponentsOverallMetrics(GameState gameState, MetricsEvaluator evaluator)
@@ -169,7 +171,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 if (playersComponent == null)
                 {
                     // The player has no more moves left - there are no edges leading from the cell, and hence no components to be part of!
-                    overallMetrics = new Metrics();
+                    overallMetrics = Metrics.Zero;
                 }
                 else
                 {
@@ -182,6 +184,9 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             gameState.NumberOfCellsReachableByOpponent = overallMetrics.NumberOfCellsReachableByPlayer;
             gameState.TotalDegreesOfCellsClosestToOpponent = overallMetrics.TotalDegreesOfCellsClosestToPlayer;
             gameState.TotalDegreesOfCellsReachableByOpponent = overallMetrics.TotalDegreesOfCellsReachableByPlayer;
+            gameState.SumOfDistancesFromYouOnOpponentsClosestCells = overallMetrics.SumOfDistancesFromOtherPlayerOnClosestCells;
+            gameState.SumOfDistancesFromOpponentOnOpponentsClosestCells = overallMetrics.SumOfDistancesFromThisPlayerOnClosestCells;
+            gameState.NumberOfComponentBranchesInOpponentsTree = overallMetrics.NumberOfComponentBranchesInTree;
         }
     }
 }
