@@ -118,16 +118,20 @@ namespace AndrewTweddle.Tron.Core
 
         private void RunNegaMaxAtAParticularDepth()
         {
+            SearchNode newRootNode = new SearchNode(Coordinator.CurrentGameState);
+
             // TODO: Modify this to store the old and new search tree (old depth and new depth).
             // The challenge is to be able to use the old search tree to sort the new tree by the most promising branch first.
-            double evaluation = Negamax(RootNode);
+            double evaluation = Negamax(newRootNode);
 
             if (SolverState == SolverState.Stopping)
             {
-                RootNode.EvaluationStatus = EvaluationStatus.Stopped;
+                newRootNode.EvaluationStatus = EvaluationStatus.Stopped;
             }
             else
             {
+                RootNode = newRootNode;
+
                 // A solution was found at this depth. Choose a best solution:
                 RootNode.Evaluation = evaluation;
 
@@ -202,7 +206,18 @@ namespace AndrewTweddle.Tron.Core
                     double max = double.NegativeInfinity;
                     bool pruning = false;
 
-                    foreach (SearchNode childNode in searchNode.ChildNodes.OrderByDescending(snode => snode.Evaluation))
+                    /* Rather expand child nodes in default move sequence...
+                    IEnumerable<SearchNode> searchNodesInSequence = searchNode.ChildNodes
+                        // OrderByDescending(snode => snode.Evaluation)
+                        .OrderBy(
+                            snode => searchNode.GameState.PlayerToMoveNext == PlayerType.You
+                                   ? searchNode.GameState[snode.Move.To].DistanceFromOpponent
+                                   : searchNode.GameState[snode.Move.To].DistanceFromYou
+                        )  // Move towards the other player
+                        .ThenBy(snode => Math.Abs(snode.Move.To.Y - 14.5));  // Move towards the equator
+                     */
+
+                    foreach (SearchNode childNode in searchNode.ChildNodes)
                     {
                         if (SolverState == SolverState.Stopping)
                         {

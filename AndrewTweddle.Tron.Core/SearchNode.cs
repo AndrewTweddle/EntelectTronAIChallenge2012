@@ -194,7 +194,14 @@ namespace AndrewTweddle.Tron.Core
             if (ExpansionStatus != Core.ExpansionStatus.FullyExpanded)
             {
                 IEnumerable<Move> possibleMoves = GameState.GetPossibleNextMoves();
-                IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move)).ToList();
+                IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move))
+                    .OrderBy(
+                        snode => GameState.PlayerToMoveNext == PlayerType.You
+                                ? GameState[snode.Move.To].DistanceFromOpponent
+                                : GameState[snode.Move.To].DistanceFromYou
+                    )  // Move towards the other player
+                    .ThenBy(snode => Math.Abs(snode.Move.To.Y - 14.5))  // Move towards the equator
+                    .ToList();
                 if (childNodes.Any())
                 {
                     // Only include child search nodes which aren't already in the list of children:
