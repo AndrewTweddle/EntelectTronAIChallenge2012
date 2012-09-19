@@ -986,7 +986,7 @@ namespace AndrewTweddle.Tron.Core
             return GetPossibleNextMoves().Contains(move);
         }
 
-        public void MakeMove(Move move, bool performDijkstra = true)
+        public void MakeMove(Move move, bool performDijkstra = true, bool shouldCalculatedBiconnectedComponents = true)
         {
             // Check that the move has the correct player:
             if (move.PlayerType != PlayerToMoveNext)
@@ -1006,7 +1006,7 @@ namespace AndrewTweddle.Tron.Core
             }
 
             // Further validation will occur in the MoveToPosition call:
-            MoveToPosition(move.To, performDijkstra);
+            MoveToPosition(move.To, performDijkstra, shouldCalculatedBiconnectedComponents);
         }
 
         public void MoveToPosition(Position position, bool performDijkstra = true, bool shouldCalculatedBiconnectedComponents = true)

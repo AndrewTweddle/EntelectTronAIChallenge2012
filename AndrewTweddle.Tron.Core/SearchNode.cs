@@ -26,7 +26,7 @@ namespace AndrewTweddle.Tron.Core
 
         #region Public properties
 
-        public int Depth 
+        public int Depth
         {
             get
             {
@@ -194,14 +194,21 @@ namespace AndrewTweddle.Tron.Core
             if (ExpansionStatus != Core.ExpansionStatus.FullyExpanded)
             {
                 IEnumerable<Move> possibleMoves = GameState.GetPossibleNextMoves();
-                IList<SearchNode> childSearchNodes = possibleMoves.Select(move => new SearchNode(this, move))
-                    .OrderBy(
+                IList<SearchNode> childSearchNodes
+                    = possibleMoves.OrderBy(move => Math.Abs(move.To.Y - 14.5))  // First check moves towards the equator
+                        .Select(move => new SearchNode(this, move)).ToList();
+
+                /* Removed following ordering, since it depends on algorithms being run...
+                IList<SearchNode> childSearchNodes
+                    = possibleMoves.OrderBy(
                         snode => GameState.PlayerToMoveNext == PlayerType.You
                                 ? GameState[snode.Move.To].DistanceFromOpponent
                                 : GameState[snode.Move.To].DistanceFromYou
                     )  // Move towards the other player
                     .ThenBy(snode => Math.Abs(snode.Move.To.Y - 14.5))  // Move towards the equator
                     .ToList();
+                */
+
                 if (childNodes.Any())
                 {
                     // Only include child search nodes which aren't already in the list of children:
@@ -308,7 +315,7 @@ namespace AndrewTweddle.Tron.Core
             // Recursively get from parent:
             GameState parentGameState = ParentNode.GetOrGenerateGameState();
             GameState newGameState = parentGameState.Clone();
-            newGameState.MakeMove(Move);
+            newGameState.MakeMove(Move, false, false);  // Don't perform algorithms - BaseNegaMaxSolver will do so manually when at a leaf node
             GameState = newGameState;
             return newGameState;
         }

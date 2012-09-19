@@ -4,11 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using AndrewTweddle.Tron.Core.Algorithms;
+using AndrewTweddle.Tron.Core.Evaluators;
 
 namespace AndrewTweddle.Tron.Core
 {
     public abstract class BaseNegaMaxSolver: BaseSolver
     {
+        #region Private member variables
+
+        private Dictionary<int, int> numberOfEvaluationsByDepth = new Dictionary<int, int>();
+
+        #endregion
+
         #region Abstract methods
 
         protected abstract void Evaluate(SearchNode searchNode);
@@ -80,6 +88,14 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public Dictionary<int, int> NumberOfEvaluationsByDepth
+        {
+            get
+            {
+                return numberOfEvaluationsByDepth;
+            }
+        }
+
         #endregion
 
 
@@ -98,6 +114,7 @@ namespace AndrewTweddle.Tron.Core
 
         protected override void DoSolve()
         {
+            numberOfEvaluationsByDepth.Clear();
             RootNode = new SearchNode(Coordinator.CurrentGameState);
 
             if (IsIterativeDeepeningEnabled)
@@ -114,6 +131,12 @@ namespace AndrewTweddle.Tron.Core
                 CurrentDepth = MaxDepth;
                 RunNegaMaxAtAParticularDepth();
             }
+
+#if DEBUG
+            int numberOfCalculationsAtAllDepths = NumberOfEvaluationsByDepth.Values.Sum();
+            System.Diagnostics.Debug.WriteLine("***** TOTAL EVALUATIONS: {0}", numberOfCalculationsAtAllDepths);
+            System.Diagnostics.Debug.WriteLine("=================================");
+#endif
         }
 
         private void RunNegaMaxAtAParticularDepth()
@@ -160,6 +183,10 @@ namespace AndrewTweddle.Tron.Core
                 {
                     Debug.WriteLine("NegaMax found no best child");
                 }
+
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine("*** NegaMax performed {0} evaluations at depth {1}", numberOfEvaluationsByDepth[CurrentDepth], CurrentDepth);
+#endif
             }
         }
 
@@ -170,6 +197,8 @@ namespace AndrewTweddle.Tron.Core
         private double Negamax(SearchNode searchNode, int depth = 0, double alpha = double.NegativeInfinity, 
             double beta = double.PositiveInfinity)
         {
+            GameState gameState = searchNode.GameState;
+
             int multiplier;
             if (searchNode.ParentNode == null)
             {
@@ -183,7 +212,19 @@ namespace AndrewTweddle.Tron.Core
 
             if (depth >= CurrentDepth)
             {
+                // Perform the algorithms on the game state, before running the evaluation:
+                Dijkstra.Perform(gameState);
+                BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                bcAlg.Calculate(searchNode.GameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+
+                // This has a possible race condition, because searchNode.GameState could be held by a weak reference.
+                // So the calculations above might be invalidated when searchNode.GameState is retrieved in the Evaluate() method.
+                // TODO: Modify Evaluate to take the game state as a parameter.
                 Evaluate(searchNode);
+
+                int evaluationsAtThisDepth = numberOfEvaluationsByDepth.ContainsKey(depth) ? numberOfEvaluationsByDepth[depth] : 0;
+                numberOfEvaluationsByDepth[depth] = evaluationsAtThisDepth + 1;
+
                 return multiplier * searchNode.Evaluation;
             }
             else
@@ -198,24 +239,27 @@ namespace AndrewTweddle.Tron.Core
                 if (!searchNode.ChildNodes.Any())
                 {
                     /* Game is terminal: */
-                    Evaluate(searchNode);
+                    if (gameState.IsGameOver)
+                    {
+                        if (gameState.PlayerToMoveNext == PlayerType.You)
+                        {
+                            searchNode.Evaluation = double.NegativeInfinity;
+                        }
+                        else
+                        {
+                            searchNode.Evaluation = double.PositiveInfinity;
+                        }
+                    }
+                    else
+                    {
+                        throw new ApplicationException("Game state should be over if there are no child search nodes!");
+                    }
                     return multiplier * searchNode.Evaluation;
                 }
                 else
                 {
                     double max = double.NegativeInfinity;
                     bool pruning = false;
-
-                    /* Rather expand child nodes in default move sequence...
-                    IEnumerable<SearchNode> searchNodesInSequence = searchNode.ChildNodes
-                        // OrderByDescending(snode => snode.Evaluation)
-                        .OrderBy(
-                            snode => searchNode.GameState.PlayerToMoveNext == PlayerType.You
-                                   ? searchNode.GameState[snode.Move.To].DistanceFromOpponent
-                                   : searchNode.GameState[snode.Move.To].DistanceFromYou
-                        )  // Move towards the other player
-                        .ThenBy(snode => Math.Abs(snode.Move.To.Y - 14.5));  // Move towards the equator
-                     */
 
                     foreach (SearchNode childNode in searchNode.ChildNodes)
                     {
