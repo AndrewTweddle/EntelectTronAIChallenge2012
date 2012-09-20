@@ -191,12 +191,17 @@ namespace AndrewTweddle.Tron.Core
 
         public void Expand()
         {
+            Expand(GameState);
+        }
+
+        public void Expand(GameState gameState)
+        {
             if (ExpansionStatus != Core.ExpansionStatus.FullyExpanded)
             {
-                IEnumerable<Move> possibleMoves = GameState.GetPossibleNextMoves();
-                IList<SearchNode> childSearchNodes
+                IEnumerable<Move> possibleMoves = gameState.GetPossibleNextMoves();
+                IEnumerable<SearchNode> childSearchNodes
                     = possibleMoves.OrderBy(move => Math.Abs(move.To.Y - 14.5))  // First check moves towards the equator
-                        .Select(move => new SearchNode(this, move)).ToList();
+                        .Select(move => new SearchNode(this, move));
                 
                 /* Removed following ordering, since it depends on algorithms being run...
                 IList<SearchNode> childSearchNodes
@@ -219,12 +224,13 @@ namespace AndrewTweddle.Tron.Core
                     childNodes.Add(childSearchNode);
                 }
                 ExpansionStatus = ExpansionStatus.FullyExpanded;
+
                 if (GameStateStoragePolicy == GameStateStoragePolicy.StrongReferenceOnRootAndLeafNodeOnly
-                    && ParentNode != null && gameState != null)
+                    && ParentNode != null && this.gameState != null)
                 {
                     /* This is no longer a leaf node, so change reference from a strong to a weak reference: */
-                    weakReferenceToGameState = new WeakReference(gameState);
-                    gameState = null;
+                    weakReferenceToGameState = new WeakReference(this.gameState);
+                    this.gameState = null;
                 }
             }
         }

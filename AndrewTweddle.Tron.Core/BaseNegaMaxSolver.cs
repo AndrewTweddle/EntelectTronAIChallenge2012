@@ -17,6 +17,13 @@ namespace AndrewTweddle.Tron.Core
 
         #endregion
 
+        #region Static members
+
+        // public static /* TODO: readonly*/ NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo;
+        public static readonly NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.GameStatePerSearchNode;
+
+        #endregion
+
 
         #region Private member variables
 
@@ -149,7 +156,10 @@ namespace AndrewTweddle.Tron.Core
             int numberOfCalculationsAtAllDepths = NumberOfEvaluationsByDepth.Values.Sum();
             string annotation = String.Format("{0} evals, depth {1}, {2} seconds",
                 numberOfCalculationsAtAllDepths, LastDepthCompleted, swatch.Elapsed.TotalMilliseconds / 1000.0);
-            Coordinator.BestMoveSoFar.Annotation = annotation;
+            if (Coordinator.BestMoveSoFar != null)
+            {
+                Coordinator.BestMoveSoFar.Annotation = annotation;
+            }
             System.Diagnostics.Debug.WriteLine("***** TOTAL EVALUATIONS: {0}", annotation);
             System.Diagnostics.Debug.WriteLine("=================================");
 #endif
@@ -158,7 +168,14 @@ namespace AndrewTweddle.Tron.Core
         private void RunNegaMaxAtAParticularDepth()
         {
             SearchNode newRootNode = new SearchNode(Coordinator.CurrentGameState);
-            double evaluation = Negamax(newRootNode);
+            
+            GameState mutableGameState = null;
+            if (gameStateGenerationMethod == NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo)
+            {
+                mutableGameState = newRootNode.GetMutableGameState();
+            }
+
+            double evaluation = Negamax(newRootNode, mutableGameState);
 
             if (SolverState == SolverState.Stopping)
             {
@@ -172,32 +189,21 @@ namespace AndrewTweddle.Tron.Core
                 // A solution was found at this depth. Choose a best solution:
                 RootNode.Evaluation = evaluation;
 
-                List<SearchNode> bestChildNodes = RootNode.ChildNodes.Where(
+                // Always choose the first child node matching the best evaluation, as other nodes might be a result of pruning:
+                SearchNode chosenChildNode = RootNode.ChildNodes.Where(
                     childNode => childNode.EvaluationStatus == EvaluationStatus.Evaluated && childNode.Evaluation == evaluation
-                ).ToList();
-
-                SearchNode chosenChildNode = null;
-                if (bestChildNodes.Count > 1)
-                {
-                    Random rnd = new Random();
-                    int randomMoveIndex = rnd.Next(bestChildNodes.Count);
-                    chosenChildNode = bestChildNodes[randomMoveIndex];
-                }
-                else
-                    if (bestChildNodes.Count == 1)
-                    {
-                        chosenChildNode = bestChildNodes[0];
-                    }
+                ).FirstOrDefault();
 
                 if (chosenChildNode != null)
                 {
+                    GameState chosenGameState = chosenChildNode.GameState;
 #if DEBUG
                     // Perform algorithms on chosen node, since search nodes no longer do this (except at leaf nodes):
-                    Dijkstra.Perform(chosenChildNode.GameState);
+                    Dijkstra.Perform(chosenGameState);
                     BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
-                    bcAlg.Calculate(chosenChildNode.GameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+                    bcAlg.Calculate(chosenGameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
 #endif
-                    Coordinator.SetBestMoveSoFar(chosenChildNode.GameState);
+                    Coordinator.SetBestMoveSoFar(chosenGameState);
                 }
                 else
                 {
@@ -215,15 +221,18 @@ namespace AndrewTweddle.Tron.Core
 
         #region Private methods
 
-        private double Negamax(SearchNode searchNode, int depth = 0, double alpha = double.NegativeInfinity, 
+        private double Negamax(SearchNode searchNode, GameState gameState, int depth = 0, double alpha = double.NegativeInfinity, 
             double beta = double.PositiveInfinity)
         {
-            GameState gameState = searchNode.GameState;
+            if (gameStateGenerationMethod == NegaMaxGameStateGenerationMethod.GameStatePerSearchNode)
+            {
+                gameState = searchNode.GameState;
+            }
 
             int multiplier;
             if (searchNode.ParentNode == null)
             {
-                multiplier = searchNode.GameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
+                multiplier = gameState.PlayerToMoveNext == PlayerType.You ? 1 : -1;
             }
             else
             {
@@ -236,11 +245,10 @@ namespace AndrewTweddle.Tron.Core
                 // Perform the algorithms on the game state, before running the evaluation:
                 Dijkstra.Perform(gameState);
                 BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
-                bcAlg.Calculate(searchNode.GameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+                bcAlg.Calculate(gameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
 
                 // This has a possible race condition, because searchNode.GameState could be held by a weak reference.
                 // So the calculations above might be invalidated when searchNode.GameState is retrieved in the Evaluate() method.
-                // TODO: Modify Evaluate to take the game state as a parameter.
                 Evaluate(searchNode, gameState);
 
                 int evaluationsAtThisDepth = numberOfEvaluationsByDepth.ContainsKey(depth) ? numberOfEvaluationsByDepth[depth] : 0;
@@ -250,7 +258,7 @@ namespace AndrewTweddle.Tron.Core
             }
             else
             {
-                searchNode.Expand();
+                searchNode.Expand(gameState);
 
                 if (SolverState == SolverState.Stopping)
                 {
@@ -295,34 +303,50 @@ namespace AndrewTweddle.Tron.Core
                             }
                             else
                             {
-                                double evaluation = -Negamax(childNode, depth + 1, -beta, -alpha);
-                                if (SolverState == SolverState.Stopping)
+                                if (gameStateGenerationMethod == NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo)
                                 {
-                                    childNode.EvaluationStatus = EvaluationStatus.Stopped;
-                                    return 0.0;
+                                    gameState.MakeMove(childNode.Move, false, false);  // Don't perform algorithms
                                 }
-                                else
+                                try
                                 {
-                                    childNode.Evaluation = evaluation;
+                                    double evaluation = -Negamax(childNode, gameState, depth + 1, -beta, -alpha);
 
-                                    // Alpha-beta pruning:
-                                    if (evaluation > max)
+                                    if (SolverState == SolverState.Stopping)
                                     {
-                                        max = evaluation;
+                                        childNode.EvaluationStatus = EvaluationStatus.Stopped;
+                                        return 0.0;
                                     }
-                                    if (evaluation > alpha)
+                                    else
                                     {
-                                        alpha = evaluation;
+                                        childNode.Evaluation = evaluation;
+
+                                        // Alpha-beta pruning:
+                                        if (evaluation > max)
+                                        {
+                                            max = evaluation;
+                                        }
+                                        if (evaluation > alpha)
+                                        {
+                                            alpha = evaluation;
+                                        }
+                                        if (alpha >= beta)
+                                        {
+                                            pruning = true;
+                                        }
                                     }
-                                    if (alpha >= beta)
+                                }
+                                finally
+                                {
+                                    if (gameStateGenerationMethod == NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo)
                                     {
-                                        pruning = true;
+                                        gameState.UndoLastMove();
                                     }
                                 }
                             }
                     }
                     if (pruning)
                     {
+                        searchNode.EvaluationStatus = EvaluationStatus.Pruned;
                         return alpha;
                     }
                     return max;
