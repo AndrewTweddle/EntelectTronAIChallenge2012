@@ -117,7 +117,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 {
                     CellState sourceCell = cellsToExpand.Dequeue();
                     nextDistance = getDistance(sourceCell) + 1;
-                    IEnumerable<CellState> adjacentCells = sourceCell.GetAdjacentCellStates();
+                    CellState[] adjacentCells = sourceCell.GetAdjacentCellStates();
                     foreach (CellState adjacentCell in adjacentCells)
                     {
                         switch (adjacentCell.OccupationStatus)

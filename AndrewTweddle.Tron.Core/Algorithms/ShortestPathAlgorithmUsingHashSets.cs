@@ -119,7 +119,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                     HashSet<CellState> nextLevelOfCells = new HashSet<CellState>();
                     foreach (CellState sourceCell in cellsToExpand)
                     {
-                        IEnumerable<CellState> adjacentCells = sourceCell.GetAdjacentCellStates();
+                        CellState[] adjacentCells = sourceCell.GetAdjacentCellStates();
                         foreach (CellState adjacentCell in adjacentCells)
                         {
                             switch (adjacentCell.OccupationStatus)

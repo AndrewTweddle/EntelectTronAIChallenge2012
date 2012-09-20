@@ -19,7 +19,6 @@ namespace AndrewTweddle.Tron.Core
 
         #region Static members
 
-        // public static /* TODO: readonly*/ NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo;
         public static readonly NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.GameStatePerSearchNode;
 
         #endregion
@@ -172,7 +171,7 @@ namespace AndrewTweddle.Tron.Core
             GameState mutableGameState = null;
             if (gameStateGenerationMethod == NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo)
             {
-                mutableGameState = newRootNode.GetMutableGameState();
+                mutableGameState = Coordinator.CurrentGameState.Clone();
             }
 
             double evaluation = Negamax(newRootNode, mutableGameState);
@@ -247,8 +246,6 @@ namespace AndrewTweddle.Tron.Core
                 BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
                 bcAlg.Calculate(gameState, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
 
-                // This has a possible race condition, because searchNode.GameState could be held by a weak reference.
-                // So the calculations above might be invalidated when searchNode.GameState is retrieved in the Evaluate() method.
                 Evaluate(searchNode, gameState);
 
                 int evaluationsAtThisDepth = numberOfEvaluationsByDepth.ContainsKey(depth) ? numberOfEvaluationsByDepth[depth] : 0;

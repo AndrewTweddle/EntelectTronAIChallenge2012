@@ -21,6 +21,9 @@ namespace AndrewTweddle.Tron.Core
         private int degreeOfVertex;
         private CompartmentStatus compartmentStatus;
 
+        [NonSerialized]
+        CellState[] adjacentCellStates = null;
+
         #region Fields for biconnected components algorithm:
 
         [NonSerialized]
@@ -631,12 +634,15 @@ namespace AndrewTweddle.Tron.Core
 
         public CellState[] GetAdjacentCellStates()
         {
-            Position[] adjacentPositions = Position.GetAdjacentPositions();
-            int count = adjacentPositions.Length;
-            CellState[] adjacentCellStates = new CellState[count];
-            for (int i=0; i<count; i++)
+            if (adjacentCellStates == null)
             {
-                adjacentCellStates[i] = GameState[adjacentPositions[i]];
+                Position[] adjacentPositions = Position.GetAdjacentPositions();
+                int count = adjacentPositions.Length;
+                adjacentCellStates = new CellState[count];
+                for (int i = 0; i < count; i++)
+                {
+                    adjacentCellStates[i] = GameState[adjacentPositions[i]];
+                }
             }
             return adjacentCellStates;
         }

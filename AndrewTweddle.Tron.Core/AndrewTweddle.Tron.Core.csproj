@@ -82,6 +82,7 @@
     <Compile Include="MetricsEvaluator.cs" />
     <Compile Include="MetricsWeightings.cs" />
     <Compile Include="Move.cs" />
+    <Compile Include="NegaMaxGameStateGenerationMethod.cs" />
     <Compile Include="NegaMaxSolverWithConfigurationFilesInExeFolder.cs" />
     <Compile Include="NegaMaxSolverWithFileBasedWeightings.cs" />
     <Compile Include="OccupationStatus.cs" />

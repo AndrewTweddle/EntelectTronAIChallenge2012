@@ -44,6 +44,10 @@ namespace AndrewTweddle.Tron.Core
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
 
+        // Cache data that is used frequently
+        [NonSerialized]
+        private CellState[] allCellStates = null;
+
         [OptionalField]
         private int sumOfDistancesFromYouOnYourClosestCells;
         [OptionalField]
@@ -735,7 +739,7 @@ namespace AndrewTweddle.Tron.Core
             OpponentsDijkstraStatus = DijkstraStatus.NotCalculated;
             OpponentsUpToDateDijkstraDistance = 0;
 
-            IEnumerable<CellState> cells = GetAllCellStates();
+            CellState[] cells = GetAllCellStates();
             foreach (CellState cell in cells)
             {
                 switch (cell.OccupationStatus)
@@ -787,7 +791,7 @@ namespace AndrewTweddle.Tron.Core
                 OpponentsUpToDateDijkstraDistance = 0;
             }
 
-            IEnumerable<CellState> cells = GetAllCellStates();
+            CellState[] cells = GetAllCellStates();
             foreach (CellState cell in cells)
             {
                 cell.ClearDijkstraStateForPlayer(playerType);
@@ -932,14 +936,22 @@ namespace AndrewTweddle.Tron.Core
             IsUsingIncrementalDijkstra = sourceGameState.IsUsingIncrementalDijkstra;
         }
 
-        public IEnumerable<CellState> GetAllCellStates()
+        public CellState[] GetAllCellStates()
         {
-            yield return NorthPole;
-            foreach (CellState cellState in cells)
+            if (allCellStates == null)
             {
-                yield return cellState;
+                int numberOfCellStates = (Constants.Rows - 2) * Constants.Columns + 2;
+                allCellStates = new CellState[numberOfCellStates];
+                allCellStates[0] = NorthPole;
+                int i = 1;
+                foreach (CellState cellState in cells)
+                {
+                    allCellStates[i] = cellState;
+                    i++;
+                }
+                allCellStates[i] = SouthPole;
             }
-            yield return SouthPole;
+            return allCellStates;
         }
 
         public IEnumerable<Position> GetPossibleNextPositions()
@@ -955,10 +967,13 @@ namespace AndrewTweddle.Tron.Core
                 fromCell = OpponentsCell;
             }
 
-            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates().Where(cs => cs.OccupationStatus == OccupationStatus.Clear);
+            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates();
             foreach (CellState toCell in clearCells)
             {
-                yield return toCell.Position;
+                if (toCell.OccupationStatus == OccupationStatus.Clear)
+                {
+                    yield return toCell.Position;
+                }
             }
         }
 
@@ -978,11 +993,14 @@ namespace AndrewTweddle.Tron.Core
                 moveNumber = OpponentsWallLength + 1;
             }
 
-            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates().Where(cs => cs.OccupationStatus == OccupationStatus.Clear);
+            IEnumerable<CellState> clearCells = fromCell.GetAdjacentCellStates();
             foreach (CellState toCell in clearCells)
             {
-                Move move = new Move(PlayerToMoveNext, moveNumber, toCell.Position);
-                yield return move;
+                if (toCell.OccupationStatus == OccupationStatus.Clear)
+                {
+                    Move move = new Move(PlayerToMoveNext, moveNumber, toCell.Position);
+                    yield return move;
+                }
             }
         }
 
@@ -1137,7 +1155,7 @@ namespace AndrewTweddle.Tron.Core
         public void UndoLastMove(bool performDijkstra = false, bool shouldCalculatedBiconnectedComponents = false)
         {
             CellState cellToClear;
-            CellState previousCell;
+            CellState previousCell = null;
             OccupationStatus oldStatusOfPreviousCell;
             OccupationStatus newStatusOfPreviousCell;
             PlayerType newPlayerToMoveNext;
@@ -1163,8 +1181,14 @@ namespace AndrewTweddle.Tron.Core
             }
 
             lastMoveNumber = cellToClear.MoveNumber - 1;
-            previousCell = cellToClear.GetAdjacentCellStates().Where(
-                cs => cs.OccupationStatus == oldStatusOfPreviousCell && cs.MoveNumber == lastMoveNumber).FirstOrDefault();
+            foreach (CellState cs in cellToClear.GetAdjacentCellStates())
+            {
+                if (cs.OccupationStatus == oldStatusOfPreviousCell && cs.MoveNumber == lastMoveNumber)
+                {
+                    previousCell = cs;
+                    break;
+                }
+            }
 
             if (lastMoveNumber == -1 || previousCell == null)
             {
