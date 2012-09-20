@@ -16,11 +16,11 @@ namespace AndrewTweddle.Tron.Bots
             set;
         }
 
-        protected override void Evaluate(SearchNode searchNode)
+        protected override void Evaluate(SearchNode searchNode, GameState gameStateAfterMove)
         {
-            if (searchNode.GameState.IsGameOver)
+            if (gameStateAfterMove.IsGameOver)
             {
-                if (searchNode.GameState.PlayerToMoveNext == PlayerType.You)
+                if (gameStateAfterMove.PlayerToMoveNext == PlayerType.You)
                 {
                     searchNode.Evaluation = double.NegativeInfinity;
                 }
@@ -31,12 +31,12 @@ namespace AndrewTweddle.Tron.Bots
             }
             else
             {
-                int totalDegreesDifference = searchNode.GameState.TotalDegreesOfCellsClosestToYou - searchNode.GameState.TotalDegreesOfCellsClosestToOpponent;
+                int totalDegreesDifference = gameStateAfterMove.TotalDegreesOfCellsClosestToYou - gameStateAfterMove.TotalDegreesOfCellsClosestToOpponent;
 
                 if (!IncludeDegreeOfVertexOfPoles)
                 {
                     // Exclude the poles, since they have a large number of edges, which causes the algorithm to avoid filling the poles:
-                    CellState[] poles = new CellState[] { searchNode.GameState.NorthPole, searchNode.GameState.SouthPole };
+                    CellState[] poles = new CellState[] { gameStateAfterMove.NorthPole, gameStateAfterMove.SouthPole };
                     foreach (CellState pole in poles)
                     {
                         if (pole.OccupationStatus == OccupationStatus.Clear)
@@ -54,10 +54,10 @@ namespace AndrewTweddle.Tron.Bots
                     }
                 }
 
-                int totalDifferenceInClosestCells = searchNode.GameState.NumberOfCellsClosestToYou - searchNode.GameState.NumberOfCellsClosestToOpponent;
-                int totalReachableCellsDifference = searchNode.GameState.NumberOfCellsReachableByYou - searchNode.GameState.NumberOfCellsReachableByOpponent;
+                int totalDifferenceInClosestCells = gameStateAfterMove.NumberOfCellsClosestToYou - gameStateAfterMove.NumberOfCellsClosestToOpponent;
+                int totalReachableCellsDifference = gameStateAfterMove.NumberOfCellsReachableByYou - gameStateAfterMove.NumberOfCellsReachableByOpponent;
 
-                if (searchNode.GameState.OpponentIsInSameCompartment || totalReachableCellsDifference < reachableCellsThreshold)
+                if (gameStateAfterMove.OpponentIsInSameCompartment || totalReachableCellsDifference < reachableCellsThreshold)
                 {
                     searchNode.Evaluation = 0.194 * totalDegreesDifference + 0.055 * totalDifferenceInClosestCells;
                 }

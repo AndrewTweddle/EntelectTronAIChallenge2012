@@ -13,7 +13,7 @@ namespace AndrewTweddle.Tron.Core
     {
         #region Abstract methods
 
-        protected abstract void Evaluate(SearchNode searchNode);
+        protected abstract void Evaluate(SearchNode searchNode, GameState gameStateAfterMove);
 
         #endregion
 
@@ -241,7 +241,7 @@ namespace AndrewTweddle.Tron.Core
                 // This has a possible race condition, because searchNode.GameState could be held by a weak reference.
                 // So the calculations above might be invalidated when searchNode.GameState is retrieved in the Evaluate() method.
                 // TODO: Modify Evaluate to take the game state as a parameter.
-                Evaluate(searchNode);
+                Evaluate(searchNode, gameState);
 
                 int evaluationsAtThisDepth = numberOfEvaluationsByDepth.ContainsKey(depth) ? numberOfEvaluationsByDepth[depth] : 0;
                 numberOfEvaluationsByDepth[depth] = evaluationsAtThisDepth + 1;

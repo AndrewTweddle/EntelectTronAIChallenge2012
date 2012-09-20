@@ -19,9 +19,8 @@ namespace AndrewTweddle.Tron.Core
             protected set;
         }
 
-        protected override void Evaluate(SearchNode searchNode)
+        protected override void Evaluate(SearchNode searchNode, GameState gameState)
         {
-            GameState gameState = searchNode.GameState;
             if (gameState.IsGameOver)
             {
                 if (gameState.PlayerToMoveNext == PlayerType.You)
