@@ -197,10 +197,10 @@ namespace AndrewTweddle.Tron.Core
                 IList<SearchNode> childSearchNodes
                     = possibleMoves.OrderBy(move => Math.Abs(move.To.Y - 14.5))  // First check moves towards the equator
                         .Select(move => new SearchNode(this, move)).ToList();
-
+                
                 /* Removed following ordering, since it depends on algorithms being run...
                 IList<SearchNode> childSearchNodes
-                    = possibleMoves.OrderBy(
+                    = possibleMoves.Select(move => new SearchNode(this, move)).OrderBy(
                         snode => GameState.PlayerToMoveNext == PlayerType.You
                                 ? GameState[snode.Move.To].DistanceFromOpponent
                                 : GameState[snode.Move.To].DistanceFromYou
@@ -227,6 +227,23 @@ namespace AndrewTweddle.Tron.Core
                     gameState = null;
                 }
             }
+        }
+
+        public GameState GetMutableGameState()
+        {
+            GameState mutableGameState;
+
+            if (ParentNode == null)
+            {
+                mutableGameState = GameState.Clone();
+            }
+            else
+            {
+                mutableGameState = ParentNode.GetMutableGameState();
+                mutableGameState.MakeMove(Move, false, false);  
+                // i.e. Don't perform algorithms - let BaseNegaMaxSolver do this only when necessary (at a leaf node)
+            }
+            return mutableGameState;
         }
 
         public override bool Equals(object obj)
