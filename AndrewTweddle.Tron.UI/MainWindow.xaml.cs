@@ -188,5 +188,10 @@ namespace AndrewTweddle.Tron.UI
 
             MainViewModel.GoBackToMoveNumber(playerWhoMovedLast, moveNumber);
         }
+
+        private void UndoMoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel.UndoLastMove();
+        }
     }
 }

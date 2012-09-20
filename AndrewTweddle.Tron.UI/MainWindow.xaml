@@ -263,6 +263,22 @@
                 <ComboBoxItem>You</ComboBoxItem>
                 <ComboBoxItem>Opponent</ComboBoxItem>
             </ComboBox>
+
+            <Button Name="UndoMoveButton" Margin="2" Click="UndoMoveButton_Click" IsEnabled="True">
+                <!--
+                <Button.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInProgress}">
+                                <Setter Property="Button.IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Button.IsEnabled" Value="False" />
+                    </Style>
+                </Button.Style>
+                -->
+                Undo
+            </Button>
         </WrapPanel>
 
         <gb:GameStateView x:Name="MainGameStateView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Margin="2" VerticalAlignment="Top" />

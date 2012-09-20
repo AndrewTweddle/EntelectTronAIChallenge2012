@@ -453,6 +453,14 @@ namespace AndrewTweddle.Tron.UI
             ContinueWithANewOrLoadedGame();
         }
 
+        public void UndoLastMove()
+        {
+            GameStateViewModel.GameState.UndoLastMove(true, true); // Perform algorithms
+            IsTurnOfPlayer1 = GameStateViewModel.GameState.PlayerToMoveNext == PlayerType.You;
+            IsPaused = true;
+            ContinueWithANewOrLoadedGame();
+        }
+
         public void DisplaySearchTree()
         {
             if (!IsTurnOfPlayer1)

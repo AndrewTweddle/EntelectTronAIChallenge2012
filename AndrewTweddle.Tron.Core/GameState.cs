@@ -1134,6 +1134,80 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public void UndoLastMove(bool performDijkstra = false, bool shouldCalculatedBiconnectedComponents = false)
+        {
+            CellState cellToClear;
+            CellState previousCell;
+            OccupationStatus oldStatusOfPreviousCell;
+            OccupationStatus newStatusOfPreviousCell;
+            PlayerType newPlayerToMoveNext;
+            int lastMoveNumber;
+
+            switch (PlayerToMoveNext)
+            {
+                case PlayerType.You:
+                    // Opponent moved last:
+                    cellToClear = OpponentsCell;
+                    oldStatusOfPreviousCell = OccupationStatus.OpponentWall;
+                    newStatusOfPreviousCell = OccupationStatus.Opponent;
+                    newPlayerToMoveNext = PlayerType.Opponent;
+                    break;
+
+                default:
+                    // You moved last:
+                    cellToClear = YourCell;
+                    oldStatusOfPreviousCell = OccupationStatus.YourWall;
+                    newStatusOfPreviousCell = OccupationStatus.You;
+                    newPlayerToMoveNext = PlayerType.You;
+                    break;
+            }
+
+            lastMoveNumber = cellToClear.MoveNumber - 1;
+            previousCell = cellToClear.GetAdjacentCellStates().Where(
+                cs => cs.OccupationStatus == oldStatusOfPreviousCell && cs.MoveNumber == lastMoveNumber).FirstOrDefault();
+
+            if (lastMoveNumber == -1 || previousCell == null)
+            {
+                throw new ApplicationException("The previous move can't be undone as there was no previous move");
+            }
+
+            previousCell.OccupationStatus = newStatusOfPreviousCell;
+            cellToClear.OccupationStatus = OccupationStatus.Clear;
+            cellToClear.MoveNumber = 0;
+            PlayerToMoveNext = newPlayerToMoveNext;
+
+            switch (newPlayerToMoveNext)
+            {
+                case PlayerType.You:
+                    YourWallLength--;
+                    YourCell = previousCell;
+                    break;
+
+                default:
+                    OpponentsWallLength--;
+                    OpponentsCell = previousCell;
+                    break;
+            }
+
+            // Update Dijkstra status and distance:
+            YourDijkstraStatus = DijkstraStatus.NotCalculated;
+            YourUpToDateDijkstraDistance = 0;
+            opponentsDijkstraStatus = DijkstraStatus.NotCalculated;
+            OpponentsUpToDateDijkstraDistance = 0;
+
+            // Perform algorithms, if requested:
+            if (performDijkstra)
+            {
+                Dijkstra.Perform(this);
+            }
+
+            if (shouldCalculatedBiconnectedComponents)
+            {
+                BiconnectedComponentsAlgorithm bcAlg = new BiconnectedComponentsAlgorithm();
+                bcAlg.Calculate(this, ReachableCellsThenClosestCellsThenDegreesOfClosestCellsEvaluator.Instance);
+            }
+        }
+
         public void CheckThatGameStateIsValid(GameState previousGameState)
         {
             if (PlayerToMoveNext == previousGameState.PlayerToMoveNext)
