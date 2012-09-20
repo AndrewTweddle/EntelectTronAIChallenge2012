@@ -62,6 +62,9 @@ namespace AndrewTweddle.Tron.Core
 
         [OptionalField]
         private bool isUsingIncrementalDijkstra;
+
+        [OptionalField]
+        private string annotation;
         
         public GameState()
         {
@@ -534,6 +537,23 @@ namespace AndrewTweddle.Tron.Core
 
         #endregion
 
+        #region Diagnostic information
+
+        public string Annotation
+        {
+            get
+            {
+                return annotation;
+            }
+            set
+            {
+                annotation = value;
+                OnPropertyChanged("Annotation");
+            }
+        }
+
+        #endregion
+
         public static GameState LoadGameState(string filePath, FileType fileType = FileType.Binary)
         {
             IFormatter formatter;
@@ -907,6 +927,7 @@ namespace AndrewTweddle.Tron.Core
             OpponentsDijkstraStatus = sourceGameState.OpponentsDijkstraStatus;
             YourUpToDateDijkstraDistance = sourceGameState.YourUpToDateDijkstraDistance;
             OpponentsUpToDateDijkstraDistance = sourceGameState.OpponentsUpToDateDijkstraDistance;
+            Annotation = sourceGameState.Annotation;
 
             IsUsingIncrementalDijkstra = sourceGameState.IsUsingIncrementalDijkstra;
         }
@@ -1302,6 +1323,14 @@ namespace AndrewTweddle.Tron.Core
             int newTotalDegreesOfCellsReachableByOpponent = TotalDegreesOfCellsReachableByYou;
             TotalDegreesOfCellsReachableByYou = TotalDegreesOfCellsReachableByOpponent;
             TotalDegreesOfCellsReachableByOpponent = newTotalDegreesOfCellsReachableByOpponent;
+
+            int newSumOfDistancesFromYouOnYourClosestCells = SumOfDistancesFromOpponentOnOpponentsClosestCells;
+            SumOfDistancesFromOpponentOnOpponentsClosestCells = SumOfDistancesFromYouOnYourClosestCells;
+            SumOfDistancesFromYouOnYourClosestCells = newSumOfDistancesFromYouOnYourClosestCells;
+
+            int newSumOfDistancesFromYouOnOpponentsClosestCells = SumOfDistancesFromOpponentOnYourClosestCells;
+            SumOfDistancesFromOpponentOnYourClosestCells = SumOfDistancesFromYouOnOpponentsClosestCells;
+            SumOfDistancesFromYouOnOpponentsClosestCells = newSumOfDistancesFromYouOnOpponentsClosestCells;
         }
 
         public void RecalculateDegreesOfVertices()

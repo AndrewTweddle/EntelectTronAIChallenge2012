@@ -31,6 +31,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
         
             <Grid.ColumnDefinitions>
@@ -55,12 +56,13 @@
             <Label Grid.Row="14" Grid.Column="0" Content="NumberOfCellsClosestToOpponent" />
             <Label Grid.Row="15" Grid.Column="0" Content="TotalDegreesOfCellsClosestToYou" />
             <Label Grid.Row="16" Grid.Column="0" Content="TotalDegreesOfCellsClosestToOpponent" />
-            <Label Grid.Row="17" Grid.Column="0" Content="SumOfDistancesFromOpponentOnYourClosestCells" />
-            <Label Grid.Row="18" Grid.Column="0" Content="SumOfDistancesFromYouOnOpponentsClosestCells" />
-            <Label Grid.Row="19" Grid.Column="0" Content="YourDijkstraStatus" />
-            <Label Grid.Row="20" Grid.Column="0" Content="OpponentsDijkstraStatus" />
-            <Label Grid.Row="21" Grid.Column="0" Content="YourUpToDateDijkstraDistance" />
-            <Label Grid.Row="22" Grid.Column="0" Content="OpponentsUpToDateDijkstraDistance" />
+            <Label Grid.Row="17" Grid.Column="0" Content="DistancesFromOpponentOnYourCells" />
+            <Label Grid.Row="18" Grid.Column="0" Content="DistancesFromYouOnOpponentsCells" />
+            <Label Grid.Row="19" Grid.Column="0" Content="Annotation" />
+            <Label Grid.Row="20" Grid.Column="0" Content="YourDijkstraStatus" />
+            <Label Grid.Row="21" Grid.Column="0" Content="OpponentsDijkstraStatus" />
+            <Label Grid.Row="22" Grid.Column="0" Content="YourUpToDateDijkstraDistance" />
+            <Label Grid.Row="23" Grid.Column="0" Content="OpponentsUpToDateDijkstraDistance" />
 
             <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.PlayerWhoMovedFirst,Mode=OneWay}" />
             <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.PlayerToMoveNext,Mode=OneWay}" />
@@ -81,10 +83,11 @@
             <TextBox Grid.Row="16" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsClosestToOpponent,Mode=OneWay}" />
             <TextBox Grid.Row="17" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.SumOfDistancesFromOpponentOnYourClosestCells,Mode=OneWay}" />
             <TextBox Grid.Row="18" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.SumOfDistancesFromYouOnOpponentsClosestCells,Mode=OneWay}" />
-            <TextBox Grid.Row="19" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourDijkstraStatus,Mode=OneWay}" />
-            <TextBox Grid.Row="20" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsDijkstraStatus,Mode=OneWay}" />
-            <TextBox Grid.Row="21" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourUpToDateDijkstraDistance,Mode=OneWay}" />
-            <TextBox Grid.Row="22" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsUpToDateDijkstraDistance,Mode=OneWay}" />
+            <TextBox Grid.Row="19" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.Annotation,Mode=OneWay}" />
+            <TextBox Grid.Row="20" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourDijkstraStatus,Mode=OneWay}" />
+            <TextBox Grid.Row="21" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsDijkstraStatus,Mode=OneWay}" />
+            <TextBox Grid.Row="22" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourUpToDateDijkstraDistance,Mode=OneWay}" />
+            <TextBox Grid.Row="23" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsUpToDateDijkstraDistance,Mode=OneWay}" />
         </Grid>
     </Border>
 </UserControl>

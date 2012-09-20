@@ -11,12 +11,6 @@ namespace AndrewTweddle.Tron.Core
 {
     public abstract class BaseNegaMaxSolver: BaseSolver
     {
-        #region Private member variables
-
-        private Dictionary<int, int> numberOfEvaluationsByDepth = new Dictionary<int, int>();
-
-        #endregion
-
         #region Abstract methods
 
         protected abstract void Evaluate(SearchNode searchNode);
@@ -30,6 +24,8 @@ namespace AndrewTweddle.Tron.Core
         private int currentDepth;
         private int maxDepth;
         private SearchNode rootNode;
+        private int lastDepthCompleted;
+        private Dictionary<int, int> numberOfEvaluationsByDepth = new Dictionary<int, int>();
 
         #endregion
 
@@ -96,6 +92,19 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public int LastDepthCompleted
+        {
+            get
+            {
+                return lastDepthCompleted;
+            }
+            set
+            {
+                lastDepthCompleted = value;
+                OnPropertyChanged("LastDepthCompleted");
+            }
+        }
+
         #endregion
 
 
@@ -114,8 +123,11 @@ namespace AndrewTweddle.Tron.Core
 
         protected override void DoSolve()
         {
+#if DEBUG
+            Stopwatch swatch = Stopwatch.StartNew();
             numberOfEvaluationsByDepth.Clear();
-            RootNode = new SearchNode(Coordinator.CurrentGameState);
+#endif
+            LastDepthCompleted = 0;
 
             if (IsIterativeDeepeningEnabled)
             {
@@ -133,8 +145,12 @@ namespace AndrewTweddle.Tron.Core
             }
 
 #if DEBUG
+            swatch.Stop();
             int numberOfCalculationsAtAllDepths = NumberOfEvaluationsByDepth.Values.Sum();
-            System.Diagnostics.Debug.WriteLine("***** TOTAL EVALUATIONS: {0}", numberOfCalculationsAtAllDepths);
+            string annotation = String.Format("{0} evals, depth {1}, {2} seconds",
+                numberOfCalculationsAtAllDepths, LastDepthCompleted, swatch.Elapsed.TotalMilliseconds / 1000.0);
+            Coordinator.BestMoveSoFar.Annotation = annotation;
+            System.Diagnostics.Debug.WriteLine("***** TOTAL EVALUATIONS: {0}", annotation);
             System.Diagnostics.Debug.WriteLine("=================================");
 #endif
         }
@@ -142,9 +158,6 @@ namespace AndrewTweddle.Tron.Core
         private void RunNegaMaxAtAParticularDepth()
         {
             SearchNode newRootNode = new SearchNode(Coordinator.CurrentGameState);
-
-            // TODO: Modify this to store the old and new search tree (old depth and new depth).
-            // The challenge is to be able to use the old search tree to sort the new tree by the most promising branch first.
             double evaluation = Negamax(newRootNode);
 
             if (SolverState == SolverState.Stopping)
@@ -154,6 +167,7 @@ namespace AndrewTweddle.Tron.Core
             else
             {
                 RootNode = newRootNode;
+                LastDepthCompleted = CurrentDepth;
 
                 // A solution was found at this depth. Choose a best solution:
                 RootNode.Evaluation = evaluation;
@@ -191,7 +205,8 @@ namespace AndrewTweddle.Tron.Core
                 }
 
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine("*** NegaMax performed {0} evaluations at depth {1}", numberOfEvaluationsByDepth[CurrentDepth], CurrentDepth);
+                int numberOfEvaluationsAtThisDepth = numberOfEvaluationsByDepth.ContainsKey(CurrentDepth) ? numberOfEvaluationsByDepth[CurrentDepth] : 0;
+                System.Diagnostics.Debug.WriteLine("*** NegaMax performed {0} evaluations at depth {1}", numberOfEvaluationsAtThisDepth, CurrentDepth);
 #endif
             }
         }
