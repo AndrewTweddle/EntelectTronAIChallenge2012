@@ -6,6 +6,13 @@ using System.Diagnostics;
 
 namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
 {
+    /// <summary>
+    /// An algorithm of my own invention to determine shortest paths from a point to all other connected points.
+    /// It uses a "wavefront" with a particular direction (diagonal or vertical, from the poles).
+    /// Edges of wavefronts are either shared with adjacent wavefronts (at 90 degrees), 
+    /// or a new "eddy" wavefront is created at the edges of the existing wavefronts, 
+    /// to "backfill" into areas behind barriers.
+    /// </summary>
     public class WaveFrontAlgorithm: BaseVoronoiAlgorithm
     {
         protected override void CalculateDistancesFromAPlayer(GameState gameState, PlayerType player, HashSet<CellState> reachableCells)

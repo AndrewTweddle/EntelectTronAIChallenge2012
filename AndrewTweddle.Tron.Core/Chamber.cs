@@ -10,6 +10,7 @@ namespace AndrewTweddle.Tron.Core
     {
         private HashSet<CellState> cells = new HashSet<CellState>();
         private HashSet<CellState> cutVertices = new HashSet<CellState>();
+        private HashSet<Chamber> enemyChambers = new HashSet<Chamber>();
 
         public int ChamberNumber
         {
@@ -48,6 +49,21 @@ namespace AndrewTweddle.Tron.Core
         public void AddCutVertex(CellState cellState)
         {
             cutVertices.Add(cellState);
+        }
+
+        public void AddAdjacentEnemyChamber(Chamber enemyChamber)
+        {
+            enemyChambers.Add(enemyChamber);
+        }
+
+        public IEnumerable<Chamber> GetAdjacentEnemyChambers()
+        {
+            return enemyChambers;
+        }
+
+        public int GetNumberOfCellsExcludingCutVertices()
+        {
+            return cells.Count - cutVertices.Count;
         }
     }
 }

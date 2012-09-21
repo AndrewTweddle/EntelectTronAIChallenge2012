@@ -49,6 +49,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             swatch.Stop();
             Debug.WriteLine(String.Format("Biconnected components algorithm with {1} spaces filled took {0} ", swatch.Elapsed, gameState.OpponentsWallLength + gameState.YourWallLength + 2));
 #endif
+
+            // TODO: Move to a more appropriate place later...
+            BiconnectedChambersAlgorithm bcChambersAlg = new BiconnectedChambersAlgorithm();
+            bcChambersAlg.Calculate(gameState);
         }
 
         private void Visit(CellState startCellState)

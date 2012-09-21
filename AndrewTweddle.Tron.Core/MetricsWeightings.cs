@@ -16,6 +16,7 @@ namespace AndrewTweddle.Tron.Core
         private double numberOfComponentBranchesInTreeFactor;
         private double sumOfDistancesFromThisPlayerOnClosestCellsFactor;
         private double sumOfDistancesFromOtherPlayerOnClosestCellsFactor;
+        private double chamberValueFactor;
 
         public double NumberOfCellsReachableByPlayerFactor
         {
@@ -122,6 +123,21 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public double ChamberValueFactor
+        {
+            get
+            {
+                return chamberValueFactor;
+            }
+            set
+            {
+                chamberValueFactor = value;
+#if DEBUG
+                OnPropertyChanged("ChamberValueFactor");
+#endif
+            }
+        }
+
         public void ReadWeightingsFromXmlFile(string xmlFilePath)
         {
             XDocument xdoc = XDocument.Load(xmlFilePath);
@@ -133,6 +149,7 @@ namespace AndrewTweddle.Tron.Core
             NumberOfComponentBranchesInTreeFactor = GetElementValueAsDouble(root, "NumberOfComponentBranchesInTreeFactor", xmlFilePath);
             SumOfDistancesFromThisPlayerOnClosestCellsFactor = GetElementValueAsDouble(root, "SumOfDistancesFromThisPlayerOnClosestCellsFactor", xmlFilePath);
             SumOfDistancesFromOtherPlayerOnClosestCellsFactor = GetElementValueAsDouble(root, "SumOfDistancesFromOtherPlayerOnClosestCellsFactor", xmlFilePath);
+            ChamberValueFactor = GetElementValueAsDouble(root, "ChamberValueFactor", xmlFilePath);
         }
 
         private static double GetElementValueAsDouble(XElement root, string elementName, string xmlFilePath)

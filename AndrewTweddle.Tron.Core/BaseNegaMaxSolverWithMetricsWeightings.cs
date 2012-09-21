@@ -49,7 +49,9 @@ namespace AndrewTweddle.Tron.Core
                     + weightings.SumOfDistancesFromThisPlayerOnClosestCellsFactor
                         * (gameState.SumOfDistancesFromYouOnYourClosestCells - gameState.SumOfDistancesFromOpponentOnOpponentsClosestCells)
                     + weightings.SumOfDistancesFromOtherPlayerOnClosestCellsFactor
-                        * (gameState.SumOfDistancesFromOpponentOnYourClosestCells - gameState.SumOfDistancesFromYouOnOpponentsClosestCells);
+                        * (gameState.SumOfDistancesFromOpponentOnYourClosestCells - gameState.SumOfDistancesFromYouOnOpponentsClosestCells)
+                    + weightings.ChamberValueFactor
+                        * (gameState.ChamberValueForYou - gameState.ChamberValueForOpponent);
                 searchNode.Evaluation = evaluation;
             }
         }

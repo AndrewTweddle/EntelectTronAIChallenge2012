@@ -45,10 +45,10 @@ namespace AndrewTweddle.Tron.Core
         private int opponentsUpToDateDijkstraDistance;
 
         [NonSerialized]
-        private List<CellState> yourFrontierCells = new List<CellState>();
+        private List<CellState> yourFrontierCells;
 
         [NonSerialized]
-        private List<CellState> opponentsFrontierCells = new List<CellState>();
+        private List<CellState> opponentsFrontierCells;
 
         // Cache data that is used frequently
         [NonSerialized]
@@ -66,6 +66,11 @@ namespace AndrewTweddle.Tron.Core
         private int numberOfComponentBranchesInYourTree;
         [OptionalField]
         private int numberOfComponentBranchesInOpponentsTree;
+
+        [OptionalField]
+        private double chamberValueForYou;
+        [OptionalField]
+        private double chamberValueForOpponent;
 
         [NonSerialized]
         private List<BiconnectedComponent> biconnectedComponents;
@@ -439,7 +444,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 totalDegreesOfCellsClosestToYou = value;
+#if DEBUG
                 OnPropertyChanged("TotalDegreesOfCellsClosestToYou");
+#endif
             }
         }
 
@@ -452,7 +459,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 totalDegreesOfCellsClosestToOpponent = value;
+#if DEBUG
                 OnPropertyChanged("TotalDegreesOfCellsClosestToOpponent");
+#endif
             }
         }
 
@@ -486,6 +495,36 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public double ChamberValueForYou
+        {
+            get
+            {
+                return chamberValueForYou;
+            }
+            set
+            {
+                chamberValueForYou = value;
+#if DEBUG
+                OnPropertyChanged("ChamberValueForYou");
+#endif
+            }
+        }
+
+        public double ChamberValueForOpponent
+        {
+            get
+            {
+                return chamberValueForOpponent;
+            }
+            set
+            {
+                chamberValueForOpponent = value;
+#if DEBUG
+                OnPropertyChanged("ChamberValueForOpponent");
+#endif
+            }
+        }
+
         public DijkstraStatus YourDijkstraStatus
         {
             get
@@ -495,7 +534,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 yourDijkstraStatus = value;
+#if DEBUG
                 OnPropertyChanged("YourDijkstraStatus");
+#endif
             }
         }
 
@@ -508,7 +549,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 opponentsDijkstraStatus = value;
+#if DEBUG
                 OnPropertyChanged("OpponentsDijkstraStatus");
+#endif
             }
         }
 
@@ -521,7 +564,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 yourUpToDateDijkstraDistance = value;
+#if DEBUG
                 OnPropertyChanged("YourUpToDateDijkstraDistance");
+#endif
             }
         }
 
@@ -534,7 +579,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 opponentsUpToDateDijkstraDistance = value;
+#if DEBUG
                 OnPropertyChanged("OpponentsUpToDateDijkstraDistance");
+#endif
             }
         }
 
@@ -547,7 +594,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 isUsingIncrementalDijkstra = value;
+#if DEBUG
                 OnPropertyChanged("IsUsingIncrementalDijkstra");
+#endif
             }
         }
 
@@ -564,7 +613,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 annotation = value;
+#if DEBUG
                 OnPropertyChanged("Annotation");
+#endif
             }
         }
 
@@ -737,8 +788,15 @@ namespace AndrewTweddle.Tron.Core
         {
             OpponentIsInSameCompartment = true;
 
-            yourFrontierCells.Clear();
-            opponentsFrontierCells.Clear();
+            if (yourFrontierCells != null)
+            {
+                yourFrontierCells.Clear();
+            }
+
+            if (opponentsFrontierCells != null)
+            {
+                opponentsFrontierCells.Clear();
+            }
 
             NumberOfCellsReachableByYou = 0;
             TotalDegreesOfCellsReachableByYou = 0;
@@ -818,12 +876,40 @@ namespace AndrewTweddle.Tron.Core
             switch (playerType)
             {
                 case PlayerType.You:
+                    if (yourFrontierCells == null)
+                    {
+                        yourFrontierCells = new List<CellState>();
+                    }
                     yourFrontierCells.Add(cellState);
                     break;
 
                 case PlayerType.Opponent:
+                    if (opponentsFrontierCells == null)
+                    {
+                        opponentsFrontierCells = new List<CellState>();
+                    }
                     opponentsFrontierCells.Add(cellState);
                     break;
+            }
+        }
+
+        public IEnumerable<CellState> GetFrontierCellsForPlayer(PlayerType player)
+        {
+            switch (player)
+            {
+                case PlayerType.You:
+                    if (yourFrontierCells == null)
+                    {
+                        yourFrontierCells = new List<CellState>();
+                    }
+                    return yourFrontierCells;
+
+                default:  // Assume Opponent
+                    if (opponentsFrontierCells == null)
+                    {
+                        opponentsFrontierCells = new List<CellState>();
+                    }
+                    return opponentsFrontierCells;
             }
         }
 
@@ -956,6 +1042,8 @@ namespace AndrewTweddle.Tron.Core
             SumOfDistancesFromYouOnOpponentsClosestCells = sourceGameState.SumOfDistancesFromYouOnOpponentsClosestCells;
             SumOfDistancesFromOpponentOnOpponentsClosestCells = sourceGameState.SumOfDistancesFromOpponentOnOpponentsClosestCells;
             SumOfDistancesFromOpponentOnYourClosestCells = sourceGameState.SumOfDistancesFromOpponentOnYourClosestCells;
+            ChamberValueForYou = sourceGameState.ChamberValueForYou;
+            ChamberValueForOpponent = sourceGameState.ChamberValueForOpponent;
             YourDijkstraStatus = sourceGameState.YourDijkstraStatus;
             OpponentsDijkstraStatus = sourceGameState.OpponentsDijkstraStatus;
             YourUpToDateDijkstraDistance = sourceGameState.YourUpToDateDijkstraDistance;
@@ -1458,6 +1546,10 @@ namespace AndrewTweddle.Tron.Core
             int newSumOfDistancesFromYouOnOpponentsClosestCells = SumOfDistancesFromOpponentOnYourClosestCells;
             SumOfDistancesFromOpponentOnYourClosestCells = SumOfDistancesFromYouOnOpponentsClosestCells;
             SumOfDistancesFromYouOnOpponentsClosestCells = newSumOfDistancesFromYouOnOpponentsClosestCells;
+
+            double newChamberValueForYou = ChamberValueForOpponent;
+            ChamberValueForOpponent = ChamberValueForYou;
+            ChamberValueForYou = newChamberValueForYou;
         }
 
         public void RecalculateDegreesOfVertices()

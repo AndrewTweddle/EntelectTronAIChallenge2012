@@ -76,6 +76,9 @@ namespace AndrewTweddle.Tron.Core
         [NonSerialized]
         private string opponentsChambersListing;
 
+        [NonSerialized]
+        private List<CellState> adjacentEnemyCellStates;
+
         #endregion
 
         public GameState GameState
@@ -1029,6 +1032,57 @@ namespace AndrewTweddle.Tron.Core
                 metrics.TotalDegreesOfCellsReachableByPlayer = DegreeOfVertex;
             }
             return metrics;
+        }
+
+        public bool IsAChamberCutVertex 
+        {
+            get
+            {
+                switch (ClosestPlayer)
+                {
+                    case PlayerType.You:
+                        if (yourChambers != null && yourChambers.Count > 1)
+                        {
+                            return true;
+                        }
+                        break;
+                    case PlayerType.Opponent:
+                        if (opponentsChambers != null && opponentsChambers.Count > 1)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+        }
+
+        public IEnumerable<CellState> GetAdjacentEnemyCellStates()
+        {
+            if (OccupationStatus != Core.OccupationStatus.YourWall && OccupationStatus != Core.OccupationStatus.OpponentWall)
+            {
+                foreach (CellState cellState in adjacentCellStates)
+                {
+                    switch (ClosestPlayer)
+                    {
+                        case PlayerType.You:
+                            if (cellState.ClosestPlayer == PlayerType.Opponent
+                                && (cellState.OccupationStatus == OccupationStatus.Clear || cellState.OccupationStatus == OccupationStatus.Opponent))
+                            {
+                                yield return cellState;
+                            }
+                            break;
+
+                        case PlayerType.Opponent:
+                            if (cellState.ClosestPlayer == PlayerType.You
+                                && (cellState.OccupationStatus == Core.OccupationStatus.Clear || cellState.OccupationStatus == Core.OccupationStatus.You))
+                            {
+                                yield return cellState;
+                            }
+                            break;
+                    }
+                }
+            }
         }
     }
 }

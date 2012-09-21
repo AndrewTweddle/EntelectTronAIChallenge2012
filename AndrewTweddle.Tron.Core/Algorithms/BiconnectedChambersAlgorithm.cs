@@ -26,6 +26,9 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             this.gameState = gameState;
             CalculateChambersForPlayer(PlayerType.You);
             CalculateChambersForPlayer(PlayerType.Opponent);
+            CalculateContiguousEnemyChambers();
+            CalculateChamberValues();
+
 #if DEBUG
             swatch.Stop();
             Debug.WriteLine(String.Format("Chambers algorithm with {1} spaces filled took {0} ",
@@ -34,7 +37,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
         }
 
-        public void CalculateChambersForPlayer(PlayerType player)
+        private void CalculateChambersForPlayer(PlayerType player)
         {
             this.player = player;
             count = 0;
@@ -138,5 +141,73 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                 }
             }
         }
+
+        private void CalculateContiguousEnemyChambers()
+        {
+            IEnumerable<CellState> frontierCellsForYou = gameState.GetFrontierCellsForPlayer(PlayerType.You);
+            foreach (CellState yourFrontierCell in frontierCellsForYou)
+            {
+                foreach (CellState adjacentEnemyCellState in yourFrontierCell.GetAdjacentEnemyCellStates())
+                {
+                    foreach (Chamber yourChamber in yourFrontierCell.GetYourChambers())
+                    {
+                        foreach (Chamber opponentsChamber in adjacentEnemyCellState.GetOpponentsChambers())
+                        {
+                            opponentsChamber.AddAdjacentEnemyChamber(yourChamber);
+                            yourChamber.AddAdjacentEnemyChamber(opponentsChamber);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CalculateChamberValues()
+        {
+            double yourChamberValues = CalculateChamberValuesForPlayer(PlayerType.You);
+            double opponentsChamberValues = CalculateChamberValuesForPlayer(PlayerType.Opponent);
+            gameState.ChamberValueForYou = yourChamberValues;
+            gameState.ChamberValueForOpponent = opponentsChamberValues;
+        }
+
+        private double CalculateChamberValuesForPlayer(PlayerType player,
+            double valueOfCellInChamberNextToLargerEnemyChamber = 0.5,
+            double valueOfCellInChamberLargerThanAllAdjacentEnemyChambers = 0.75)
+        {
+            double value = 0.0;
+            foreach (Chamber chamber in gameState.GetChambersForPlayer(player))
+            {
+                int chamberSize = chamber.GetNumberOfCellsExcludingCutVertices();
+                if (chamberSize != 0)
+                {
+                    int sizeOfLargestAdjacentEnemyChamber = 0;
+                    foreach (Chamber enemyChamber in chamber.GetAdjacentEnemyChambers())
+                    {
+                        int enemyChamberSize = enemyChamber.GetNumberOfCellsExcludingCutVertices();
+                        if (enemyChamberSize > sizeOfLargestAdjacentEnemyChamber)
+                        {
+                            sizeOfLargestAdjacentEnemyChamber = enemyChamberSize;
+                        }
+                    }
+                    if (sizeOfLargestAdjacentEnemyChamber == 0)
+                    {
+                        value += chamberSize;  // Count full chamber size
+                    }
+                    else
+                        if (sizeOfLargestAdjacentEnemyChamber > chamberSize)
+                        {
+                            value += chamberSize * valueOfCellInChamberNextToLargerEnemyChamber;
+                        }
+                        else
+                        {
+                            value += chamberSize * valueOfCellInChamberLargerThanAllAdjacentEnemyChambers;
+                        }
+                }
+            }
+
+            // TODO: How to include value of cut vertices as well?
+
+            return value;
+        }
+
     }
 }
