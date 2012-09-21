@@ -64,6 +64,12 @@ namespace AndrewTweddle.Tron.Core
         [NonSerialized]
         private List<BiconnectedComponent> biconnectedComponents;
 
+        [NonSerialized]
+        private List<Chamber> yourChambers;
+
+        [NonSerialized]
+        private List<Chamber> opponentsChambers;
+
         [OptionalField]
         private bool isUsingIncrementalDijkstra;
 
@@ -1547,6 +1553,11 @@ namespace AndrewTweddle.Tron.Core
 
         #region Biconnected components methods
 
+        public void ClearBiconnectedComponentProperties()
+        {
+            biconnectedComponents = null;
+        }
+
         public void AddBiconnectedComponent(BiconnectedComponent component)
         {
             if (biconnectedComponents == null)
@@ -1563,6 +1574,95 @@ namespace AndrewTweddle.Tron.Core
                 biconnectedComponents = new List<BiconnectedComponent>();
             }
             return biconnectedComponents;
+        }
+
+        #endregion
+
+        #region Biconnected chambers methods
+
+        public void ClearChamberPropertiesForPlayer(PlayerType player)
+        {
+            switch (player)
+            {
+                case PlayerType.You:
+                    ClearYourChamberProperties();
+                    break;
+                case PlayerType.Opponent:
+                    ClearOpponentsChamberProperties();
+                    break;
+            }
+        }
+
+        public void ClearYourChamberProperties()
+        {
+            yourChambers = null;
+        }
+
+        public void ClearOpponentsChamberProperties()
+        {
+            opponentsChambers = null;
+        }
+
+        public void AddChamber(Chamber chamber, PlayerType player)
+        {
+            switch (player)
+            {
+                case PlayerType.You:
+                    AddChamberForYou(chamber);
+                    break;
+                case PlayerType.Opponent:
+                    AddChamberForOpponent(chamber);
+                    break;
+            }
+        }
+
+        public void AddChamberForYou(Chamber chamber)
+        {
+            if (yourChambers == null)
+            {
+                yourChambers = new List<Chamber>();
+            }
+            yourChambers.Add(chamber);
+        }
+
+        public void AddChamberForOpponent(Chamber chamber)
+        {
+            if (opponentsChambers == null)
+            {
+                opponentsChambers = new List<Chamber>();
+            }
+            opponentsChambers.Add(chamber);
+        }
+
+        public IEnumerable<Chamber> GetChambersForPlayer(PlayerType player)
+        {
+            switch (player)
+            {
+                case PlayerType.You:
+                    return GetYourChambers();
+                    break;
+                default:
+                    return GetOpponentsChambers();
+                    break;
+            }
+        }
+
+        public IEnumerable<Chamber> GetYourChambers()
+        {
+            if (yourChambers == null)
+            {
+                yourChambers = new List<Chamber>();
+            }
+            return yourChambers;
+        }
+
+        public IEnumerable<Chamber> GetOpponentsChambers()
+        {
+            if (opponentsChambers == null)
+            {
+                opponentsChambers = new List<Chamber>();
+            }
+            return opponentsChambers;
         }
 
         #endregion

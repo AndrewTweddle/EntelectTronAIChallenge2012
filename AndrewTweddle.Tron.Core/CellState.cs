@@ -24,7 +24,7 @@ namespace AndrewTweddle.Tron.Core
         [NonSerialized]
         CellState[] adjacentCellStates = null;
 
-        #region Fields for biconnected components algorithm:
+        #region Fields shared between biconnected components and biconnected chambers algorithm
 
         [NonSerialized]
         private bool visited;
@@ -34,6 +34,11 @@ namespace AndrewTweddle.Tron.Core
         private int dfsLow;
         [NonSerialized]
         private CellState parentCellState;
+
+        #endregion
+
+        #region Fields for biconnected components algorithm:
+
         [NonSerialized]
         private HashSet<BiconnectedComponent> biconnectedComponents;
         [NonSerialized]
@@ -54,6 +59,22 @@ namespace AndrewTweddle.Tron.Core
         private BiconnectedComponent entryComponentForOpponent;
         [NonSerialized]
         private BiconnectedComponent exitComponentForOpponent;
+
+        #endregion
+
+        #region Fields for biconnected chambers algorithm:
+
+        [NonSerialized]
+        private HashSet<Chamber> yourChambers;
+
+        [NonSerialized]
+        private HashSet<Chamber> opponentsChambers;
+
+        [NonSerialized]
+        private string yourChambersListing;
+
+        [NonSerialized]
+        private string opponentsChambersListing;
 
         #endregion
 
@@ -520,6 +541,182 @@ namespace AndrewTweddle.Tron.Core
             ExitComponentForOpponent = null;
             SubtreeMetricsForYou = Metrics.Zero;
             SubtreeMetricsForOpponent = Metrics.Zero;
+        }
+
+        #endregion
+
+        #region Biconnected chambers
+
+        public string YourChambersListing
+        {
+            get
+            {
+                if (yourChambersListing == null)
+                {
+                    yourChambersListing = CalculateYourChambersListing();
+                }
+                return yourChambersListing;
+            }
+            set
+            {
+                yourChambersListing = value;
+#if DEBUG
+                OnPropertyChanged("YourChambersListing");
+#endif
+            }
+        }
+
+        public string OpponentsChambersListing
+        {
+            get
+            {
+                if (opponentsChambersListing == null)
+                {
+                    opponentsChambersListing = CalculateOpponentsChambersListing();
+                }
+                return opponentsChambersListing;
+            }
+            set
+            {
+                opponentsChambersListing = value;
+#if DEBUG
+                OnPropertyChanged("OpponentsChambersListing");
+#endif
+            }
+        }
+
+        public void ClearChamberPropertiesForPlayer(PlayerType player)
+        {
+            Visited = false;
+            ParentCellState = null;
+            switch (player)
+            {
+                case PlayerType.You:
+                    yourChambers = null;
+                    break;
+                case PlayerType.Opponent:
+                    opponentsChambers = null;
+                    break;
+            }
+        }
+
+        public void AddChamber(Chamber chamber, PlayerType player)
+        {
+            switch (player)
+            {
+                case PlayerType.You:
+                    AddYourChamber(chamber);
+                    break;
+                case PlayerType.Opponent:
+                    AddOpponentsChamber(chamber);
+                    break;
+            }
+        }
+
+        public void AddYourChamber(Chamber chamber)
+        {
+            if (yourChambers == null)
+            {
+                yourChambers = new HashSet<Chamber>();
+            }
+            int countBefore = yourChambers.Count;
+            yourChambers.Add(chamber);
+            int countAfter = yourChambers.Count;
+
+            if (countAfter != countBefore)
+            {
+                if (countBefore == 1)
+                {
+                    // It has just become a cut vertex. Update both chambers accordingly:
+                    foreach (Chamber existingChamber in yourChambers)
+                    {
+                        existingChamber.AddCutVertex(this);
+                    }
+                }
+                else
+                    if (countBefore > 1)
+                    {
+                        // It was already a cut vertex. So just add as a cut vertex to the new component:
+                        chamber.AddCutVertex(this);
+                    }
+
+                // If in use, update the string listing of the components:
+                if (yourChambersListing != null)
+                {
+                    yourChambersListing = CalculateYourChambersListing();
+                }
+            }
+        }
+
+        public void AddOpponentsChamber(Chamber chamber)
+        {
+            if (opponentsChambers == null)
+            {
+                opponentsChambers = new HashSet<Chamber>();
+            }
+            int countBefore = opponentsChambers.Count;
+            opponentsChambers.Add(chamber);
+            int countAfter = opponentsChambers.Count;
+
+            if (countAfter != countBefore)
+            {
+                if (countBefore == 1)
+                {
+                    // It has just become a cut vertex. Update both chambers accordingly:
+                    foreach (Chamber existingChamber in opponentsChambers)
+                    {
+                        existingChamber.AddCutVertex(this);
+                    }
+                }
+                else
+                    if (countBefore > 1)
+                    {
+                        // It was already a cut vertex. So just add as a cut vertex to the new component:
+                        chamber.AddCutVertex(this);
+                    }
+
+                // If in use, update the string listing of the components:
+                if (opponentsChambersListing != null)
+                {
+                    opponentsChambersListing = CalculateOpponentsChambersListing();
+                }
+            }
+        }
+
+        public IEnumerable<Chamber> GetYourChambers()
+        {
+            if (yourChambers == null)
+            {
+                yourChambers = new HashSet<Chamber>();
+            }
+            return yourChambers;
+        }
+
+        public IEnumerable<Chamber> GetOpponentsChambers()
+        {
+            if (opponentsChambers == null)
+            {
+                opponentsChambers = new HashSet<Chamber>();
+            }
+            return opponentsChambers;
+        }
+
+        private string CalculateYourChambersListing()
+        {
+            return String.Join(", ",
+                GetYourChambers()
+                    .OrderBy(chamber => chamber.ChamberNumber)
+                    .Select(chamber => chamber.ChamberNumber.ToString())
+            );
+        }
+
+        private string CalculateOpponentsChambersListing()
+        {
+            return String.Join(", ",
+                GetOpponentsChambers()
+                    .OrderBy(chamber => chamber.ChamberNumber)
+                    .Select(chamber => chamber.ChamberNumber.ToString())
+            );
         }
 
         #endregion
