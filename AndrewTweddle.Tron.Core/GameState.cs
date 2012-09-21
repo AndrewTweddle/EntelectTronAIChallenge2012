@@ -44,6 +44,12 @@ namespace AndrewTweddle.Tron.Core
         private int yourUpToDateDijkstraDistance;
         private int opponentsUpToDateDijkstraDistance;
 
+        [NonSerialized]
+        private List<CellState> yourFrontierCells = new List<CellState>();
+
+        [NonSerialized]
+        private List<CellState> opponentsFrontierCells = new List<CellState>();
+
         // Cache data that is used frequently
         [NonSerialized]
         private CellState[] allCellStates = null;
@@ -727,9 +733,12 @@ namespace AndrewTweddle.Tron.Core
             ClearDijkstraProperties();
         }
 
-        public void ClearDijkstraProperties(bool updateYourDijkstraProperties = true, bool updateOpponentsDijkstraProperties = true)
+        public void ClearDijkstraProperties()
         {
             OpponentIsInSameCompartment = true;
+
+            yourFrontierCells.Clear();
+            opponentsFrontierCells.Clear();
 
             NumberOfCellsReachableByYou = 0;
             TotalDegreesOfCellsReachableByYou = 0;
@@ -801,6 +810,20 @@ namespace AndrewTweddle.Tron.Core
             foreach (CellState cell in cells)
             {
                 cell.ClearDijkstraStateForPlayer(playerType);
+            }
+        }
+
+        public void AddFrontierCellForPlayer(CellState cellState, PlayerType playerType)
+        {
+            switch (playerType)
+            {
+                case PlayerType.You:
+                    yourFrontierCells.Add(cellState);
+                    break;
+
+                case PlayerType.Opponent:
+                    opponentsFrontierCells.Add(cellState);
+                    break;
             }
         }
 
@@ -1666,5 +1689,6 @@ namespace AndrewTweddle.Tron.Core
         }
 
         #endregion
+
     }
 }

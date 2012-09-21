@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\BaseVoronoiAlgorithm.cs" />
+    <Compile Include="Algorithms\BiconnectedChambersAlgorithm.cs" />
     <Compile Include="Algorithms\BiconnectedComponentsAlgorithm.cs" />
     <Compile Include="Algorithms\Dijkstra.cs" />
     <Compile Include="Algorithms\ShortestPathAlgorithmUsingHashSets.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="BaseSolver.cs" />
     <Compile Include="BiconnectedComponent.cs" />
     <Compile Include="CellState.cs" />
+    <Compile Include="Chamber.cs" />
     <Compile Include="CompartmentStatus.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Coordinator.cs" />
