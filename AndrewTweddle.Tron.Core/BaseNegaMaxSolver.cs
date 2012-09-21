@@ -19,7 +19,7 @@ namespace AndrewTweddle.Tron.Core
 
         #region Static members
 
-        public static readonly NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.GameStatePerSearchNode;
+        public static readonly NegaMaxGameStateGenerationMethod gameStateGenerationMethod = NegaMaxGameStateGenerationMethod.MutableGameStateWithUndo;
 
         #endregion
 

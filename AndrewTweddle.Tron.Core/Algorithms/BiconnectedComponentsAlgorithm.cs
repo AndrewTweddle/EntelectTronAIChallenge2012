@@ -23,6 +23,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             edgeStack = new Stack<Edge>();
             Queue<CellState> cellsToVisit = new Queue<CellState>();
 
+            gameState.ClearBiconnectedComponentProperties();
+
             foreach (CellState cellState in gameState.GetAllCellStates())
             {
                 if (cellState.OccupationStatus != OccupationStatus.YourWall && cellState.OccupationStatus != OccupationStatus.OpponentWall)
