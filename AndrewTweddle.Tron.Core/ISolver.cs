@@ -9,7 +9,7 @@ namespace AndrewTweddle.Tron.Core
     {
         Coordinator Coordinator { get; set; }
 
-        SolverState SolverState { get; }
+        SolverState SolverState { get; set; }
 
         void Solve();
         void Stop();

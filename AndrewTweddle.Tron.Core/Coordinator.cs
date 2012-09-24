@@ -15,6 +15,7 @@ namespace AndrewTweddle.Tron.Core
         public static readonly int MAX_DURATION_IN_MILLISECONDS = 5000;
         public static readonly int TIME_TO_WAIT_UNTIL_STOPPING_SOLVER_IN_MILLISECONDS = 4000;
         public static readonly int MAX_GRACE_PERIOD_TO_STOP_IN = 500;
+        public static readonly int BEST_MOVE_LOCK_TIMEOUT = 100;
 
         public bool IsInDebugMode { get; set; }
         public bool IgnoreTimer { get; set; }
@@ -46,9 +47,23 @@ namespace AndrewTweddle.Tron.Core
 
         public void SetBestMoveSoFar(GameState bestMove)
         {
-            lock (BestMoveLock)
+            bool isBestMoveLocked = Monitor.TryEnter(BestMoveLock, BEST_MOVE_LOCK_TIMEOUT);
+            try
             {
+#if DEBUG
+                if (!isBestMoveLocked)
+                {
+                    System.Diagnostics.Debug.WriteLine("Lock timeout with best move lock");
+                }
+#endif
                 BestMoveSoFar = bestMove;
+            }
+            finally
+            {
+                if (isBestMoveLocked)
+                {
+                    Monitor.Exit(BestMoveLock);
+                }
             }
         }
 
@@ -95,12 +110,26 @@ namespace AndrewTweddle.Tron.Core
 
             IEnumerable<RawCellData> cells = GameState.LoadRawCellDataFromTronGameFile(tronGameFilePath);
             Run(cells);
-            lock (BestMoveLock)
+            bool isBestMoveLocked = Monitor.TryEnter(BestMoveLock, BEST_MOVE_LOCK_TIMEOUT);
+            try
             {
+#if DEBUG
+                if (!isBestMoveLocked)
+                {
+                    System.Diagnostics.Debug.WriteLine("Lock timeout with best move lock");
+                }
+#endif
                 SaveGameState();
                 if (BestMoveSoFar != null)
                 {
                     BestMoveSoFar.SaveTronGameFile(tronGameFilePath);
+                }
+            }
+            finally
+            {
+                if (isBestMoveLocked)
+                {
+                    Monitor.Exit(BestMoveLock);
                 }
             }
         }
@@ -219,7 +248,7 @@ namespace AndrewTweddle.Tron.Core
 
                     /* Wait for solver to stop: */
                     int milliSecondsUntilSolverStopped = 0;
-                    while (!(Solver.SolverState == SolverState.NotRunning))
+                    while ((Solver.SolverState != SolverState.NotRunning) && (milliSecondsUntilSolverStopped <= MAX_GRACE_PERIOD_TO_STOP_IN))
                     {
                         Thread.Sleep(10);
                         milliSecondsUntilSolverStopped += 10;

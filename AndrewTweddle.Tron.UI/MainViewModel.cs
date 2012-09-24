@@ -7,6 +7,7 @@ using AndrewTweddle.Tron.Bots;
 using AndrewTweddle.Tron.UI.GameBoard;
 using System.Collections.ObjectModel;
 using AndrewTweddle.Tron.UI.SearchTree;
+using System.Threading;
 
 namespace AndrewTweddle.Tron.UI
 {
@@ -369,8 +370,15 @@ namespace AndrewTweddle.Tron.UI
                 {
                     System.Diagnostics.Debug.WriteLine(exc);
                 }
-                lock (coordinator.BestMoveLock)
+                bool isBestMoveLocked = Monitor.TryEnter(coordinator.BestMoveLock, Coordinator.BEST_MOVE_LOCK_TIMEOUT);
+                try
                 {
+    #if DEBUG
+                    if (!isBestMoveLocked)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Lock timeout with best move lock");
+                    }
+    #endif
                     GameState newGameState = coordinator.BestMoveSoFar;
                     if (newGameState == null)
                     {
@@ -396,6 +404,13 @@ namespace AndrewTweddle.Tron.UI
                     if (newGameState.IsGameOver)
                     {
                         StopGame();
+                    }
+                }
+                finally
+                {
+                    if (isBestMoveLocked)
+                    {
+                        Monitor.Exit(coordinator.BestMoveLock);
                     }
                 }
             }
