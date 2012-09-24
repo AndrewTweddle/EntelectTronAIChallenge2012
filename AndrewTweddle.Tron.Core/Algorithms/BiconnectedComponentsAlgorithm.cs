@@ -51,8 +51,8 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 #endif
 
             // TODO: Move to a more appropriate place later...
-            BiconnectedChambersAlgorithm bcChambersAlg = new BiconnectedChambersAlgorithm();
-            bcChambersAlg.Calculate(gameState);
+            //BiconnectedChambersAlgorithm bcChambersAlg = new BiconnectedChambersAlgorithm();
+            //bcChambersAlg.Calculate(gameState);
         }
 
         private void Visit(CellState startCellState)

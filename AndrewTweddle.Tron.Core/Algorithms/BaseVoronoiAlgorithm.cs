@@ -56,19 +56,19 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                         if (distanceFromYou == distanceFromOpponent)
                         {
                             cellState.ClosestPlayer = gameState.PlayerToMoveNext;
-                            gameState.AddFrontierCellForPlayer(cellState, gameState.PlayerToMoveNext);
+                            // gameState.AddFrontierCellForPlayer(cellState, gameState.PlayerToMoveNext);
                         }
                         else
                         {
                             if (distanceFromYou < distanceFromOpponent)
                             {
                                 cellState.ClosestPlayer = PlayerType.You;
-                                CheckIfCellIsOnFrontierForPlayer(gameState, cellState, PlayerType.You);
+                                // CheckIfCellIsOnFrontierForPlayer(gameState, cellState, PlayerType.You);
                             }
                             else
                             {
                                 cellState.ClosestPlayer = PlayerType.Opponent;
-                                CheckIfCellIsOnFrontierForPlayer(gameState, cellState, PlayerType.Opponent);
+                                // CheckIfCellIsOnFrontierForPlayer(gameState, cellState, PlayerType.Opponent);
                             }
                         }
                         break;
