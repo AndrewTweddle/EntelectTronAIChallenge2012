@@ -168,6 +168,14 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public Parity Parity
+        {
+            get
+            {
+                return Position.Parity;
+            }
+        }
+
         public void RecalculateDegree()
         {
             switch (OccupationStatus)

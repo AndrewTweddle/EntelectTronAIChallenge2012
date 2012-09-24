@@ -51,6 +51,22 @@ namespace AndrewTweddle.Tron.Core
             }
         }
 
+        public Parity Parity
+        {
+            get
+            {
+                if (IsPole)
+                {
+                    return Parity.Neutral;
+                }
+                if ((x + y) % 2 == 0)
+                {
+                    return Parity.Even;
+                }
+                return Parity.Odd;
+            }
+        }
+
         public Position(int x, int y)
         {
             this.x = x;
