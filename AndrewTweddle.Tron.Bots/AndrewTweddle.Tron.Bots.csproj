@@ -40,10 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompetitionSolver.cs" />
     <Compile Include="ConfigurableNegaMaxSolver1.cs" />
     <Compile Include="ConfigurableNegaMaxSolver2.cs" />
     <Compile Include="HumanSolver.cs" />
     <Compile Include="NegaMaxSolver.cs" />
+    <Compile Include="NorthernPendulumBlock.cs" />
+    <Compile Include="PendulumSolver.cs" />
+    <Compile Include="PendulumState.cs" />
     <Compile Include="RandomSolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SloaneNegaMaxSolver.cs" />

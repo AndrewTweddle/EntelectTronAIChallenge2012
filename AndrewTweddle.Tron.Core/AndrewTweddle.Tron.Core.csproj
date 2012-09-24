@@ -66,6 +66,7 @@
     <Compile Include="BaseNegaMaxSolverWithMetricsWeightings.cs" />
     <Compile Include="BaseSolver.cs" />
     <Compile Include="BiconnectedComponent.cs" />
+    <Compile Include="Block.cs" />
     <Compile Include="CellState.cs" />
     <Compile Include="Chamber.cs" />
     <Compile Include="CompartmentStatus.cs" />
@@ -85,6 +86,19 @@
     <Compile Include="MetricsEvaluator.cs" />
     <Compile Include="MetricsWeightings.cs" />
     <Compile Include="Move.cs" />
+    <Compile Include="Parity.cs" />
+    <Compile Include="RulesEngine\CompositeStep.cs" />
+    <Compile Include="RulesEngine\Direction.cs" />
+    <Compile Include="RulesEngine\DirectionHelper.cs" />
+    <Compile Include="RulesEngine\FlipSetting.cs" />
+    <Compile Include="RulesEngine\MoveInALine.cs" />
+    <Compile Include="RulesEngine\MoveToAPoint.cs" />
+    <Compile Include="RulesEngine\RulesEngineHelper.cs" />
+    <Compile Include="RulesEngine\RuleStatus.cs" />
+    <Compile Include="RulesEngine\RepeatWithIncreasingLevels.cs" />
+    <Compile Include="RulesEngine\RuleOutcome.cs" />
+    <Compile Include="RulesEngine\Step.cs" />
+    <Compile Include="RulesEngine\StepSequence.cs" />
     <Compile Include="NegaMaxGameStateGenerationMethod.cs" />
     <Compile Include="NegaMaxSolverWithConfigurationFilesInExeFolder.cs" />
     <Compile Include="NegaMaxSolverWithFileBasedWeightings.cs" />

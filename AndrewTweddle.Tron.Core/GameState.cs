@@ -113,10 +113,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return playerWhoMovedFirst;
             }
-            private set
+            set
             {
                 playerWhoMovedFirst = value;
+#if DEBUG
                 OnPropertyChanged("PlayerWhoMovedFirst");
+#endif
             }
         }
 
@@ -126,10 +128,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return playerToMoveNext;
             }
-            private set
+            set
             {
                 playerToMoveNext = value;
+#if DEBUG
                 OnPropertyChanged("PlayerToMoveNext");
+#endif
             }
         }
 
@@ -142,7 +146,9 @@ namespace AndrewTweddle.Tron.Core
             private set
             {
                 southPole = value;
+#if DEBUG
                 OnPropertyChanged("SouthPole");
+#endif
             }
         }
 
@@ -155,7 +161,9 @@ namespace AndrewTweddle.Tron.Core
             private set
             {
                 northPole = value;
+#if DEBUG
                 OnPropertyChanged("NorthPole");
+#endif
             }
         }
 
@@ -190,10 +198,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return yourCell;
             }
-            internal set
+            set
             {
                 yourCell = value;
+#if DEBUG
                 OnPropertyChanged("YourCell");
+#endif
             }
         }
 
@@ -203,10 +213,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return opponentsCell;
             }
-            internal set
+            set
             {
                 opponentsCell = value;
+#if DEBUG
                 OnPropertyChanged("OpponentsCell");
+#endif
             }
         }
 
@@ -216,10 +228,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return yourOriginalCell;
             }
-            private set
+            set
             {
                 yourOriginalCell = value;
+#if DEBUG
                 OnPropertyChanged("YourOriginalCell");
+#endif
             }
         }
 
@@ -229,10 +243,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return opponentsOriginalCell;
             }
-            private set
+            set
             {
                 opponentsOriginalCell = value;
+#if DEBUG
                 OnPropertyChanged("OpponentsOriginalCell");
+#endif
             }
         }
 
@@ -242,10 +258,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return yourWallLength;
             }
-            private set
+            set
             {
                 yourWallLength = value;
+#if DEBUG
                 OnPropertyChanged("YourWallLength");
+#endif
             }
         }
 
@@ -255,10 +273,12 @@ namespace AndrewTweddle.Tron.Core
             {
                 return opponentsWallLength;
             }
-            private set
+            set
             {
                 opponentsWallLength = value;
+#if DEBUG
                 OnPropertyChanged("OpponentsWallLength");
+#endif
             }
         }
 
@@ -293,7 +313,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 opponentIsInSameCompartment = value;
+#if DEBUG
                 OnPropertyChanged("OpponentIsInSameCompartment");
+#endif
             }
         }
 
@@ -306,7 +328,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 numberOfCellsReachableByYou = value;
+#if DEBUG
                 OnPropertyChanged("NumberOfCellsReachableByYou");
+#endif
             }
         }
 
@@ -319,7 +343,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 numberOfCellsReachableByOpponent = value;
+#if DEBUG
                 OnPropertyChanged("NumberOfCellsReachableByOpponent");
+#endif
             }
         }
 
@@ -332,7 +358,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 totalDegreesOfCellsReachableByYou = value;
+#if DEBUG
                 OnPropertyChanged("TotalDegreesOfCellsReachableByYou");
+#endif
             }
         }
 
@@ -345,7 +373,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 totalDegreesOfCellsReachableByOpponent = value;
+#if DEBUG
                 OnPropertyChanged("TotalDegreesOfCellsReachableByOpponent");
+#endif
             }
         }
         
@@ -358,7 +388,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 numberOfCellsClosestToYou = value; 
+#if DEBUG
                 OnPropertyChanged("NumberOfCellsClosestToYou");
+#endif
             }
         }
 
@@ -371,7 +403,9 @@ namespace AndrewTweddle.Tron.Core
             set
             {
                 numberOfCellsClosestToOpponent = value;
+#if DEBUG
                 OnPropertyChanged("NumberOfCellsClosestToOpponent");
+#endif
             }
         }
 
@@ -666,7 +700,7 @@ namespace AndrewTweddle.Tron.Core
             Debug.WriteLine("Time to serialize state: {0}", swatch.Elapsed);
         }
 
-        public void LoadRawCellData(IEnumerable<RawCellData> cells)
+        public void LoadRawCellData(IEnumerable<RawCellData> cells, PlayerType newPlayerToMoveNext = PlayerType.You)
         {
             bool isFirstNorthPoleCell = true;
             bool isFirstSouthPoleCell = true;
@@ -737,7 +771,7 @@ namespace AndrewTweddle.Tron.Core
 
             YourWallLength = yourWallLength;
             OpponentsWallLength = opponentsWallLength;
-            PlayerToMoveNext = PlayerType.You;
+            PlayerToMoveNext = newPlayerToMoveNext;
 
             if (yourWallLength == opponentsWallLength)
             {
@@ -749,7 +783,7 @@ namespace AndrewTweddle.Tron.Core
                 }
             }
             else
-                if (opponentsWallLength == yourWallLength + 1)
+                if (opponentsWallLength == yourWallLength + 1 && newPlayerToMoveNext == PlayerType.Opponent)
                 {
                     PlayerWhoMovedFirst = PlayerType.Opponent;
                     if (yourWallLength == 0)
@@ -759,13 +793,24 @@ namespace AndrewTweddle.Tron.Core
                             cs => cs.OccupationStatus == OccupationStatus.OpponentWall);
                     }
                 }
-                else
-                {
-                    string errorMessage = string.Format(
-                        "Wall lengths are not consistent with alternating player turns (you: {0}, opponent: {1})",
-                        yourWallLength, opponentsWallLength);
-                    throw new ApplicationException(errorMessage);
-                }
+                else 
+                    if (yourWallLength == opponentsWallLength + 1 && newPlayerToMoveNext == PlayerType.Opponent)
+                    {
+                        PlayerWhoMovedFirst = PlayerType.You;
+                        if (opponentsWallLength == 0)
+                        {
+                            OpponentsOriginalCell = OpponentsCell;
+                            YourOriginalCell = YourCell.GetAdjacentCellStates().FirstOrDefault(
+                                cs => cs.OccupationStatus == OccupationStatus.YourWall);
+                        }
+                    }
+                    else
+                    {
+                        string errorMessage = string.Format(
+                            "Wall lengths are not consistent with alternating player turns (you: {0}, opponent: {1})",
+                            yourWallLength, opponentsWallLength);
+                        throw new ApplicationException(errorMessage);
+                    }
 
             // Set move numbers on each cell (starting position is zero, then increments for each player):
             YourCell.MoveNumber = yourWallLength;
@@ -1069,6 +1114,67 @@ namespace AndrewTweddle.Tron.Core
                 allCellStates[i] = SouthPole;
             }
             return allCellStates;
+        }
+
+        public CellState GetNextCellStateForPlayerFromPreviousCellState(CellState previousCellStateForPlayer)
+        {
+            int moveNumber = previousCellStateForPlayer.MoveNumber + 1;
+
+            OccupationStatus playerWall;
+            OccupationStatus playerCycle;
+
+            switch (previousCellStateForPlayer.OccupationStatus)
+            {
+                case OccupationStatus.You:
+                case OccupationStatus.YourWall:
+                    playerWall = OccupationStatus.YourWall;
+                    playerCycle = OccupationStatus.You;
+                    break;
+                case OccupationStatus.Opponent:
+                case OccupationStatus.OpponentWall:
+                    playerWall = OccupationStatus.OpponentWall;
+                    playerCycle = OccupationStatus.Opponent;
+                    break;
+                default:
+                    return null;
+            }
+            foreach (CellState cellState in previousCellStateForPlayer.GetAdjacentCellStates())
+            {
+                if (cellState.MoveNumber == moveNumber && (cellState.OccupationStatus == playerWall || cellState.OccupationStatus == playerCycle))
+                {
+                    return cellState;
+                }
+            }
+            return null;
+        }
+
+        public CellState GetCellByMoveNumber(PlayerType player, int moveNumber)
+        {
+            OccupationStatus playerWall;
+            OccupationStatus playerCycle;
+            switch (player)
+            {
+                case PlayerType.You:
+                    playerWall = OccupationStatus.YourWall;
+                    playerCycle = OccupationStatus.You;
+                    break;
+                case PlayerType.Opponent:
+                    playerWall = OccupationStatus.OpponentWall;
+                    playerCycle = OccupationStatus.Opponent;
+                    break;
+                default:
+                    return null;
+            }
+
+            // Search all positions for the given move:
+            foreach (CellState cellState in GetAllCellStates())
+            {
+                if (cellState.MoveNumber == moveNumber && (cellState.OccupationStatus == playerWall || cellState.OccupationStatus == playerCycle))
+                {
+                    return cellState;
+                }
+            }
+            return null;
         }
 
         public IEnumerable<Position> GetPossibleNextPositions()
@@ -1782,5 +1888,34 @@ namespace AndrewTweddle.Tron.Core
 
         #endregion
 
+        #region Path-finding algorithms:
+
+        public bool IsCellStateReachableByPlayer(PlayerType player, CellState destinationCellState)
+        {
+            return (destinationCellState.OccupationStatus == OccupationStatus.Clear
+                && (destinationCellState.CompartmentStatus == CompartmentStatus.InYourCompartment
+                    || destinationCellState.CompartmentStatus == CompartmentStatus.InSharedCompartment));
+        }
+
+        public List<Position> GetPositionsOnAnyRouteToTheTargetPosition(PlayerType player, Position to)
+        {
+            List<Position> positionsOnRoute = new List<Position>();
+            CellState destinationState = this[to];
+            if (IsCellStateReachableByPlayer(player, destinationState))
+            {
+                int distanceFromPlayer = player == PlayerType.You ? destinationState.DistanceFromYou : destinationState.DistanceFromOpponent;
+
+                for (int dist = distanceFromPlayer - 1; dist > 0; dist--)
+                {
+                    int d = dist;
+                    destinationState = destinationState.GetAdjacentCellStates().Where(
+                        cs => cs.OccupationStatus == OccupationStatus.Clear && cs.DistanceFromYou == d).FirstOrDefault();
+                    positionsOnRoute.Insert(0, destinationState.Position);
+                }
+            }
+            return positionsOnRoute;
+        }
+
+        #endregion
     }
 }

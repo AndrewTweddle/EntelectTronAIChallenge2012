@@ -36,5 +36,22 @@ namespace AndrewTweddle.Tron.Core
                     throw new ArgumentException("PlayerType.Unknown can not be converted to a wall OccupationStatus", "playerType");
             }
         }
+
+        public static int NormalizedX(int x)
+        {
+            if (x <= -1)
+            {
+                x = x % Constants.Columns;
+                if (x < 0)
+                {
+                    x += Constants.Columns;
+                }
+            }
+            if (x >= Constants.Columns)
+            {
+                return x % Constants.Columns;
+            }
+            return x;
+        }
     }
 }
