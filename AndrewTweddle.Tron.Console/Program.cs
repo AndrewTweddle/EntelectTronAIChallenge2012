@@ -24,7 +24,7 @@ namespace AndrewTweddle.Tron.Console
             }
             try
             {
-                ISolver solver = new NegaMaxSolver();
+                ISolver solver = new CompetitionSolver();
                 Coordinator coordinator = new Coordinator(solver);
                 coordinator.IsInDebugMode = false;
                 coordinator.Run(tronFilePath);
