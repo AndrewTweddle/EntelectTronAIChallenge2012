@@ -43,6 +43,7 @@
     <Compile Include="CompetitionSolver.cs" />
     <Compile Include="ConfigurableNegaMaxSolver1.cs" />
     <Compile Include="ConfigurableNegaMaxSolver2.cs" />
+    <Compile Include="FluentPendulumSolver.cs" />
     <Compile Include="HumanSolver.cs" />
     <Compile Include="NegaMaxSolver.cs" />
     <Compile Include="NorthernPendulumBlock.cs" />
