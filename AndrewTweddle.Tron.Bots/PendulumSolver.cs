@@ -243,7 +243,7 @@ namespace AndrewTweddle.Tron.Bots
             int nextMoveNumber = 0;
 
             /* Move to the equator: */
-            int distance = 14 - nextPosition.Y;
+            int distance = 14 - nextPosition.Y;     // Remove hard-coding
             for (int i = 0; i < distance; i++)
             {
                 nextMoveNumber++;
