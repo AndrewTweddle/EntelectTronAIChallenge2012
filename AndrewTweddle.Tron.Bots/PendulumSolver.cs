@@ -73,6 +73,9 @@ namespace AndrewTweddle.Tron.Bots
             Position nextPosition = mutableGameState.YourOriginalCell.Position;
             int nextMoveNumber = 0;
 
+            Block leftBlock = GetInitialLeftBlock(mutableGameState);
+            Block rightBlock = GetInitialRightBlock(mutableGameState);
+
             /* Move to the equator: */
             int distance = 14 - nextPosition.Y;     // Remove hard-coding
             for (int i = 0; i < distance; i++)
@@ -84,6 +87,8 @@ namespace AndrewTweddle.Tron.Bots
                 {
                     return outcome;
                 }
+
+                // TODO: Update leftBlock and rightBlock
             }
 
             // Set up a state object to track various information:
@@ -205,6 +210,43 @@ namespace AndrewTweddle.Tron.Bots
             };
 
             return outcome;
+        }
+
+        private static Block GetInitialRightBlock(GameState mutableGameState)
+        {
+            Block rightBlock = new Block();
+            rightBlock.LeftX = Helper.NormalizedX(mutableGameState.YourOriginalCell.Position.X + 1);
+            int rightX1 = Helper.NormalizedX(mutableGameState.OpponentsOriginalCell.Position.X - 1);
+            int rightX2 = Helper.NormalizedX(mutableGameState.OpponentsCell.Position.X - 1);
+            if ((rightX2 == 0 && rightX1 == Constants.Columns - 1) || (rightX1 == Constants.Columns - 1 && rightX2 == 0))
+            {
+                rightBlock.RightX = Constants.Columns - 1;
+            }
+            else
+            {
+                rightBlock.RightX = Math.Min(rightX1, rightX2);
+            }
+            rightBlock.TopY = mutableGameState.YourOriginalCell.Position.Y;
+            rightBlock.BottomY = rightBlock.TopY;
+            return rightBlock;
+        }
+
+        private static Block GetInitialLeftBlock(GameState mutableGameState)
+        {
+            Block leftBlock = new Block();
+            int leftX1 = Helper.NormalizedX(mutableGameState.OpponentsOriginalCell.Position.X + 1);
+            int leftX2 = Helper.NormalizedX(mutableGameState.OpponentsCell.Position.X + 1);
+            if ((leftX2 == 0 && leftX1 == Constants.Columns - 1) || (leftX1 == Constants.Columns - 1 && leftX2 == 0))
+            {
+                leftBlock.LeftX = 0;
+            }
+            {
+                leftBlock.LeftX = Math.Max(leftX1, leftX2);
+            }
+            leftBlock.RightX = Helper.NormalizedX(mutableGameState.YourOriginalCell.Position.X - 1);
+            leftBlock.TopY = mutableGameState.YourOriginalCell.Position.Y;
+            leftBlock.BottomY = leftBlock.TopY;
+            return leftBlock;
         }
 
     }
