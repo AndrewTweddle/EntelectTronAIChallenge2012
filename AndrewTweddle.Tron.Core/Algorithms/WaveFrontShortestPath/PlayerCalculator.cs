@@ -15,7 +15,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms.WaveFrontShortestPath
 
         public virtual void SetDistance(CellState cellState, int distance, HashSet<CellState> reachableCells)
         {
-            reachableCells.Add(cellState);
+            if (reachableCells != null)
+            {
+                reachableCells.Add(cellState);
+            }
             NumberOfCellsReachable = NumberOfCellsReachable + 1;
             TotalDegreesOfCellsReachable = TotalDegreesOfCellsReachable + cellState.DegreeOfVertex;
         }

@@ -65,7 +65,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                             && (cellState.CompartmentStatus == compartmentStatus || cellState.CompartmentStatus == CompartmentStatus.InSharedCompartment)
                             && (distance <= upToDateDijkstraDistance))
                         {
-                            reachableCells.Add(cellState);
+                            if (reachableCells != null)
+                            {
+                                reachableCells.Add(cellState);
+                            }
                             numberOfCellsReachable++;
                             totalDegreesOfCellsReachable += cellState.DegreeOfVertex;
                             if (distance == upToDateDijkstraDistance)
@@ -111,7 +114,10 @@ namespace AndrewTweddle.Tron.Core.Algorithms
 
                                         // HashSets automatically filter out duplicates, so no need to check:
                                         nextLevelOfCells.Add(adjacentCell);
-                                        reachableCells.Add(adjacentCell);
+                                        if (reachableCells != null)
+                                        {
+                                            reachableCells.Add(adjacentCell);
+                                        }
                                     }
                                     break;
                             }

@@ -16,7 +16,7 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             Stopwatch swatch = Stopwatch.StartNew();
 #endif
             gameState.ClearDijkstraProperties();
-            HashSet<CellState> reachableCells = new HashSet<CellState>();
+            HashSet<CellState> reachableCells = null; // new HashSet<CellState>();
 
             CalculateDistancesFromAPlayer(gameState, PlayerType.You, reachableCells);
 
@@ -37,8 +37,20 @@ namespace AndrewTweddle.Tron.Core.Algorithms
             int numberOfCellsClosestToOpponent = 0;
             int totalDegreesOfCellsClosestToYou = 0;
             int totalDegreesOfCellsClosestToOpponent = 0;
+            bool throwErrorOnUnreachableCellFoundInReachableSet = true;
+            IEnumerable<CellState> cellsToCheck;
 
-            foreach (CellState cellState in reachableCells)
+            if (reachableCells == null)
+            {
+                cellsToCheck = gameState.GetAllCellStates();
+                throwErrorOnUnreachableCellFoundInReachableSet = false;
+            }
+            else
+            {
+                cellsToCheck = reachableCells;
+            }
+
+            foreach (CellState cellState in cellsToCheck)
             {
                 switch (cellState.CompartmentStatus)
                 {
@@ -74,10 +86,17 @@ namespace AndrewTweddle.Tron.Core.Algorithms
                         break;
 
                     default:
-                        throw new ApplicationException(
-                            String.Format(
-                                "The cell at ({0}, {1}) is not showing in either player's compartment, but it is in the reachable set",
-                                cellState.Position.X, cellState.Position.Y));
+                        if (throwErrorOnUnreachableCellFoundInReachableSet)
+                        {
+                            throw new ApplicationException(
+                                String.Format(
+                                    "The cell at ({0}, {1}) is not showing in either player's compartment, but it is in the reachable set",
+                                    cellState.Position.X, cellState.Position.Y));
+                        }
+                        else
+                        {
+                            continue;
+                        }
                 }
 
                 if (cellState.OccupationStatus == OccupationStatus.Clear)
