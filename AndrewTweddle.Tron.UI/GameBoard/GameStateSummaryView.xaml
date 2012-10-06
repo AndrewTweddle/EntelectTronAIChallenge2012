@@ -58,8 +58,10 @@
             <Label Grid.Row="16" Grid.Column="0" Content="TotalDegreesOfCellsClosestToOpponent" />
             <Label Grid.Row="17" Grid.Column="0" Content="DistancesFromOpponentOnYourCells" />
             <Label Grid.Row="18" Grid.Column="0" Content="DistancesFromYouOnOpponentsCells" />
+            <!--
             <Label Grid.Row="19" Grid.Column="0" Content="ChamberValueForYou" />
             <Label Grid.Row="20" Grid.Column="0" Content="ChamberValueForOpponent" />
+            -->
             <Label Grid.Row="21" Grid.Column="0" Content="Annotation" />
             <Label Grid.Row="22" Grid.Column="0" Content="YourDijkstraStatus" />
             <Label Grid.Row="23" Grid.Column="0" Content="OpponentsDijkstraStatus" />
@@ -85,8 +87,10 @@
             <TextBox Grid.Row="16" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.TotalDegreesOfCellsClosestToOpponent,Mode=OneWay}" />
             <TextBox Grid.Row="17" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.SumOfDistancesFromOpponentOnYourClosestCells,Mode=OneWay}" />
             <TextBox Grid.Row="18" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.SumOfDistancesFromYouOnOpponentsClosestCells,Mode=OneWay}" />
+            <!--
             <TextBox Grid.Row="19" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.ChamberValueForYou,Mode=OneWay}" />
             <TextBox Grid.Row="20" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.ChamberValueForOpponent,Mode=OneWay}" />
+            -->
             <TextBox Grid.Row="21" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.Annotation,Mode=OneWay}" />
             <TextBox Grid.Row="22" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.YourDijkstraStatus,Mode=OneWay}" />
             <TextBox Grid.Row="23" Grid.Column="1" IsReadOnly="True" Width="150" Text="{Binding Path=GameState.OpponentsDijkstraStatus,Mode=OneWay}" />

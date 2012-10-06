@@ -277,7 +277,6 @@ namespace AndrewTweddle.Tron.Core
             double valueOfBestCutVertex = double.NegativeInfinity;
             int branchCount = 0;
 
-            // TODO: Order the cut vertices from most promising to least promising, in case there is a cycle:
             foreach (CellState cutVertex in cutVertices)
             {
                 if (cutVertex != entryVertex && cutVertex.OccupationStatus != OccupationStatus.Opponent)

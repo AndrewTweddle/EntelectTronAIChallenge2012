@@ -112,7 +112,7 @@ namespace AndrewTweddle.Tron.Bots
                 Dijkstra.Perform(mutableGameState);
 
                 // Only move to first and second position if this reduces the opponent's gap:
-                // bool isOpponentCloserToGapOnLeft = 
+                // ... bool isOpponentCloserToGapOnLeft = 
 
                 if (pendulumLevel % 2 == 0)
                 {
