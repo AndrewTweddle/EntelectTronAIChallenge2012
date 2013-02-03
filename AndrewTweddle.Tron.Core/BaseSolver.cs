@@ -23,6 +23,14 @@ namespace AndrewTweddle.Tron.Core
 
         private ISolver delegatedSolver;
 
+        public string Name
+        {
+            get
+            {
+                return GetType().Name;
+            }
+        }
+
         public SolverState SolverState
         {
             get 

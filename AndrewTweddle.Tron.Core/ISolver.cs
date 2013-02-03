@@ -11,6 +11,8 @@ namespace AndrewTweddle.Tron.Core
 
         SolverState SolverState { get; set; }
 
+        string Name { get; }
+
         void Solve();
         void Stop();
     }

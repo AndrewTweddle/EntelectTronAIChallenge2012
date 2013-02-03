@@ -1271,6 +1271,34 @@ namespace AndrewTweddle.Tron.Core
             MoveToPosition(move.To, performDijkstra, shouldCalculatedBiconnectedComponents);
         }
 
+        public Move GetLastMove()
+        {
+            Move move;
+
+            if (PlayerToMoveNext == PlayerType.You)
+            {
+                // Is it the start of the game?
+                if (OpponentsWallLength == 0)
+                {
+                    return null;
+                }
+
+                // Opponent moved last:
+                move = new Move(playerType: PlayerType.Opponent, moveNumber: OpponentsWallLength, to: OpponentsCell.Position);
+                return move;
+            }
+
+            // Is it the start of the game?
+            if (YourWallLength == 0)
+            {
+                return null;
+            }
+
+            // You moved last:
+            move = new Move(playerType: PlayerType.You, moveNumber: YourWallLength, to: YourCell.Position);
+            return move;
+        }
+
         public void MoveToPosition(Position position, bool performDijkstra = true, bool shouldCalculatedBiconnectedComponents = true)
         {
             CellState fromCell = PlayerToMoveNext == PlayerType.You ? YourCell : OpponentsCell;
@@ -1578,12 +1606,27 @@ namespace AndrewTweddle.Tron.Core
 
         public static GameState InitializeNewGameState(bool performDijkstra = true, bool shouldCalculateBiconnectedComponents = true)
         {
-            GameState gameState = new GameState();
             Random rnd = new Random();
             int yourX = rnd.Next(Constants.Columns);
             int yourY = rnd.Next(Constants.Rows - 2) + 1;
             int opponentsX = (yourX + Constants.Columns / 2) % Constants.Columns;
             int opponentsY = yourY; // was: Constants.SouthPoleY - yourY;
+
+            GameState gameState = InitializeNewGameState(yourX, yourY, opponentsX, opponentsY, performDijkstra, shouldCalculateBiconnectedComponents);
+            return gameState;
+        }
+
+        public static GameState InitializeNewGameState(Position yourStartingPosition, Position opponentsStartingPosition,
+            bool performDijkstra = true, bool shouldCalculateBiconnectedComponents = true)
+        {
+            return InitializeNewGameState(yourStartingPosition.X, yourStartingPosition.Y, opponentsStartingPosition.X, opponentsStartingPosition.Y,
+                performDijkstra, shouldCalculateBiconnectedComponents);
+        }
+
+        public static GameState InitializeNewGameState(int yourX, int yourY, int opponentsX, int opponentsY,
+            bool performDijkstra = true, bool shouldCalculateBiconnectedComponents = true)
+        {
+            GameState gameState = new GameState();
             CellState yourCell = gameState[yourX, yourY];
             CellState opponentsCell = gameState[opponentsX, opponentsY];
             yourCell.OccupationStatus = OccupationStatus.You;
