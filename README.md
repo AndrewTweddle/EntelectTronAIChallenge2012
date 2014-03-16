@@ -11,9 +11,11 @@ The competition was won by Jaco Cronje. His blog post and code can be found at h
 
 The challenge was to write a command line utility to play the game of Tron against an opponent's "bot".
 
-The bot had to be written in either Java or a Visual Studio language (C#, VB.Net or Visual C++). The command line utility would be launched on every turn, read a board state from a file (passed as the single command line argument), make a move and write out the replacement file. Each bot had 5 seconds to make each move.
+However there was a twist... The game would be fought on a 30x30 grid representing a sphere. So the board wrapped around horizontally. And rows 0 and 29 represented a single point each (the North and South pole). From a point in row 0 you could move to any point in row 1, and similarly from row 29 to any point in row 28.
 
-However there was a twist... The game would be fought on a 30x30 grid representing a sphere. The board wrapped around horizontally. And rows 0 and 29 represented a single point each (the North and South pole). From a point in row 0 you could move to any point in row 1, and similarly for rows 29 and 28.
+The bot had to be written in either Java 7 or in .Net 4.0 (Actually any language which can be built using msbuild was acceptable, so Visual C++ was allowed).
+
+The command line utility would be launched on every turn, read a board state from a file (passed as the single command line argument), make a move and write out the replacement file. Each bot had 5 seconds to make each move.
 
 An archive of the rules is available on [the way back machine](http://web.archive.org/web/20120721045001/http://challenge.entelect.co.za/Home/Rules)
 
@@ -23,7 +25,7 @@ I decided to write a WPF utility to test my application rather than writing unit
 
 The WPF test utility can be used to play any two algorithms against one another. Additionally a human player can replace either or both algorithms.
 
-# Tools used:
+# Tools used
 
 Visual C# 2010 Express.
 
@@ -74,6 +76,7 @@ Below is a sample weightings file:
   <SumOfDistancesFromThisPlayerOnClosestCellsFactor>0.0</SumOfDistancesFromThisPlayerOnClosestCellsFactor>
   <SumOfDistancesFromOtherPlayerOnClosestCellsFactor>100.0</SumOfDistancesFromOtherPlayerOnClosestCellsFactor>
 </Weightings>
+```
 
 # The pendulum solver
 
