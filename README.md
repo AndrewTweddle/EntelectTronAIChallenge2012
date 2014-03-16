@@ -1,5 +1,5 @@
-EntelectTronAIChallenge2012
-===========================
+Entelect Challenge 2012: Tron AI
+================================
 
 # Introduction
 
@@ -9,9 +9,13 @@ The competition was won by Jaco Cronje. His blog post and code can be found at h
 
 ## Rules overview
 
-The challenge was to write a command line utility to play the game of Tron against an opponent's "bot". The bot had to be written in either Java or a Visual Studio language (C#, VB.Net or Visual C++). The command line utility would be launched on every turn, read a board state from a file (passed as the single command line argument), make a move and write out the replacement file. Each bot had 5 seconds to make each move.
+The challenge was to write a command line utility to play the game of Tron against an opponent's "bot".
+
+The bot had to be written in either Java or a Visual Studio language (C#, VB.Net or Visual C++). The command line utility would be launched on every turn, read a board state from a file (passed as the single command line argument), make a move and write out the replacement file. Each bot had 5 seconds to make each move.
 
 However there was a twist... The game would be fought on a 30x30 grid representing a sphere. The board wrapped around horizontally. And rows 0 and 29 represented a single point each (the North and South pole). From a point in row 0 you could move to any point in row 1, and similarly for rows 29 and 28.
+
+An archive of the rules is available on [the way back machine](http://web.archive.org/web/20120721045001/http://challenge.entelect.co.za/Home/Rules)
 
 ## Testing
 
@@ -23,7 +27,7 @@ The WPF test utility can be used to play any two algorithms against one another.
 
 Visual C# 2010 Express.
 
-# Running the application:
+# Running the application
 
 1. Open up solution file AndrewTweddle.Tron.PlayAgainstAI.sln and hit F5 to build and run it.
 2. Select algorithms for the 2 players in both drop-down combo boxes in the top-left.
@@ -33,11 +37,14 @@ Visual C# 2010 Express.
 6. You can use the "Go to" button to move to a particular past point in a game. Use the edit box next to the button to specify the move number and the drop-down box to specify the next player to move.
 7. You can use the Stop, Pause, Resume and Step buttons to control the flow of the game. For example, you can change the algorithms partway through a game.
 
-# Known issues:
+# Known issues
+
 1. I have seen situations occur where the resume button is not enabled after a pause or load.
    This prevents the game from continuing. I haven't been able to reproduce the error consistently.
 
-# Configurable value functions:
+2. The terms You and Opponent are confusing. They are terms in the official game state file format. They DON'T correspond to the human player and AI player.
+
+# Configurable value functions
 
 ## Two configurable "solvers" (bots)
 
@@ -49,9 +56,9 @@ The configuration files must in the same location as the executable.
 There are 2 files. One is used when the opponent is in the same "compartment" in the solver. 
 The other weightings file is used when the two bots become separated from one another.
 
-The names of the files should be as follows:
-. ConfigurableSolver1_SameCompartment.xml
-. ConfigurableSolver1_SeparateCompartments.xml
+The names of the files should be similar to the following:
+ConfigurableSolver1_SameCompartment.xml
+ConfigurableSolver1_SeparateCompartments.xml
 
 ## A sample weightings files
 
@@ -67,3 +74,15 @@ Below is a sample weightings file:
   <SumOfDistancesFromThisPlayerOnClosestCellsFactor>0.0</SumOfDistancesFromThisPlayerOnClosestCellsFactor>
   <SumOfDistancesFromOtherPlayerOnClosestCellsFactor>100.0</SumOfDistancesFromOtherPlayerOnClosestCellsFactor>
 </Weightings>
+
+# The pendulum solver
+
+I was at the beach for the last week of the competition. I ran games between the configurable solvers while I was on the beach, and tweaked the parameters at lunch time and in the evening.
+
+I also played games against my algorithm and found I could easily beat it by forcing it into a decision between two areas. The easiest way to do this was to move to the "equator", keep a decent-sized gap open along the equator, force the bot to close down the other gap on the equator to a single "corridor", and then race back to the bigger gap. The bot would be forced to commit to one or other hemisphere, and I could eat up space in that hemisphere before moving back to the other hemisphere.
+
+While driving back from my beach holiday, I was thinking about how to implement my strategy. The pendulum solver was an attempt to build a rules engine which could play out a sequence of opening moves as described above, then revert to the standard algorithm.
+
+The competition closed the next morning. Trying to implement this algorithm after a 500 km drive proved to be a bridge too far.
+
+So the pendulum solver is an incomplete attempt at creating a killer strategy for the opening period of the game.
